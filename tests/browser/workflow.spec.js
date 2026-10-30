@@ -31,7 +31,7 @@ test('offline crop, adjustments, JPEG geometry, density, and clear keep all phot
   await upload(page,buffer);
   await expect(page.locator('#copy-count')).toHaveText('6 copies');
   await setRange(page,'zoom',2);await setRange(page,'x',100);await setRange(page,'y',0);
-  await page.locator('summary').click();await page.locator('#allow-edits').check();
+  await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();
   await setRange(page,'brightness',10);await setRange(page,'contrast',-5);
   await page.locator('#reset-edits').click();await expect(page.locator('#save')).toBeEnabled();
   const comparison=await page.evaluate(()=>{
@@ -68,7 +68,7 @@ test('HEIC fallback decodes offline and EXIF orientation is normalized',async({p
 });
 
 test('adjustments always use original pixels; comparison and reset restore the original',async({page})=>{
-  await page.goto('./');await upload(page);await page.locator('summary').click();await page.locator('#allow-edits').check();
+  await page.goto('./');await upload(page);await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();
   const pixel=()=>page.locator('#crop').evaluate(c=>[...c.getContext('2d').getImageData(100,100,1,1).data]);
   const original=await pixel();
   await setRange(page,'brightness',10);const edited=await pixel();expect(edited).not.toEqual(original);

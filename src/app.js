@@ -32,6 +32,7 @@ function updateLanguage() {
   $('sheet').ariaLabel = lang === 'zh' ? '完整的 4×6 英寸打印排版' : 'Complete 4 by 6 inch print sheet';
   $('photo').ariaLabel = t(photo ? 'replace' : 'choose');
   $('language').ariaLabel = t('language');
+  $('tool-tabs').ariaLabel = lang === 'zh' ? '照片调整工具' : 'Photo editing tools';
   $('choose-label').textContent = t(photo ? 'replace' : 'choose');
   updateDocuments(false); updatePresetDetails();
   setStatus(statusKey); setError(errorKey); setExport(exportKey); updateReadouts();
@@ -81,6 +82,7 @@ function chooseSize() {
 }
 
 function updateReadouts() {
+  $('cut-note').textContent = t($('cut-guides').checked ? 'cut' : 'cutPlain');
   for (const key of ['zoom','x','y','brightness','contrast']) {
     $(key).value = settings[key];
     $(`${key}-value`).textContent = key === 'zoom' ? `${settings[key].toFixed(2)}×` :
@@ -114,14 +116,15 @@ function updateReadouts() {
 function scheduleRender() {
   const current = ++revision;
   clearTimeout(renderTimer); discardExport(); setExport();
-  $('sheet').hidden = true; $('sheet-empty').hidden = false;
-  if (!photo || !layout) return;
+  if (!photo || !layout) {
+    $('sheet').hidden = true; $('sheet-empty').hidden = false; return;
+  }
   drawCrop(); updateReadouts();
   setExport('saving');
   renderTimer = setTimeout(async () => {
     let sheet;
     try {
-      sheet = renderSheet(photo.canvas, settings, layout);
+      sheet = renderSheet(photo.canvas, settings, layout, $('cut-guides').checked);
       const jpeg = await exportJpeg(sheet);
       if (current !== revision) return;
       $('sheet').getContext('2d').drawImage(sheet,0,0);
@@ -131,7 +134,7 @@ function scheduleRender() {
       $('share').hidden = !navigator.canShare || !navigator.canShare({ files: [file] });
       $('share').disabled = $('share').hidden;
       setExport();
-    } catch { if (current === revision) { setError('exportError'); setExport(); } }
+    } catch { if (current === revision) { setError('exportError'); setExport(); $('sheet').hidden = true; $('sheet-empty').hidden = false; } }
     finally { if (sheet) sheet.width = sheet.height = 1; }
   }, 110);
 }
@@ -145,13 +148,15 @@ function drawCrop() {
   $('crop').getContext('2d').drawImage(preview,0,0);
   preview.width = preview.height = 1;
   // Keep overlay and canvas bounds identical even for a tall custom photo.
-  $('crop-wrap').style.maxWidth = `${Math.min(600, 440 * settings.ratio)}px`;
+  $('crop-wrap').style.setProperty('--crop-ratio', settings.ratio);
 }
 
 function clearPhoto() {
+  selectTool('framing');
   revision++; clearTimeout(renderTimer); discardExport();
   if (photo) photo.canvas.width = photo.canvas.height = 1;
   photo = null; $('photo').value = ''; $('clear').disabled = true;
+  document.querySelector('.file-button').classList.replace('quiet','primary');
   $('edit-controls').disabled = $('reset-crop').disabled = true;
   $('crop-empty').hidden = false; $('crop-wrap').hidden = true;
   $('sheet').hidden = true; $('sheet-empty').hidden = false;
@@ -168,10 +173,12 @@ $('photo').addEventListener('change', async event => {
   try {
     const result = await decodePhoto(selected);
     photo = result; setStatus('ready');
+    document.querySelector('.file-button').classList.replace('primary','quiet');
     $('clear').disabled = $('edit-controls').disabled = $('reset-crop').disabled = false;
     $('crop-empty').hidden = true; $('crop-wrap').hidden = false;
     $('choose-label').textContent = t('replace'); $('photo').ariaLabel = t('replace');
     updatePresetDetails(); scheduleRender();
+    if (matchMedia('(max-width: 760px)').matches) $('crop-title').scrollIntoView({block:'start',behavior:'auto'});
   } catch (e) { setStatus(); setError(messages.en[e.message] ? e.message : 'decodeError'); }
   finally { loading = false; $('photo').disabled = false; $('photo').removeAttribute('aria-busy'); }
 });
@@ -196,6 +203,24 @@ $('allow-edits').onchange = () => {
 };
 $('original').onchange = () => { if (photo && layout) drawCrop(); };
 $('guides').onchange = updateReadouts;
+$('cut-guides').onchange = () => { updateReadouts(); scheduleRender(); };
+function selectTool(name, focus = false) {
+  for (const tool of ['framing','adjustments']) {
+    const selected = tool === name;
+    $(`${tool}-tab`).setAttribute('aria-selected',String(selected));
+    $(`${tool}-tab`).tabIndex = selected ? 0 : -1;
+    $(`${tool}-panel`).hidden = !selected;
+  }
+  if (focus) $(`${name}-tab`).focus();
+}
+for (const name of ['framing','adjustments']) {
+  $(`${name}-tab`).onclick = () => selectTool(name);
+  $(`${name}-tab`).onkeydown = e => {
+    if (['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) {
+      e.preventDefault(); selectTool(e.key === 'Home' ? 'framing' : e.key === 'End' ? 'adjustments' : name === 'framing' ? 'adjustments' : 'framing',true);
+    }
+  };
+}
 $('language').onchange = () => { lang = $('language').value; updateLanguage(); };
 $('save').onclick = () => {
   if (!file) return;

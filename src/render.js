@@ -21,7 +21,7 @@ export function renderCrop(image, settings, width, height, original = false) {
   return canvas;
 }
 
-export function renderSheet(image, settings, layout) {
+export function renderSheet(image, settings, layout, cutGuides = false) {
   const crop = renderCrop(image, settings, Math.round(mmToPx(layout.widthMm)), Math.round(mmToPx(layout.heightMm)));
   const sheet = document.createElement('canvas');
   sheet.width = SHEET.width; sheet.height = SHEET.height;
@@ -36,8 +36,36 @@ export function renderSheet(image, settings, layout) {
     } else ctx.drawImage(crop, copy.x, copy.y, copy.width, copy.height);
     ctx.restore();
   }
+  if (cutGuides) drawCutGuides(ctx, layout);
   crop.width = crop.height = 1;
   return sheet;
+}
+
+export function drawCutGuides(ctx, layout) {
+  const left = Math.min(...layout.copies.map(c=>c.x));
+  const top = Math.min(...layout.copies.map(c=>c.y));
+  const right = Math.max(...layout.copies.map(c=>c.x+c.width));
+  const bottom = Math.max(...layout.copies.map(c=>c.y+c.height));
+  const xs = [...new Set(layout.copies.flatMap(c=>[c.x,c.x+c.width]))];
+  const ys = [...new Set(layout.copies.flatMap(c=>[c.y,c.y+c.height]))];
+  ctx.save(); ctx.fillStyle = '#727272';
+  // One output pixel (0.085 mm): no gutters, scaling, or thick retained borders.
+  // Each dash is placed inside the grid; outer trim ticks stay in unused paper.
+  for (const x of xs.filter(x=>x>left && x<right)) {
+    for (let y=top;y<bottom;y+=16) ctx.fillRect(x,y,1,Math.min(8,bottom-y));
+  }
+  for (const y of ys.filter(y=>y>top && y<bottom)) {
+    for (let x=left;x<right;x+=16) ctx.fillRect(x,y,Math.min(8,right-x),1);
+  }
+  for (const x of xs) {
+    if (top>=14) ctx.fillRect(Math.min(x,ctx.canvas.width-1),top-12,1,8);
+    if (bottom<=ctx.canvas.height-14) ctx.fillRect(Math.min(x,ctx.canvas.width-1),bottom+4,1,8);
+  }
+  for (const y of ys) {
+    if (left>=14) ctx.fillRect(left-12,Math.min(y,ctx.canvas.height-1),8,1);
+    if (right<=ctx.canvas.width-14) ctx.fillRect(right+4,Math.min(y,ctx.canvas.height-1),8,1);
+  }
+  ctx.restore();
 }
 
 export async function exportJpeg(canvas) {

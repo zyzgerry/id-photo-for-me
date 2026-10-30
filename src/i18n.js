@@ -1,6 +1,6 @@
 export const messages = {
   en: {
-    title:'ID Photo for Me', subtitle:'Your photo. Your device. Ready for a 4×6 print.', language:'Language',
+    title:'ID Photo for Me', workspaceTitle:'Prepare your photo sheet', subtitle:'Frame once. Print at 4×6. Cut to size.', language:'Language',
     choose:'Choose a photo', replace:'Replace photo', clear:'Clear photo', privacy:'Photos stay on this device. No uploads, accounts, or saved history.',
     formats:'JPEG, PNG, or HEIC/HEIF. Up to 30 MB, 50 megapixels, and 12,000 pixels per side. Still images only.',
     step1:'1. Photo size', step2:'2. Framing', step3:'3. Print sheet', country:'Country or custom size',
@@ -16,7 +16,9 @@ export const messages = {
     adjustments:'Brightness and contrast', editWarning:'Document rules may restrict edits. Neutral settings are recommended.', allowEdits:'Enable adjustments despite document editing restrictions',
     brightness:'Brightness', contrast:'Contrast', resetEdits:'Reset adjustments', original:'Compare original',
     sheetEmpty:'Your complete 4×6 sheet appears after you choose a photo.', dimensions:'Photo size', copies:'copies', sheetSize:'4×6 inches', output:'1800×1200 pixels · 300 ppi',
-    cut:'No gaps or borders are added. Shared edges need just one cut. Unused sheet space stays white.',
+    cut:'Fine dashed lines mark shared cut edges. Trim along them to avoid traces. Photo size and copy count stay the same.',
+    cutGuides:'Include cutting guides', supportedFormats:'Supported photos and limits', documentGuidance:'Document guidance', framingTool:'Framing', adjustmentsTool:'Adjustments', finePosition:'Fine positioning',
+    cutPlain:'Cutting guides are off. No lines, borders, or gaps are added; photo size and copy count stay the same.',
     rotated:'Copies rotated on the sheet to fit more; turn the print before cutting.',
     save:'Download JPEG', share:'Share JPEG', saving:'Preparing JPEG…', saved:'JPEG downloaded. On iPhone, look in Files → Downloads. Use Share → Save Image if available to save to Photos.',
     shared:'Sharing opened. Choose Save Image for Photos, Save to Files, or a print service.',
@@ -33,7 +35,7 @@ export const messages = {
     local:'Local processing', source:'Decoder notices', noScript:'JavaScript is needed to process photos locally. Enable it and reload.',
   },
   zh: {
-    title:'我的证件照', subtitle:'照片留在本机，轻松排成 4×6 英寸打印照片。', language:'语言',
+    title:'我的证件照', workspaceTitle:'制作你的证件照排版', subtitle:'调整构图，按 4×6 英寸打印，沿线裁切。', language:'语言',
     choose:'选择照片', replace:'更换照片', clear:'清除照片', privacy:'照片仅在本机处理，不上传、不登录、不保存历史。',
     formats:'支持 JPEG、PNG、HEIC/HEIF 静态照片。最大 30 MB、5000 万像素，单边不超过 12,000 像素。',
     step1:'1. 照片尺寸', step2:'2. 裁剪构图', step3:'3. 打印排版', country:'国家或自定义尺寸',
@@ -49,7 +51,9 @@ export const messages = {
     adjustments:'亮度与对比度', editWarning:'证件要求可能限制修图，建议保持原始设置。', allowEdits:'了解证件修图限制，仍启用调整',
     brightness:'亮度', contrast:'对比度', resetEdits:'重置调整', original:'对比原图',
     sheetEmpty:'选择照片后，这里显示完整的 4×6 英寸排版。', dimensions:'单张尺寸', copies:'张', sheetSize:'4×6 英寸', output:'1800×1200 像素 · 300 ppi',
-    cut:'不添加间隙或边框，相邻照片共用一条裁切线。未用区域保留白色。', rotated:'照片已旋转排版以容纳更多张，请转动打印纸后裁切。',
+    cut:'细虚线标示共用裁切边，请沿线裁切以免留下痕迹。单张尺寸和照片数量保持不变。', rotated:'照片已旋转排版以容纳更多张，请转动打印纸后裁切。',
+    cutGuides:'添加裁切参考线', supportedFormats:'支持的照片格式和限制', documentGuidance:'证件要求说明', framingTool:'裁剪构图', adjustmentsTool:'明暗调整', finePosition:'精细调整位置',
+    cutPlain:'裁切参考线已关闭。不添加线条、边框或间隙，单张尺寸和照片数量保持不变。',
     save:'下载 JPEG', share:'分享 JPEG', saving:'正在生成 JPEG…', saved:'JPEG 已下载。iPhone 请在“文件 → 下载项”中查找；如分享菜单提供“存储图像”，可存入“照片”。',
     shared:'已打开分享菜单，可选择“存储图像”“存储到文件”或打印服务。',
     printTitle:'按 4×6 英寸原尺寸打印', print:'保留完整画面，关闭自动裁剪、放大及适应/填充选项。无边框打印可能裁掉边缘，请测量第一张测试照片。',

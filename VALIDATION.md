@@ -27,3 +27,11 @@ Source photographs are not persisted. Ordinary hosting requests still occur on f
 6. Confirm current document requirements with the applicable agency. The Portugal 35×45-mm preset is tied to the linked VFS Portugal U.S. short-stay checklist from 2022, not all Portuguese applications.
 
 Real-iPhone and physical-print checks have not yet been performed. Supported device/browser versions and final large-file limits must follow this evidence.
+
+## October 30 refinement checks
+
+The initial phone issue was reproduced in a browser: revealing the contrast slider placed the crop preview 347 pixels above the viewport. The regression now passes with a persistent, bounded preview and separate Framing/Adjustments tabs. The browser suite additionally checks keyboard tab navigation and retained edits, and verifies that switchable one-pixel cut guides affect cut edges without resizing or changing copy count. Outer ticks for metric layouts stay in unused paper.
+
+Responsive screenshots were inspected at widths 320, 390, 768, 1024, 1280, and 1440 pixels, including short landscape and Chinese controls. These are desktop browser checks; real-iPhone verification of the revised UI and a physical print with guides remain pending.
+
+Two personal exported sheets were measured locally: eight nominal 35×45-mm photos (413/414×531 pixels per copy) and six exact 2×2-inch photos (600×600 pixels). Both sheets are 1800×1200 pixels. The private report and photographs remain in iCloud, outside this repository. Physical dimensions assume the full sheet is printed at exactly 4×6 inches with no cropping/scaling; measurements do not certify agency acceptance.
