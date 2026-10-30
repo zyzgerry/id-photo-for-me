@@ -205,6 +205,10 @@ $('original').onchange = () => { if (photo && layout) drawCrop(); };
 $('guides').onchange = updateReadouts;
 $('cut-guides').onchange = () => { updateReadouts(); scheduleRender(); };
 function selectTool(name, focus = false) {
+  if (name === 'framing' && $('original').checked) {
+    $('original').checked = false;
+    if (photo && layout) drawCrop();
+  }
   for (const tool of ['framing','adjustments']) {
     const selected = tool === name;
     $(`${tool}-tab`).setAttribute('aria-selected',String(selected));

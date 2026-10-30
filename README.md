@@ -34,11 +34,11 @@ pnpm dev
 Open `http://127.0.0.1:4173/id-photo-for-me/`. The root URL works too. No server is needed in production beyond static hosting; the local server is for development.
 
 ```sh
-pnpm exec playwright install chromium
+pnpm exec playwright install chromium webkit firefox
 pnpm test:browser
 ```
 
-On Windows, the tests use an installed Chrome if found. Otherwise they use Playwright Chromium. Browser tests use synthetic quadrants, including a HEIC file and an EXIF-rotated JPEG; no personal photos are included. Fixture recreation is documented in `tests/fixtures/generate.py` and requires development-only Pillow/pillow-heif, not the application.
+The suite runs Chromium, WebKit, and Firefox. On Windows, the Chromium project uses an installed Chrome if found; otherwise it uses Playwright Chromium. Run one project with `pnpm test:browser --project=webkit` (or `chromium` / `firefox`). Browser tests use synthetic quadrants, including a HEIC file and an EXIF-rotated JPEG; no personal photos are included. Fixture recreation is documented in `tests/fixtures/generate.py` and requires development-only Pillow/pillow-heif, not the application.
 
 The GitHub Actions workflow verifies the app, builds static files, and deploys `dist/` to GitHub Pages on pushes to `main`. Relative asset URLs support both repository subpaths and root hosting.
 

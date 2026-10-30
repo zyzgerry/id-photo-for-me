@@ -35,3 +35,11 @@ The initial phone issue was reproduced in a browser: revealing the contrast slid
 Responsive screenshots were inspected at widths 320, 390, 768, 1024, 1280, and 1440 pixels, including short landscape and Chinese controls. These are desktop browser checks; real-iPhone verification of the revised UI and a physical print with guides remain pending.
 
 Two personal exported sheets were measured locally: eight nominal 35×45-mm photos (413/414×531 pixels per copy) and six exact 2×2-inch photos (600×600 pixels). Both sheets are 1800×1200 pixels. The private report and photographs remain in iCloud, outside this repository. Physical dimensions assume the full sheet is printed at exactly 4×6 inches with no cropping/scaling; measurements do not certify agency acceptance.
+
+## Playwright CLI audit
+
+Microsoft's official `playwright-cli` skill was used to walk through the live site with synthetic fixtures. The walkthrough covered file-picker selection, tonal editing, original comparison, returning to framing, invalid/custom dimensions, unit conversion, Chinese controls, offline HEIC replacement, actual JPEG download, and clearing. The downloaded file was independently opened and confirmed as 1800×1200 pixels at 300 ppi; browser storage state contained no cookies or persisted origins.
+
+Confirmed and fixed: original comparison remained enabled after its control was hidden by switching to Framing. The preview could therefore show neutral pixels while the sheet/export retained edits. The new regression reproduced the mismatch before the fix. Returning to Framing now ends comparison and redraws the edited crop. A missing browser icon also caused a harmless root favicon 404; an explicitly referenced local icon now ships with the app.
+
+The suite now contains twelve browser scenarios, including transparent-PNG flattening and checking that refresh leaves no photo data in IndexedDB or Cache Storage. All twelve pass locally in both Chrome and WebKit. Firefox failed to launch on this Windows host (`spawn UNKNOWN`), before any app scenario ran. GitHub Actions installs and runs all three engines on Linux; WebKit automation still does not establish actual iPhone compatibility.
