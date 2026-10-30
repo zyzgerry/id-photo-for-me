@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Prepare accurately sized ID photos on a 4×6 print sheet, entirely on your device.">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; font-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>ID Photo for Me</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./src/app.js"></script>
+</head>
+<body>
+  <header class="topbar shell">
+    <a class="wordmark" href="./" data-i18n="title">ID Photo for Me</a>
+    <label class="language"><span data-i18n="language">Language</span>
+      <select id="language" aria-label="Language"><option value="en">English</option><option value="zh">简体中文</option></select>
+    </label>
+  </header>
+  <main class="shell">
+    <section class="intro">
+      <h1 data-i18n="title">ID Photo for Me</h1>
+      <p class="lead" data-i18n="subtitle">Your photo. Your device. Ready for a 4×6 print.</p>
+      <div class="file-actions">
+        <label class="button primary file-button" for="photo"><span id="choose-label" data-i18n="choose">Choose a photo</span><input id="photo" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" aria-describedby="formats privacy"></label>
+        <button id="clear" class="button quiet" disabled data-i18n="clear">Clear photo</button>
+      </div>
+      <p id="formats" class="hint" data-i18n="formats">JPEG, PNG, or HEIC/HEIF. Up to 30 MB, 50 megapixels, and 12,000 pixels per side. Still images only.</p>
+      <p id="privacy" class="privacy" data-i18n="privacy">Photos stay on this device. No uploads, accounts, or saved history.</p>
+      <p id="status" role="status" aria-live="polite"></p>
+      <p id="error" class="error" role="alert" hidden></p>
+      <noscript><p>JavaScript is needed to process photos locally. / 请启用 JavaScript 以在本机处理照片。</p></noscript>
+    </section>
+    <div class="workspace">
+      <section class="settings region" aria-labelledby="size-title">
+        <h2 id="size-title" data-i18n="step1">1. Photo size</h2>
+        <label for="country" data-i18n="country">Country or custom size</label>
+        <select id="country"><option value="us" data-i18n="us">United States</option><option value="pt" data-i18n="pt">Portugal</option><option value="custom" data-i18n="custom">Custom dimensions</option></select>
+        <div id="document-fields"><label for="document" data-i18n="document">Document</label><select id="document"></select></div>
+        <div id="custom-fields" hidden>
+          <div class="two-fields"><label><span data-i18n="width">Width</span><input id="width" type="number" inputmode="decimal" value="35" step="any" min="10" max="152.4"></label><label><span data-i18n="height">Height</span><input id="height" type="number" inputmode="decimal" value="45" step="any" min="10" max="152.4"></label></div>
+          <label for="units" data-i18n="units">Units</label><select id="units"><option value="mm" data-i18n="mm">Millimeters</option><option value="inch" data-i18n="inch">Inches</option></select>
+        </div>
+        <p class="size-readout" id="size-readout"></p>
+        <p class="hint" id="preset-note"></p>
+        <p class="hint" id="preset-reference"><a id="reference" target="_blank" rel="noopener noreferrer" data-i18n="reference">Requirements source</a><br><span id="verified"></span></p>
+        <p class="hint" data-i18n="acceptance">Correct size does not guarantee document acceptance. Check the linked requirements.</p>
+      </section>
+      <section class="editor region" aria-labelledby="crop-title">
+        <div class="section-heading"><h2 id="crop-title" data-i18n="step2">2. Framing</h2><button id="reset-crop" class="text-button" data-i18n="resetCrop" disabled>Reset framing</button></div>
+        <div id="crop-stage" class="crop-stage">
+          <div id="crop-empty" class="empty"><h3 data-i18n="emptyTitle">Start with a photo</h3><p data-i18n="empty">Choose a photo from Photos or Files. Your crop and print sheet will appear here.</p></div>
+          <div id="crop-wrap" hidden><canvas id="crop" width="600" height="600" tabindex="0" role="img" aria-label="Photo crop preview"></canvas><div id="guide-overlay" aria-hidden="true" hidden></div></div>
+        </div>
+        <fieldset id="edit-controls" disabled>
+          <p class="hint" data-i18n="drag">Drag the photo to frame it, or use the position sliders. Pinch to zoom.</p>
+          <label class="slider-label" for="zoom"><span data-i18n="zoom">Zoom</span><output id="zoom-value">1.00×</output></label><input id="zoom" type="range" min="1" max="4" step="0.01" value="1">
+          <label class="slider-label" for="x"><span data-i18n="horizontal">Horizontal position</span><output id="x-value">50%</output></label><input id="x" type="range" min="0" max="100" step="0.1" value="50">
+          <label class="slider-label" for="y"><span data-i18n="vertical">Vertical position</span><output id="y-value">50%</output></label><input id="y" type="range" min="0" max="100" step="0.1" value="50">
+          <label class="check-row" id="guide-control"><input id="guides" type="checkbox"><span data-i18n="guides">Show head-size guides</span></label><p id="guide-note" class="hint" data-i18n="guideNote" hidden>Dashed lines show a centered head-height range only. Align crown and chin manually; no face detection or acceptance check.</p>
+          <details><summary data-i18n="adjustments">Brightness and contrast</summary>
+            <p class="hint" data-i18n="editWarning">Document rules may restrict edits. Neutral settings are recommended.</p>
+            <label class="check-row" id="allow-edits-row"><input id="allow-edits" type="checkbox"><span data-i18n="allowEdits">Enable adjustments despite document editing restrictions</span></label>
+            <fieldset id="adjust-controls" disabled>
+              <label class="slider-label" for="brightness"><span data-i18n="brightness">Brightness</span><output id="brightness-value">0</output></label><input id="brightness" type="range" min="-15" max="15" value="0">
+              <label class="slider-label" for="contrast"><span data-i18n="contrast">Contrast</span><output id="contrast-value">0</output></label><input id="contrast" type="range" min="-15" max="15" value="0">
+              <button id="reset-edits" class="text-button" data-i18n="resetEdits">Reset adjustments</button>
+            </fieldset>
+            <label class="check-row"><input id="original" type="checkbox"><span data-i18n="original">Compare original</span></label>
+          </details>
+        </fieldset>
+        <p id="resolution" class="hint"></p><p id="upscale" class="warning" data-i18n="upscale" hidden>Below 300 ppi: this crop will be enlarged. Zoom out or use a higher-resolution photo; enlargement cannot restore detail.</p>
+        <p id="bounded" class="hint" data-i18n="bounded" hidden>Large photos are reduced to a maximum working edge of 4096 pixels to limit memory use.</p>
+      </section>
+      <section class="sheet region" aria-labelledby="sheet-title">
+        <h2 id="sheet-title" data-i18n="step3">3. Print sheet</h2>
+        <div class="sheet-meta"><strong id="copy-count"></strong><span data-i18n="sheetSize">4×6 inches</span></div>
+        <div class="sheet-stage"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
+        <p class="hint" data-i18n="output">1800×1200 pixels · 300 ppi</p>
+        <p class="hint" data-i18n="cut">No gaps or borders are added. Shared edges need just one cut. Unused sheet space stays white.</p>
+        <p id="rotated" class="hint" data-i18n="rotated" hidden>Copies rotated on the sheet to fit more; turn the print before cutting.</p>
+        <div class="export-actions"><button id="save" class="button primary" data-i18n="save" disabled>Download JPEG</button><button id="share" class="button quiet" data-i18n="share" disabled>Share JPEG</button></div>
+        <p id="export-status" class="hint" role="status" aria-live="polite"></p>
+        <aside class="print-note"><h3 data-i18n="printTitle">Print at exactly 4×6 inches</h3><p data-i18n="print">Keep the entire sheet. Turn off automatic cropping, enlargement, and fit/fill options. Borderless printing may trim the edges. Measure your first test print.</p></aside>
+      </section>
+    </div>
+  </main>
+  <footer class="shell"><span data-i18n="local">Local processing</span><a href="./THIRD_PARTY.md" target="_blank" rel="noopener" data-i18n="source">Decoder notices</a></footer>
+</body>
+</html>
