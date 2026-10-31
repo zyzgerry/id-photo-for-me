@@ -73,6 +73,7 @@ select:hover, input[type=number]:hover { border-color: var(--color-ink); }
 .requirements { border-top: 1px solid var(--color-rule); padding-top: 8px; }
 .crop-stage { background: var(--color-stage); min-height: 360px; padding: 16px; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
 .empty { padding: 24px 8px; text-align: center; }
+.empty h3 { margin-inline: auto; }
 .empty p { color: var(--color-muted); font-size: 14px; margin-top: 12px; }
 .empty .button { margin-top: 20px; }
 #crop-wrap { position: relative; max-width: min(100%, calc(var(--preview-height) * var(--crop-ratio,1))); width: 100%; }
