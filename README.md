@@ -44,7 +44,7 @@ The GitHub Actions workflow verifies the app, builds static files, and deploys `
 
 ## Scope and current limits
 
-- English and Simplified Chinese; U.S. passport, U.S. printed visa photo, Portugal short-stay Schengen visa, and custom dimensions.
+- English and Simplified Chinese; 99 printed-photo presets across 95 countries and regions, plus custom dimensions. Passport and visa routes are labeled separately, including application-location restrictions. Every preset links its government, consular, or authorized application-operator source and check date. See [catalog research and benchmark](research/photo-requirements.md) for the complete list and exclusions.
 - All image processing is local. No analytics, remote fonts, image services, persistent browser storage, or service workers. A restrictive Content Security Policy disables application network connections; official sources open only when chosen.
 - HEIC tries native decoding first, with an unmodified, locally bundled `heic-to` fallback. The fallback module loads at startup so it is available after disconnecting. See `THIRD_PARTY.md` for licensing and source.
 - Provisional limits: 30 MiB, 50 megapixels, and 12,000 pixels per side. Images are reduced to a working edge of at most 4096 pixels. Effective crop resolution uses this working image and warns below 300 ppi.
@@ -52,7 +52,7 @@ The GitHub Actions workflow verifies the app, builds static files, and deploys `
 - Single-JPEG mode preserves full framing by default, with optional manual crop to an output ratio. Pixel dimensions range from 1–4096; initial output has a longest edge of at most 1200 pixels without automatic enlargement. The preview shows the actual encoded JPEG, and reports its resulting dimensions, exact bytes, and encoder quality setting.
 - The single-JPEG byte limit defaults to 300 KB (1 KB = 1,000 bytes). Leave it blank for maximum quality. Compression searches from 1.0 down to a 0.55 floor; smaller dimensions are allowed only when selected and never below the optional pixel minimums. Turn resizing off for exact output dimensions. Impossible byte/pixel/quality combinations block download rather than silently violating a constraint. This does not guarantee portal acceptance.
 - Desktop uses a compact three-region workbench. Mobile keeps the crop preview visible while adjusting, with Framing/Adjustments tabs and optional fine-position controls. See `DESIGN.md` for interface decisions.
-- Brightness and contrast are neutral by default. U.S. presets require explicitly enabling adjustments after the editing-restriction notice. The app checks geometry, not government acceptance.
+- Brightness and contrast are neutral by default. Presets with editing restrictions require explicitly enabling adjustments after the notice. Selected document guidance stays visible; paper, photographer, appointment, and portal requirements still apply. The app checks geometry, not government acceptance.
 - HEIC HDR/wide-gamut appearance, large-photo memory behavior, native sharing, and saving on real iPhones remain subject to the release checks below. Current-browser orientation handling and sRGB canvas conversion are used; universal color fidelity is not claimed.
 
 ## Release validation

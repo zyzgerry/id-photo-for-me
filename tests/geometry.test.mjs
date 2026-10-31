@@ -3,6 +3,32 @@ import assert from 'node:assert/strict';
 import { layoutSheet, cropRect, withJpegDensity, mmToPx } from '../src/geometry.js';
 import { inspectImage } from '../src/image.js';
 import { validateSingle } from '../src/single.js';
+import { PRESETS, VERIFIED } from '../src/presets.js';
+import { messages } from '../src/i18n.js';
+
+test('every document preset has unique identity, bilingual guidance, dated sources and valid print geometry',()=>{
+  const ids=new Set();
+  for(const p of PRESETS) {
+    assert.ok(!ids.has(p.id),`duplicate preset ${p.id}`);ids.add(p.id);
+    assert.match(p.country,/^[a-z]{2}$/);assert.equal(new URL(p.source).protocol,'https:');
+    assert.ok(p.sourceName);assert.match(p.checked||VERIFIED,/^\d{4}-\d{2}-\d{2}$/);
+    for(const lang of ['en','zh']) {
+      assert.ok(typeof p.document==='string'?messages[lang][p.document]:p.document[lang],`${p.id} document ${lang}`);
+      assert.ok(typeof p.note==='string'?messages[lang][p.note]:p.note[lang],`${p.id} note ${lang}`);
+      assert.notEqual(new Intl.DisplayNames([lang],{type:'region'}).of(p.country.toUpperCase()),p.country.toUpperCase());
+    }
+    if(p.head)assert.ok(p.head.length===2&&p.head[0]>0&&p.head[0]<=p.head[1]&&p.head[1]<1,`${p.id} head range`);
+    const layout=layoutSheet(p.widthMm,p.heightMm);
+    for(const c of layout.copies) {
+      assert.ok(Math.abs(c.width-mmToPx(c.rotated?p.heightMm:p.widthMm))<1,`${p.id} width`);
+      assert.ok(Math.abs(c.height-mmToPx(c.rotated?p.widthMm:p.heightMm))<1,`${p.id} height`);
+      assert.ok(c.x>=0&&c.y>=0&&c.x+c.width<=1800&&c.y+c.height<=1200,`${p.id} bounds`);
+    }
+  }
+  for(const [id,size] of [['us-passport',[50.8,50.8]],['cn-visa',[33,48]],['fi-passport',[36,47]],['dm-passport',[35,45]],['pe-visa',[50,50]]]) {
+    const p=PRESETS.find(p=>p.id===id);assert.deepEqual([p.widthMm,p.heightMm],size);
+  }
+});
 
 test('six exact 2-inch copies tile a 1800x1200 sheet with shared boundaries', () => {
   const result = layoutSheet(50.8,50.8);

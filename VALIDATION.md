@@ -70,3 +70,9 @@ The reduced preview reproduced invisible outside edges on a synthetic white phot
 Final local verification passed all eight Node tests and forty-four Chrome/WebKit browser checks. Actual-iPhone and physical-print validation remain pending.
 
 Portugal's head-guide control was reproduced as hidden because the preset had no head range. It now uses the 70–80% face-height reference in [VFS Portugal UK photo guidance](https://www.vfsglobal.com/one-pager/portugal/uk/english/pdf/tech-req-for-photos.pdf), checked October 31, 2026. The existing U.S. checklist remains the dimensional reference. The UI identifies the guide source and reminds users to confirm local requirements. A regression checks the visible control, four reference lines, source link, Chinese label, single-mode hiding, and unchanged output pixels when head guides are toggled. Both new regressions failed before the fixes and pass in Chrome and WebKit.
+
+## Expanded printed-photo catalog — October 31, 2026
+
+The catalog contains 99 document/application presets across 95 countries and regions. All nine Node tests and 48 Chrome/WebKit browser checks passed locally. Catalog checks iterate every preset in both languages, verify source links, dimensions and check dates, and retain document/custom selections when switching languages. Offline phone tests exercise China, Finland, Canada and Peru, with a real synthetic JPEG download. A 320-pixel Chinese France-preset screenshot was reviewed with no horizontal overflow.
+
+The existing crop, HEIC, print geometry, editing restrictions, single-JPEG, privacy and responsive tests also pass. The publication workflow runs all 24 scenarios in Chromium, WebKit and Firefox on Linux. Actual iPhone use and a measured physical print remain pending. Source research, benchmark coverage and exclusions are recorded in research/photo-requirements.md; the resumption audit samples high-impact routes rather than re-verifying every source.

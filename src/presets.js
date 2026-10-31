@@ -1,3 +1,10 @@
+import { ASIA_PRESETS } from './catalog-asia.js';
+import { AMERICAS_PRESETS } from './catalog-americas.js';
+import { AFRICA_PRESETS } from './catalog-africa.js';
+import { EUROPE_PRESETS } from './catalog-europe.js';
+import { EUROPE_EXTRA_PRESETS } from './catalog-europe-extra.js';
+import { PARTNER_PRESETS } from './catalog-visa-partners.js';
+
 export const VERIFIED = '2026-10-30';
 export const PRESETS = [
   { id: 'us-passport', country: 'us', document: 'passport', widthMm: 50.8, heightMm: 50.8,
@@ -10,4 +17,5 @@ export const PRESETS = [
     source: 'https://www.vfsglobal.com/one-pager/portugal/usa/english/pdf/portugal-short-stay-c-visa-apr-2022.pdf',
     sourceName: 'VFS Portugal, U.S. short-stay checklist (2022)', note: 'ptNote', head: [0.7, 0.8],
     headSource: 'https://www.vfsglobal.com/one-pager/portugal/uk/english/pdf/tech-req-for-photos.pdf', restrictEdits: false },
+  ...EUROPE_PRESETS, ...EUROPE_EXTRA_PRESETS, ...PARTNER_PRESETS, ...ASIA_PRESETS, ...AMERICAS_PRESETS, ...AFRICA_PRESETS,
 ];

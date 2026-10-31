@@ -38,15 +38,25 @@ function updateLanguage() {
   $('language').ariaLabel = t('language');
   $('tool-tabs').ariaLabel = lang === 'zh' ? '照片调整工具' : 'Photo editing tools';
   $('choose-label').textContent = t(photo ? 'replace' : 'choose');
-  updateDocuments(false); updatePresetDetails();
+  updateCountries(); updateDocuments(false); updatePresetDetails();
   updateModeLabels();
   setStatus(statusKey); setError(errorKey); setExport(exportKey); updateReadouts();
+}
+
+function updateCountries() {
+  const old = $('country').value;
+  const names = new Intl.DisplayNames([lang], {type:'region'});
+  const countries = [...new Set(PRESETS.map(p=>p.country))]
+    .map(code=>({code,name:names.of(code.toUpperCase())})).sort((a,b)=>a.name.localeCompare(b.name,lang));
+  $('country').replaceChildren(...countries.map(({code,name})=>new Option(name,code)), new Option(t('custom'),'custom'));
+  $('country').value = old || PRESETS[0].country;
 }
 
 function updateDocuments(reset = true) {
   const old = $('document').value;
   $('document').replaceChildren(...PRESETS.filter(p => p.country === $('country').value).map(p => {
-    const option = document.createElement('option'); option.value = p.id; option.textContent = t(p.document); return option;
+    const option = document.createElement('option'); option.value = p.id;
+    option.textContent = typeof p.document === 'string' ? t(p.document) : p.document[lang]; return option;
   }));
   if (!reset && [...$('document').options].some(o => o.value === old)) $('document').value = old;
 }
@@ -54,12 +64,12 @@ function updateDocuments(reset = true) {
 function updatePresetDetails() {
   $('custom-fields').hidden = $('country').value !== 'custom';
   $('document-fields').hidden = $('country').value === 'custom';
-  $('preset-note').textContent = t(preset?.note || 'customNote');
+  $('preset-note').textContent = preset ? (typeof preset.note === 'string' ? t(preset.note) : preset.note[lang]) : t('customNote');
   $('preset-reference').hidden = !preset;
   if (preset) {
     $('reference').href = preset.source;
     $('reference').textContent = `${t('reference')}: ${preset.sourceName}`;
-    $('verified').textContent = `${t('checked')}: ${VERIFIED}`;
+    $('verified').textContent = `${t('checked')}: ${preset.checked || VERIFIED}`;
   }
   $('guide-control').hidden = mode!=='print'||!preset?.head;
   $('allow-edits-row').hidden = mode!=='print'||!preset?.restrictEdits;
@@ -420,7 +430,7 @@ function placeSettings() {
 }
 phoneLayout.addEventListener('change', placeSettings);
 placeSettings();
-updateDocuments(); chooseSize(); updateLanguage();
+updateCountries(); updateDocuments(); chooseSize(); updateLanguage();
 setStatus('decoderLoading');
 prepareDecoder().then(() => { if (statusKey === 'decoderLoading') setStatus(); }).catch(() => {
   if (!photo && !loading) setStatus('decoderError');
