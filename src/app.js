@@ -1,4 +1,5 @@
 import { PRESETS, VERIFIED } from './presets.js';
+import { DIGITAL_PRESETS, DIGITAL_UNAVAILABLE, checkDigitalOutput } from './digital-presets.js';
 import { messages } from './i18n.js';
 import { SHEET, layoutSheet, cropRect } from './geometry.js';
 import { renderCrop, renderSheet, exportJpeg } from './render.js';
@@ -12,6 +13,17 @@ let file = null, downloadUrl = null, revision = 0, renderTimer, loading = false;
 let statusKey = '', errorKey = '', exportKey = '';
 const printSettings = { ratio: 1, zoom: 1, x: 50, y: 50, brightness: 0, contrast: 0 };
 const singleSettings = {...printSettings};
+const requirementSelections={print:{country:PRESETS[0].country,document:PRESETS[0].id},single:{country:'custom',document:''}};
+const catalog=()=>mode==='print'?PRESETS:DIGITAL_PRESETS;
+const activeDigital=()=>mode==='single'?DIGITAL_PRESETS.find(p=>p.id===$('document').value):null;
+const activeRequirement=()=>mode==='print'?preset:activeDigital();
+const effectiveSettings=()=>activeRequirement()?.restrictEdits&&!$('allow-edits').checked?{...settings,brightness:0,contrast:0}:settings;
+function markFramingReview(){if(photo) settings.review=true;}
+function updateExportAvailability(){
+  $('framing-review').hidden=!photo||!settings.review;
+  $('save').disabled=!file||!!settings.review;
+  $('share').disabled=!file||!!settings.review||$('share').hidden;
+}
 let settings=printSettings, mode='print', singleOptions=null, singleResult=null, requestedCopies=null, printCapacity=6;
 const canFrame=()=>mode==='print'||$('single-fit').value==='crop';
 const t = key => messages[lang][key] || messages[lang].decodeError;
@@ -46,15 +58,15 @@ function updateLanguage() {
 function updateCountries() {
   const old = $('country').value;
   const names = new Intl.DisplayNames([lang], {type:'region'});
-  const countries = [...new Set(PRESETS.map(p=>p.country))]
-    .map(code=>({code,name:names.of(code.toUpperCase())})).sort((a,b)=>a.name.localeCompare(b.name,lang));
+  const countries = [...new Set([...catalog().map(p=>p.country),...(mode==='single'?['ca','schengen']:[])])]
+    .map(code=>({code,name:code==='schengen'?t('schengen'):names.of(code.toUpperCase())})).sort((a,b)=>a.name.localeCompare(b.name,lang));
   $('country').replaceChildren(...countries.map(({code,name})=>new Option(name,code)), new Option(t('custom'),'custom'));
   $('country').value = old || PRESETS[0].country;
 }
 
 function updateDocuments(reset = true) {
   const old = $('document').value;
-  $('document').replaceChildren(...PRESETS.filter(p => p.country === $('country').value).map(p => {
+  $('document').replaceChildren(...catalog().filter(p => p.country === $('country').value).map(p => {
     const option = document.createElement('option'); option.value = p.id;
     option.textContent = typeof p.document === 'string' ? t(p.document) : p.document[lang]; return option;
   }));
@@ -62,30 +74,47 @@ function updateDocuments(reset = true) {
 }
 
 function updatePresetDetails() {
-  $('custom-fields').hidden = $('country').value !== 'custom';
-  $('document-fields').hidden = $('country').value === 'custom';
-  $('preset-location').hidden = !preset?.scope;
-  $('preset-scope').hidden = !preset?.scope;
-  $('preset-scope').textContent = preset?.scope?.[lang] || '';
-  $('preset-note').textContent = preset ? (typeof preset.note === 'string' ? t(preset.note) : preset.note[lang]) : t('customNote');
-  $('preset-reference').hidden = !preset;
-  if (preset) {
-    $('reference').href = preset.source;
-    $('reference').textContent = `${t('reference')}: ${preset.sourceName}`;
-    $('verified').textContent = `${t('checked')}: ${preset.checked || VERIFIED}`;
+  const requirement=activeRequirement(), guidance=mode==='single'?DIGITAL_UNAVAILABLE[$('country').value]:null;
+  $('custom-fields').hidden = mode!=='print'||$('country').value !== 'custom';
+  $('digital-framing').hidden=mode!=='single';
+  $('ratio-fields').hidden=mode!=='single'||$('single-fit').value==='original';
+  for(const id of ['single-fit','ratio-width','ratio-height']) $(id).disabled=!!activeDigital();
+  $('country-help').textContent=t(mode==='print'?'countryHelp':'digitalCountryHelp');
+  $('allow-edits').disabled=!!requirement?.noCrop;
+  $('digital-route-note').hidden=!requirement?.noCrop;
+  $('document-fields').hidden = $('country').value === 'custom'||!!guidance;
+  $('preset-location').hidden = !requirement?.scope;
+  $('preset-scope').hidden = !requirement?.scope;
+  $('preset-scope').textContent = requirement?.scope?.[lang] || '';
+  const details=requirement||guidance;
+  $('preset-note').textContent = details ? (typeof details.note === 'string' ? t(details.note) : details.note[lang]) : t(mode==='print'?'customNote':'digitalCustomNote');
+  $('preset-reference').hidden = !details;
+  if(details){
+    $('reference').href=details.source;
+    $('reference').textContent=`${t('reference')}: ${details.sourceName}`;
+    $('verified').textContent=`${t('checked')}: ${details.checked||VERIFIED}`;
   }
-  $('guide-control').hidden = mode!=='print'||!preset?.head;
-  $('allow-edits-row').hidden = mode!=='print'||!preset?.restrictEdits;
-  $('adjust-controls').disabled = !photo || (mode==='print' && !!preset?.restrictEdits && !$('allow-edits').checked);
+  $('guide-control').hidden=mode!=='print'||!preset?.head;
+  $('allow-edits-row').hidden=!requirement?.restrictEdits;
+  $('adjust-controls').disabled=!photo||(!!requirement?.restrictEdits&&!$('allow-edits').checked);
+  $('output-controls').disabled=!photo;
+  $('output-empty').hidden=!!photo;
+  if(mode==='single'){
+    $('size-readout').textContent=requirement?`${requirement.minWidth}×${requirement.minHeight}–${requirement.maxWidth}×${requirement.maxHeight} px · ${requirement.minKB}–${requirement.maxKB} KB`:t('digitalCustomSummary');
+    if(guidance){$('size-readout').textContent=t('noDigitalPreset');$('preset-note').closest('details').open=true;}
+  }
+
 }
 
 function updateModeLabels() {
-  document.querySelector('.intro h1').textContent=t(mode==='print'?'workspaceTitle':'singleWorkspaceTitle');
-  document.querySelector('.intro .lead').textContent=t(mode==='print'?'subtitle':'singleSubtitle');
-  $('size-title').textContent=t(mode==='print'?'step1':'singleStep1');
+  document.querySelector('.intro h1').textContent=t('workspaceTitle');
+  document.querySelector('.intro .lead').textContent=t('subtitle');
+  $('size-title').textContent=t('step1');
+  $('save').textContent=t(mode==='print'?'savePrint':'saveSingle');
+  $('sheet').ariaLabel=t(mode==='print'?'sheetPreview':'singlePreview');
   $('sheet-title').textContent=t(mode==='print'?'step3':'singleStep3');
   $('sheet-empty').textContent=t(mode==='print'?'sheetEmpty':'singleEmpty');
-  document.querySelector('#crop-empty p').textContent=t(mode==='print'?'empty':'singleEmpty');
+  document.querySelector('#crop-empty p').textContent=t('empty');
   $('output-info').textContent=t(mode==='print'?'output':'singleOutput');
   $('framing-help').textContent=t(canFrame()?'drag':'keepFullHint');
   $('crop-controls').hidden=!canFrame();
@@ -108,6 +137,7 @@ function printLayout(clamp = false) {
 }
 
 function chooseSize() {
+  markFramingReview();
   const previousRatio = settings.ratio;
   preset = PRESETS.find(p => p.id === $('document').value) || null;
   if ($('country').value === 'custom') preset = null;
@@ -115,39 +145,31 @@ function chooseSize() {
   try {
     layout = printLayout(true); settings.ratio = layout.widthMm/layout.heightMm;
     if (Math.abs(previousRatio - settings.ratio) > 1e-6) {
-      settings.x = settings.y = 50; settings.zoom = 1;
       if (photo) setStatus('cropChanged');
     }
   } catch (e) { layout = null; setError(e.message === 'noFit' ? 'noFit' : 'dimensionsError'); }
-  $('allow-edits').checked = false;
-  settings.brightness = settings.contrast = 0;
   updatePresetDetails(); updateReadouts(); scheduleRender();
 }
 
 function configureSingle(changed) {
   const aspect=photo?photo.canvas.width/photo.canvas.height:1;
-  if($('single-fit').value==='original' && photo && ['pixel-width','pixel-height','fit'].includes(changed)) {
-    const value=Number($(changed==='fit'?'pixel-width':changed).value);
-    if(value>0 && Number.isFinite(value)) {
-      if(changed!=='pixel-height') $('pixel-height').value=Math.max(1,Math.round(value/aspect));
-      else $('pixel-width').value=Math.max(1,Math.round(value*aspect));
-    }
-  }
-  const ratio=$('single-fit').value==='original'?aspect:Number($('pixel-width').value)/Number($('pixel-height').value);
-  if(Number.isFinite(ratio)&&ratio>0) {
-    if(Math.abs(settings.ratio-ratio)>1e-6) {
-      Object.assign(settings,{zoom:1,x:50,y:50});
-      if(photo&&!loading&&canFrame()) setStatus('cropChanged');
-    }
+  const ratio=$('single-fit').value==='original'?aspect:Number($('ratio-width').value)/Number($('ratio-height').value);
+  if(['fit','ratio'].includes(changed)) markFramingReview();
+  if(Number.isFinite(ratio)&&ratio>0){
     settings.ratio=ratio;
+    if(changed==='pixel-height') $('pixel-width').value=Math.max(1,Math.round(Number($('pixel-height').value)*ratio));
+    else if(($('single-fit').value==='original'&&photo)||['pixel-width','fit','ratio','preset','photo'].includes(changed)) $('pixel-height').value=Math.max(1,Math.round(Number($('pixel-width').value)/ratio));
   }
   if(!canFrame()) Object.assign(settings,{zoom:1,x:50,y:50});
   setError();$('single-error').hidden=true;
   try {
     if(['pixel-width','pixel-height','max-kb','min-width','min-height'].some(id=>$(id).validity.badInput)) throw new Error('singleDimensionsError');
+    if(!Number.isFinite(ratio)||ratio<=0||(canFrame()&&['ratio-width','ratio-height'].some(id=>!$(id).checkValidity()))) throw new Error('singleDimensionsError');
     singleOptions=validateSingle({width:Number($('pixel-width').value),height:Number($('pixel-height').value),
       maxKB:$('max-kb').value===''?null:Number($('max-kb').value),allowResize:$('allow-resize').checked,
       minWidth:$('min-width').value===''?1:Number($('min-width').value),minHeight:$('min-height').value===''?1:Number($('min-height').value)});
+    const p=activeDigital();
+    if(p&&(singleOptions.width<p.minWidth||singleOptions.height<p.minHeight||singleOptions.width>p.maxWidth||singleOptions.height>p.maxHeight)) throw new Error('digitalConstraintsError');
   } catch(e) {singleOptions=null;showSingleError(e.message);}
   updateModeLabels();updatePresetDetails();updateReadouts();scheduleRender();
 }
@@ -157,9 +179,13 @@ function showSingleError(key) {
 }
 
 function setMode(next) {
+  requirementSelections[mode]={country:$('country').value,document:$('document').value};
+  settings.allowEdits=$('allow-edits').checked;
   mode=next;settings=mode==='print'?printSettings:singleSettings;
+  $('allow-edits').checked=!!settings.allowEdits;
+  updateCountries();$('country').value=requirementSelections[mode].country;updateDocuments();$('document').value=requirementSelections[mode].document;
   selectTool('framing');setError();singleResult=null;
-  $('print-settings').hidden=mode!=='print';$('single-settings').hidden=mode!=='single';
+  $('single-settings').hidden=mode!=='single';
   for(const id of ['print-output-settings','print-guides','print-note','print-summary']) $(id).hidden=mode!=='print';
   document.querySelector('.workspace').dataset.mode=mode;
   $('sheet').hidden=true;$('sheet-empty').hidden=false;
@@ -179,7 +205,8 @@ function updateReadouts() {
     $(`${key}-value`).textContent = key === 'zoom' ? `${settings[key].toFixed(2)}×` :
       ['x','y'].includes(key) ? `${Math.round(settings[key])}%` : settings[key];
   }
-  $('size-readout').textContent = sizeLabel();
+  if(mode==='print') $('size-readout').textContent = sizeLabel();
+  updateExportAvailability();
   $('copies').max=printCapacity;
   $('copy-error').hidden=mode!=='print'||!!layout||!errorKey;
   if(!$('copy-error').hidden) $('copy-error').textContent=t(errorKey);
@@ -248,14 +275,15 @@ function scheduleRender() {
     try {
       let jpeg,filename;
       if(mode==='print') {
-        sheet = renderSheet(photo.canvas, settings, layout, $('cut-guides').checked);
+        sheet = renderSheet(photo.canvas, effectiveSettings(), layout, $('cut-guides').checked);
         jpeg = await exportJpeg(sheet);
         if (current !== revision) return;
         $('sheet').width=sheet.width;$('sheet').height=sheet.height;
         $('sheet').getContext('2d').drawImage(sheet,0,0);
         filename='id-photo-4x6-300ppi.jpg';
       } else {
-        const result=await exportSingle(photo.canvas,{...settings},{...singleOptions},()=>current===revision);
+        const result=await exportSingle(photo.canvas,{...effectiveSettings()},{...singleOptions},()=>current===revision);
+        checkDigitalOutput(activeDigital(),result);
         if(current!==revision) return;
         await drawJpegPreview(result.blob,$('sheet'),()=>current===revision);
         if(current!==revision) return;
@@ -267,7 +295,7 @@ function scheduleRender() {
       $('share').hidden = !navigator.canShare || !navigator.canShare({ files: [file] });
       $('share').disabled = $('share').hidden;
       setExport();updateReadouts();
-    } catch(e) { if (current === revision) { if(mode==='single') showSingleError(e.message==='fileTargetError'?'fileTargetError':'exportError');else setError('exportError'); setExport(); $('sheet').hidden = true; $('sheet-empty').hidden = false; } }
+    } catch(e) { if (current === revision) { if(mode==='single') showSingleError(['fileTargetError','digitalConstraintsError'].includes(e.message)?e.message:'exportError');else setError('exportError'); setExport(); $('sheet').hidden = true; $('sheet-empty').hidden = false; } }
     finally { if (sheet) sheet.width = sheet.height = 1; }
   }, 110);
 }
@@ -276,7 +304,7 @@ function drawCrop() {
   if (!photo || !(mode==='print'?layout:singleOptions)) return;
   const width = Math.round(600 * Math.min(1,settings.ratio));
   const height = Math.round(width / settings.ratio);
-  const preview = renderCrop(photo.canvas, settings, width, height, $('original').checked);
+  const preview = renderCrop(photo.canvas, effectiveSettings(), width, height, $('original').checked);
   $('crop').width = width; $('crop').height = height;
   $('crop').getContext('2d').drawImage(preview,0,0);
   preview.width = preview.height = 1;
@@ -294,7 +322,7 @@ function clearPhoto() {
   $('crop-empty').hidden = false; $('crop-wrap').hidden = true;
   $('sheet').hidden = true; $('sheet-empty').hidden = false;
   for (const id of ['crop','sheet']) $(id).getContext('2d').clearRect(0,0,$(id).width,$(id).height);
-  for(const state of [printSettings,singleSettings]) Object.assign(state,{zoom:1,x:50,y:50,brightness:0,contrast:0});
+  for(const state of [printSettings,singleSettings]) Object.assign(state,{zoom:1,x:50,y:50,brightness:0,contrast:0,review:false,allowEdits:false});
   singleResult=null;$('single-result').hidden=true;$('single-error').hidden=true;
   $('allow-edits').checked = $('original').checked = false;
   $('choose-label').textContent = t('choose'); setStatus(); setError(); setExport(); updatePresetDetails(); updateReadouts();
@@ -302,7 +330,7 @@ function clearPhoto() {
 
 $('photo').addEventListener('change', async event => {
   const selected = event.target.files[0]; if (!selected || loading) return;
-  clearPhoto(); loading = true; $('start-photo').disabled = $('photo').disabled = true; $('photo').setAttribute('aria-busy','true');
+  clearPhoto(); loading = true; $('photo').disabled = true; $('photo').setAttribute('aria-busy','true');
   setStatus('loading');
   try {
     const result = await decodePhoto(selected);
@@ -312,18 +340,34 @@ $('photo').addEventListener('change', async event => {
     $('crop-empty').hidden = true; $('crop-wrap').hidden = false;
     $('choose-label').textContent = t('replace'); $('photo').ariaLabel = t('replace');
     const scale=Math.min(1,1200/Math.max(photo.canvas.width,photo.canvas.height));
-    $('pixel-width').value=Math.max(1,Math.round(photo.canvas.width*scale));
-    $('pixel-height').value=Math.max(1,Math.round(photo.canvas.height*scale));
+    if(!activeDigital()&&!DIGITAL_PRESETS.some(p=>p.id===requirementSelections.single.document)){
+      $('pixel-width').value=Math.max(1,Math.round(photo.canvas.width*scale));
+      $('pixel-height').value=Math.max(1,Math.round(photo.canvas.height*scale));
+    }
     updateModeLabels();updatePresetDetails();
-    if(mode==='single') configureSingle();else scheduleRender();
+    if(mode==='single') configureSingle('photo');else scheduleRender();
     if (matchMedia('(max-width: 760px)').matches) $('crop-title').scrollIntoView({block:'start',behavior:'auto'});
   } catch (e) { setStatus(); setError(messages.en[e.message] ? e.message : 'decodeError'); }
-  finally { loading = false; $('start-photo').disabled = $('photo').disabled = false; $('photo').removeAttribute('aria-busy'); }
+  finally { loading = false; $('photo').disabled = false; $('photo').removeAttribute('aria-busy'); }
 });
 $('clear').onclick = clearPhoto;
-$('start-photo').onclick = () => $('photo').click();
-$('country').onchange = () => { updateDocuments(); chooseSize(); };
-$('document').onchange = chooseSize;
+function updateRequirementSelection(){
+  if(mode==='print'){chooseSize();return;}
+  const p=activeDigital();
+  if(p){
+    $('single-fit').value=p.fit;$('ratio-width').value=p.width;$('ratio-height').value=p.height;
+    $('pixel-width').value=p.width;$('pixel-height').value=p.height;
+    $('max-kb').value=p.maxKB;$('min-width').value=p.minWidth;$('min-height').value=p.minHeight;
+    $('allow-resize').checked=false;
+    if(p.noCrop) $('allow-edits').checked=false;
+  }
+  markFramingReview();configureSingle('preset');
+}
+$('country').onchange = () => {updateDocuments();updateRequirementSelection();};
+$('document').onchange = ()=>updateRequirementSelection();
+$('custom-requirements').onclick=()=>{$('country').value='custom';updateDocuments();updateRequirementSelection();updatePresetDetails();};
+$('review-framing').onclick=()=>{selectTool('framing');$('crop-title').scrollIntoView({block:'start'});$('crop').focus({preventScroll:true});};
+$('confirm-framing').onclick=()=>{settings.review=false;updateExportAvailability();};
 for (const id of ['width','height']) $(id).oninput = chooseSize;
 $('units').onchange = () => {
   const inch = $('units').value === 'inch';
@@ -351,7 +395,9 @@ function chooseCopies(maximum = false) {
 $('copies').oninput=()=>chooseCopies();$('use-max').onclick=()=>chooseCopies(true);
 for(const radio of document.querySelectorAll('[name=output-mode]')) radio.onchange=()=>setMode(radio.value);
 for(const id of ['pixel-width','pixel-height','max-kb','min-width','min-height']) $(id).oninput=()=>configureSingle(id);
-$('single-fit').onchange=()=>configureSingle('fit');$('allow-resize').onchange=()=>configureSingle();
+$('single-fit').onchange=()=>configureSingle('fit');
+for(const id of ['ratio-width','ratio-height']) $(id).oninput=()=>configureSingle('ratio');
+$('allow-resize').onchange=()=>configureSingle();
 function selectTool(name, focus = false) {
   if (name === 'framing' && $('original').checked) {
     $('original').checked = false;
@@ -375,14 +421,14 @@ for (const name of ['framing','adjustments']) {
 }
 $('language').onchange = () => { lang = $('language').value; updateLanguage(); };
 $('save').onclick = () => {
-  if (!file) return;
+  if (!file||settings.review) return;
   if (downloadUrl) URL.revokeObjectURL(downloadUrl);
   downloadUrl = URL.createObjectURL(file);
   const link = document.createElement('a'); link.href = downloadUrl; link.download = file.name;
   document.body.append(link); link.click(); link.remove(); setExport('saved');
 };
 $('share').onclick = async () => {
-  if (!file) return;
+  if (!file||settings.review) return;
   try { await navigator.share({ files:[file], title:t('title') }); setExport('shared'); }
   catch (e) { if (e.name !== 'AbortError') setError('shareError'); }
 };
@@ -423,16 +469,6 @@ $('crop').onkeydown = e => {
   e.preventDefault(); const [axis,delta] = moves[e.key]; settings[axis] = Math.min(100,Math.max(0,settings[axis]+delta)); scheduleRender();
 };
 
-const phoneLayout = matchMedia('(max-width: 760px)');
-function placeSettings() {
-  const active = document.activeElement, settingsPanel = document.querySelector('.settings');
-  // Keep screen-reader and keyboard order aligned with the phone's photo-first layout.
-  if (phoneLayout.matches) document.querySelector('.editor').after(settingsPanel);
-  else document.querySelector('.setup-column').append(settingsPanel);
-  if (settingsPanel.contains(active)) active.focus({preventScroll:true});
-}
-phoneLayout.addEventListener('change', placeSettings);
-placeSettings();
 updateCountries(); updateDocuments(); chooseSize(); updateLanguage();
 setStatus('decoderLoading');
 prepareDecoder().then(() => { if (statusKey === 'decoderLoading') setStatus(); }).catch(() => {

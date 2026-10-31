@@ -1,3 +1,4 @@
+import { DIGITAL_PRESETS, checkDigitalOutput } from '../src/digital-presets.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { layoutSheet, cropRect, withJpegDensity, mmToPx } from '../src/geometry.js';
@@ -95,4 +96,15 @@ test('single-JPEG validation enforces pixel minimums and decimal-KB byte limits'
   assert.equal(validateSingle({...base,maxKB:null}).maxBytes,Infinity);
   assert.equal(validateSingle({...base,maxKB:30.5}).maxBytes,30500);
   for(const change of [{width:0},{height:4097},{width:1.5},{minWidth:1201},{minHeight:901},{maxKB:0},{maxKB:Infinity}]) assert.throws(()=>validateSingle({...base,...change}),/singleDimensionsError/);
+});
+
+test('digital preset limits reject byte underflow, compression violations and pixel overflow',()=>{
+  const cn=DIGITAL_PRESETS.find(p=>p.country==='cn'),us=DIGITAL_PRESETS.find(p=>p.country==='us');
+  const result=(width,height,size)=>({width,height,blob:{size}});
+  assert.doesNotThrow(()=>checkDigitalOutput(cn,result(420,560,40000)));
+  assert.doesNotThrow(()=>checkDigitalOutput(cn,result(354,472,120000)));
+  for(const output of [result(420,560,39999),result(420,560,120001),result(421,560,80000),result(353,472,80000)]) assert.throws(()=>checkDigitalOutput(cn,output),/digitalConstraintsError/);
+  assert.throws(()=>checkDigitalOutput(us,result(600,600,53999)),/digitalConstraintsError/);
+  assert.doesNotThrow(()=>checkDigitalOutput(us,result(600,600,54000)));
+  assert.doesNotThrow(()=>checkDigitalOutput(null,result(90,60,1000)));
 });

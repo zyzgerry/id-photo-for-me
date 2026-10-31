@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Prepare accurately sized ID photos on a 4×6 print sheet, entirely on your device.">
+  <meta name="description" content="Prepare an ID photo for print or online applications, entirely on your device.">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; font-src 'self'; base-uri 'none'; form-action 'none'">
   <title>ID Photo for Me</title>
@@ -23,26 +23,16 @@
       <h1 data-i18n="workspaceTitle">Prepare your photo sheet</h1>
       <p class="lead" data-i18n="subtitle">Your photo. Your device. Ready for a 4×6 print.</p>
       <p id="privacy" class="privacy" data-i18n="privacy">Your photo stays on your device while you edit. This website does not upload or store photos. It only provides the editing tools that run in your browser.</p>
+    <fieldset class="mode-picker"><legend data-i18n="outputMode">What are you making?</legend>
+<label><input type="radio" name="output-mode" value="print" checked><span class="mode-content"><span class="mode-example" aria-hidden="true"><span class="example-sheet"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><strong data-i18n="printMode">Print a photo sheet</strong><span data-i18n="printExample">Multiple correctly sized photos on one 4×6 sheet.</span><small data-i18n="example">Example result</small></span></label>
+<label><input type="radio" name="output-mode" value="single"><span class="mode-content"><span class="mode-example" aria-hidden="true"><span class="example-digital"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span>600×600 px · JPEG</span></span></span><strong data-i18n="singleMode">Prepare a digital ID photo</strong><span data-i18n="digitalExample">One JPEG sized for an online application.</span><small data-i18n="example">Example result</small></span></label>
+</fieldset>
     </section>
     <div class="workspace">
       <div class="setup-column">
-      <div class="setup region">
-      <fieldset class="mode-picker"><legend data-i18n="outputMode">What are you making?</legend>
-      <label><input type="radio" name="output-mode" value="print" checked><span data-i18n="printMode">4×6 print sheet</span></label>
-      <label><input type="radio" name="output-mode" value="single"><span data-i18n="singleMode">Single JPEG / upload</span></label>
-    </fieldset>
-    <div class="photo-setup">
-      <div class="file-actions">
-        <label class="button primary file-button" for="photo"><span id="choose-label" data-i18n="choose">Choose a photo</span><input id="photo" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" aria-describedby="formats privacy"></label>
-      </div>
-      <details class="input-help"><summary data-i18n="supportedFormats">Supported photos and limits</summary><p id="formats" class="hint" data-i18n="formats">JPEG, PNG, or HEIC/HEIF. Up to 30 MB, 50 megapixels, and 12,000 pixels per side. Still images only.</p></details>
-      <p id="status" role="status" aria-live="polite"></p>
-      <p id="error" class="error" role="alert" hidden></p>
-      <noscript><p>JavaScript is needed to process photos locally. / 请启用 JavaScript 以在本机处理照片。</p></noscript>
-    </div>
-      </div>
       <section class="settings region" aria-labelledby="size-title">
         <h2 id="size-title" data-i18n="step1">Photo size</h2>
+        <button id="custom-requirements" class="text-button" data-i18n="customRequirements">Use custom requirements</button>
         <div id="print-settings">
         <label for="country" data-i18n="country">Country / region</label>
         <select id="country" aria-describedby="country-help"><option value="us">United States</option></select>
@@ -52,18 +42,11 @@
           <div class="two-fields"><label><span data-i18n="width">Width</span><input id="width" type="number" inputmode="decimal" value="35" step="any" min="10" max="152.4"></label><label><span data-i18n="height">Height</span><input id="height" type="number" inputmode="decimal" value="45" step="any" min="10" max="152.4"></label></div>
           <label for="units" data-i18n="units">Units</label><select id="units"><option value="mm" data-i18n="mm">Millimeters</option><option value="inch" data-i18n="inch">Inches</option></select>
         </div>
+        <div id="digital-framing" hidden>          <label for="single-fit" data-i18n="singleFit">Framing</label>
+          <select id="single-fit"><option value="original" data-i18n="keepFull">Keep the full photo</option><option value="crop" data-i18n="cropOutput">Crop to output ratio</option></select><div id="ratio-fields" class="two-fields"><label><span data-i18n="ratioWidth">Crop ratio: width</span><input id="ratio-width" type="number" min="1" max="4096" value="1" step="1"></label><label><span data-i18n="ratioHeight">Crop ratio: height</span><input id="ratio-height" type="number" min="1" max="4096" value="1" step="1"></label></div></div>
+        <p id="digital-route-note" class="hint" data-i18n="keepFullRequired" hidden>Keep the full photo. The application crops it; tonal adjustments are unavailable for this route.</p>
         <p class="hint" id="preset-location" data-i18n="locationCaveat" hidden>Requirements may vary by application location.</p>
         <p class="size-readout" id="size-readout"></p>
-        <div id="print-output-settings">
-        <div class="copy-picker"><label for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6"><button id="use-max" class="text-button" data-i18n="useMax">Use maximum</button></div>
-        <p id="capacity" class="hint"></p>
-        <p id="copy-error" class="error" hidden></p>
-        </div>
-        <div id="print-guides">
-        <label class="check-row cut-option"><input id="cut-guides" type="checkbox" checked><span data-i18n="cutGuides">Include cutting guides</span></label>
-        <p class="hint" id="cut-note" data-i18n="cut">Fine dashed lines mark shared cut edges. Trim along them to avoid traces. Photo size and copy count stay the same.</p>
-        <p id="rotated" class="hint" data-i18n="rotated" hidden>Copies rotated on the sheet to fit more; turn the print before cutting.</p>
-        </div>
         <details class="requirements"><summary data-i18n="documentGuidance">Requirements &amp; sources</summary>
         <p class="hint" id="preset-scope" hidden></p>
         <p class="hint" id="preset-note"></p>
@@ -71,30 +54,28 @@
         <p class="hint" data-i18n="acceptance">Correct size does not guarantee document acceptance. Check the linked requirements.</p>
         </details>
         </div>
-        <div id="single-settings" hidden>
-          <label for="single-fit" data-i18n="singleFit">Framing</label>
-          <select id="single-fit"><option value="original" data-i18n="keepFull">Keep the full photo</option><option value="crop" data-i18n="cropOutput">Crop to output ratio</option></select>
-          <div class="two-fields single-fields"><label><span data-i18n="pixelWidth">Width (pixels)</span><input id="pixel-width" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label><label><span data-i18n="pixelHeight">Height (pixels)</span><input id="pixel-height" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label></div>
-          <p class="hint" data-i18n="pixelHelp">Full-photo mode keeps proportions. Maximum output edge: 4096 pixels.</p>
-          <label for="max-kb" class="field-label" data-i18n="maxKB">Maximum file size (KB)</label><input id="max-kb" type="number" inputmode="decimal" min="1" max="30000" step="any" value="300">
-          <p class="hint" data-i18n="sizeHelp">1 KB = 1,000 bytes. Leave blank for maximum JPEG quality.</p>
-          <label class="check-row"><input id="allow-resize" type="checkbox" checked><span data-i18n="allowResize">Allow smaller dimensions to meet the limit</span></label>
-          <details><summary data-i18n="minimumPixels">Minimum pixel requirements</summary>
-            <div class="two-fields"><label><span data-i18n="minWidth">Minimum width</span><input id="min-width" type="number" inputmode="numeric" min="1" max="4096" step="1" placeholder="1"></label><label><span data-i18n="minHeight">Minimum height</span><input id="min-height" type="number" inputmode="numeric" min="1" max="4096" step="1" placeholder="1"></label></div>
-            <p class="hint" data-i18n="minimumHelp">Enter the upload portal’s minimum dimensions. For exact dimensions, turn off smaller dimensions.</p>
-          </details>
-          <p class="hint" data-i18n="uploadRules">Check the destination’s size, pixel, and editing requirements. A smaller JPEG does not guarantee acceptance.</p>
-          <p id="single-error" class="error" hidden></p>
-        </div>
+      </section>
+      <section class="setup region" aria-labelledby="upload-title"><h2 id="upload-title" data-i18n="uploadTitle">2. Upload photo</h2>
+
+    <div class="photo-setup">
+      <div class="file-actions">
+        <label class="button primary file-button" for="photo"><span id="choose-label" data-i18n="choose">Choose a photo</span><input id="photo" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" aria-describedby="formats privacy"></label>
+      </div>
+      <details class="input-help"><summary data-i18n="supportedFormats">Supported photos and limits</summary><p id="formats" class="hint" data-i18n="formats">JPEG, PNG, or HEIC/HEIF. Up to 30 MB, 50 megapixels, and 12,000 pixels per side. Still images only.</p></details>
+      <p id="status" role="status" aria-live="polite"></p>
+      <p id="error" class="error" role="alert" hidden></p>
+      <noscript><p>JavaScript is needed to process photos locally. / 请启用 JavaScript 以在本机处理照片。</p></noscript>
+    </div>
       </section>
       </div>
       <div class="preview-column">
       <section class="editor region" aria-labelledby="crop-title">
         <div class="section-heading"><h2 id="crop-title" data-i18n="step2">Your photo</h2><div class="editor-actions"><button id="reset-crop" class="text-button" data-i18n="resetCrop" disabled>Reset framing</button><button id="clear" class="text-button" disabled data-i18n="clear">Clear photo</button></div></div>
         <div id="crop-stage" class="crop-stage">
-          <div id="crop-empty" class="empty"><h3 data-i18n="emptyTitle">Start with a photo</h3><p data-i18n="empty">Choose a photo from Photos or Files. Your crop and print sheet will appear here.</p><button id="start-photo" class="button primary" data-i18n="choose">Choose a photo</button></div>
+          <div id="crop-empty" class="empty"><h3 data-i18n="emptyTitle">Start with a photo</h3><p data-i18n="empty">Choose a photo from Photos or Files. Your crop and print sheet will appear here.</p></div>
           <div id="crop-wrap" hidden><canvas id="crop" width="600" height="600" tabindex="0" role="img" aria-label="Photo crop preview"></canvas><div id="guide-overlay" aria-hidden="true" hidden></div></div>
         </div>
+        <div id="framing-review" class="review-notice" role="status" hidden><p data-i18n="reviewNeeded">Requirements changed. Review your framing before exporting.</p><button id="review-framing" class="text-button" data-i18n="reviewFraming">Review framing</button><button id="confirm-framing" class="button quiet" data-i18n="framingReviewed">Framing reviewed</button></div>
         <div class="tool-tabs" role="tablist" aria-label="Photo tools" id="tool-tabs">
           <button id="framing-tab" role="tab" aria-selected="true" aria-controls="framing-panel" data-i18n="framingTool">Framing</button>
           <button id="adjustments-tab" role="tab" aria-selected="false" aria-controls="adjustments-panel" tabindex="-1" data-i18n="adjustmentsTool">Adjustments</button>
@@ -127,12 +108,39 @@
       </section>
       <section class="sheet region" aria-labelledby="sheet-title">
         <h2 id="sheet-title" data-i18n="step3">Print sheet</h2>
+        <p id="output-empty" class="hint" data-i18n="outputInactive">Upload a photo to prepare the output.</p>
+        <fieldset id="output-controls" disabled>        <div id="print-output-settings">
+        <div class="copy-picker"><label for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6"><button id="use-max" class="text-button" data-i18n="useMax">Use maximum</button></div>
+        <p id="capacity" class="hint"></p>
+        <p id="copy-error" class="error" hidden></p>
+        </div>
+        <div id="print-guides">
+        <label class="check-row cut-option"><input id="cut-guides" type="checkbox" checked><span data-i18n="cutGuides">Include cutting guides</span></label>
+        <p class="hint" id="cut-note" data-i18n="cut">Fine dashed lines mark shared cut edges. Trim along them to avoid traces. Photo size and copy count stay the same.</p>
+        <p id="rotated" class="hint" data-i18n="rotated" hidden>Copies rotated on the sheet to fit more; turn the print before cutting.</p>
+        </div>
+        <div id="single-settings" hidden>
+
+          <div class="two-fields single-fields"><label><span data-i18n="pixelWidth">Width (pixels)</span><input id="pixel-width" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label><label><span data-i18n="pixelHeight">Height (pixels)</span><input id="pixel-height" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label></div>
+          <p class="hint" data-i18n="pixelHelp">Full-photo mode keeps proportions. Maximum output edge: 4096 pixels.</p>
+          <label for="max-kb" class="field-label" data-i18n="maxKB">Maximum file size (KB)</label><input id="max-kb" type="number" inputmode="decimal" min="1" max="30000" step="any" value="300">
+          <p class="hint" data-i18n="sizeHelp">1 KB = 1,000 bytes. Leave blank for maximum JPEG quality.</p>
+          <label class="check-row"><input id="allow-resize" type="checkbox" checked><span data-i18n="allowResize">Allow smaller dimensions to meet the limit</span></label>
+          <details><summary data-i18n="minimumPixels">Minimum pixel requirements</summary>
+            <div class="two-fields"><label><span data-i18n="minWidth">Minimum width</span><input id="min-width" type="number" inputmode="numeric" min="1" max="4096" step="1" placeholder="1"></label><label><span data-i18n="minHeight">Minimum height</span><input id="min-height" type="number" inputmode="numeric" min="1" max="4096" step="1" placeholder="1"></label></div>
+            <p class="hint" data-i18n="minimumHelp">Enter the upload portal’s minimum dimensions. For exact dimensions, turn off smaller dimensions.</p>
+          </details>
+          <p class="hint" data-i18n="uploadRules">Check the destination’s size, pixel, and editing requirements. A smaller JPEG does not guarantee acceptance.</p>
+          <p id="single-error" class="error" hidden></p>
+        </div>
+</fieldset>
         <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
         <div class="output-details">
         <div class="sheet-meta" id="print-summary"><strong id="copy-count"></strong><span data-i18n="sheetSize">4×6 inches</span></div>
         <p class="hint" id="output-info" data-i18n="output">1800×1200 pixels · 300 ppi</p>
         <p id="single-result" class="hint" role="status" hidden></p>
         </div>
+        <h3 class="export-title" data-i18n="exportTitle">5. Export</h3>
         <div class="export-actions"><button id="save" class="button primary" data-i18n="save" disabled>Download JPEG</button><button id="share" class="button quiet" data-i18n="share" disabled>Share JPEG</button></div>
         <p id="export-status" class="hint" role="status" aria-live="polite"></p>
         <details class="print-note" id="print-note"><summary data-i18n="printTitle">Print at exactly 4×6 inches</summary><p data-i18n="print">Keep the entire sheet. Turn off automatic cropping, enlargement, and fit/fill options. Borderless printing may trim the edges. Measure your first test print.</p></details>

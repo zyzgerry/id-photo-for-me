@@ -1,4 +1,4 @@
-import { openApp } from './open-app.js';
+import { openApp, reviewFraming } from './open-app.js';
 import { test, expect } from '@playwright/test';
 import { PRESETS } from '../../src/presets.js';
 import { messages } from '../../src/i18n.js';
@@ -84,7 +84,7 @@ test('new formats export offline at their stated dimensions and retain phone lay
   for(const id of ['cn-visa','fi-passport','ca-visa','pe-visa']) {
     const p=PRESETS.find(p=>p.id===id);
     await page.locator('#country').selectOption(p.country);await page.locator('#document').selectOption(p.id);
-    await expect(page.locator('#save')).toBeEnabled();
+    await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
     await expect(page.locator('#sheet')).toHaveAttribute('width','1800');await expect(page.locator('#sheet')).toHaveAttribute('height','1200');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   }

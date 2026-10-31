@@ -1,11 +1,11 @@
-import { openApp } from './open-app.js';
+import { openApp, reviewFraming } from './open-app.js';
 import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 const fixture=name=>fileURLToPath(new URL(`../fixtures/${name}`,import.meta.url));
 const single=page=>page.locator('[name=output-mode][value=single]').check();
 const print=page=>page.locator('[name=output-mode][value=print]').check();
-const ready=page=>expect(page.locator('#save')).toBeEnabled({timeout:15000});
+const ready=async page=>{await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled({timeout:15000});};
 async function noise(page) {
   return Buffer.from(await page.evaluate(()=>{
     const c=document.createElement('canvas');c.width=1200;c.height=900;
@@ -81,7 +81,7 @@ test('single mode preserves a full HEIC photo and exports offline without arrang
   await openApp(page);await expect(page.locator('#status')).toBeEmpty();await single(page);await context.setOffline(true);
   await page.locator('#photo').setInputFiles(fixture('quadrants.heic'));await ready(page);
   await expect(page.locator('#pixel-width')).toHaveValue('120');await expect(page.locator('#pixel-height')).toHaveValue('80');
-  await expect(page.locator('#print-settings')).toBeHidden();await expect(page.locator('#crop-controls')).toBeHidden();await expect(page.locator('#print-guides')).toBeHidden();
+  await expect(page.locator('#custom-fields')).toBeHidden();await expect(page.locator('#crop-controls')).toBeHidden();await expect(page.locator('#print-guides')).toBeHidden();
   const result=await download(page);expect(result.size).toEqual([120,80]);expect(result.bytes.length).toBeLessThanOrEqual(300000);expect(result.name).toBe('photo-120x80.jpg');
   await page.locator('#pixel-width').fill('90');await ready(page);await expect(page.locator('#pixel-height')).toHaveValue('60');
   expect((await download(page)).size).toEqual([90,60]);
@@ -112,7 +112,7 @@ test('single crop supports exact pixel dimensions and mode changes preserve prin
   await page.locator('#single-fit').selectOption('original');await ready(page);
   await expect(page.locator('#pixel-height')).toHaveValue('900');expect((await download(page)).size).toEqual([600,900]);
   await print(page);await ready(page);await expect(page.locator('#zoom')).toHaveValue('2');expect((await download(page)).size).toEqual([1800,1200]);
-  await single(page);await ready(page);await page.locator('#language').selectOption('zh');await expect(page.locator('#sheet-title')).toHaveText('JPEG 预览');
+  await single(page);await ready(page);await page.locator('#language').selectOption('zh');await expect(page.locator('#sheet-title')).toHaveText('4. 调整电子照片');
 });
 
 test('a superseded compression job cannot overwrite print output or leak errors',async({page})=>{

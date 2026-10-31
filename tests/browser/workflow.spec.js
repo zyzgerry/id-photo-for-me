@@ -1,4 +1,4 @@
-import { openApp } from './open-app.js';
+import { openApp, reviewFraming } from './open-app.js';
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -15,11 +15,11 @@ async function fixture(page,width=1200,height=800) {
 }
 async function upload(page,buffer) {
   await page.locator('#photo').setInputFiles({name:'synthetic.png',mimeType:'image/png',buffer:buffer||await fixture(page)});
-  await expect(page.locator('#save')).toBeEnabled();
+  await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
 }
 async function setRange(page,id,value) {
   await page.locator(`#${id}`).evaluate((el,value)=>{el.value=value;el.dispatchEvent(new Event('input',{bubbles:true}));},String(value));
-  await expect(page.locator('#save')).toBeEnabled();
+  await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
 }
 
 test('offline crop, adjustments, JPEG geometry, density, and clear keep all photo data local',async({page,context})=>{
@@ -34,7 +34,7 @@ test('offline crop, adjustments, JPEG geometry, density, and clear keep all phot
   await setRange(page,'zoom',2);await setRange(page,'x',100);await setRange(page,'y',0);
   await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();
   await setRange(page,'brightness',10);await setRange(page,'contrast',-5);
-  await page.locator('#reset-edits').click();await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('#reset-edits').click();await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   const comparison=await page.evaluate(()=>{
     const crop=document.querySelector('#crop').getContext('2d');const sheet=document.querySelector('#sheet').getContext('2d');
     return {crop:[...crop.getImageData(100,100,1,1).data],sheet:[...sheet.getImageData(100,100,1,1).data]};
@@ -61,7 +61,7 @@ test('HEIC fallback decodes offline and EXIF orientation is normalized',async({p
   await context.setOffline(true);
   for (const [name,expected] of [['quadrants.heic',[255,0,0]],['orientation-6.jpg',[0,0,255]]]) {
     await page.locator('#photo').setInputFiles(fileURLToPath(new URL(`../fixtures/${name}`,import.meta.url)));
-    await expect(page.locator('#save')).toBeEnabled({timeout:60000});
+    await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled({timeout:60000});
     const pixel=await page.locator('#crop').evaluate(c=>[...c.getContext('2d').getImageData(100,100,1,1).data].slice(0,3));
     for(let channel=0;channel<3;channel++) expect(Math.abs(pixel[channel]-expected[channel])).toBeLessThan(15);
     await page.locator('#clear').click();
@@ -76,20 +76,20 @@ test('adjustments always use original pixels; comparison and reset restore the o
   await setRange(page,'brightness',-10);await setRange(page,'brightness',10);expect(await pixel()).toEqual(edited);
   await page.locator('#original').check();expect(await pixel()).toEqual(original);
   await page.locator('#original').uncheck();expect(await pixel()).toEqual(edited);
-  await page.locator('#reset-edits').click();await expect(page.locator('#save')).toBeEnabled();expect(await pixel()).toEqual(original);
+  await page.locator('#reset-edits').click();await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();expect(await pixel()).toEqual(original);
 });
 
 test('preset changes, metric dimensions, custom errors, and translated interface',async({page})=>{
   await openApp(page);await upload(page);
-  await page.locator('#country').selectOption('pt');await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('#country').selectOption('pt');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   await expect(page.locator('#size-readout')).toHaveText('35×45 mm');
   expect(await page.locator('#crop').evaluate(el=>el.width/el.height)).toBeCloseTo(35/45,2);
   await expect(page.locator('#copy-count')).toHaveText('8 copies');
   await page.locator('#country').selectOption('custom');await page.locator('#width').fill('110');await page.locator('#height').fill('110');
   await expect(page.locator('#error')).toContainText('does not fit');await expect(page.locator('#save')).toBeDisabled();
-  await page.locator('#width').fill('35');await page.locator('#height').fill('45');await expect(page.locator('#save')).toBeEnabled();
-  await page.locator('#units').selectOption('inch');await expect(page.locator('#save')).toBeEnabled();await expect(page.locator('#copy-count')).toHaveText('8 copies');
-  await page.locator('#language').selectOption('zh');await expect(page.locator('#save')).toHaveText('下载 JPEG');await expect(page.locator('#copy-count')).toHaveText('8 张');
+  await page.locator('#width').fill('35');await page.locator('#height').fill('45');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('#units').selectOption('inch');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();await expect(page.locator('#copy-count')).toHaveText('8 copies');
+  await page.locator('#language').selectOption('zh');await expect(page.locator('#save')).toHaveText('下载打印排版');await expect(page.locator('#copy-count')).toHaveText('8 张');
   await page.locator('#country').selectOption('us');await page.locator('#document').selectOption('us-visa');
   await expect(page.locator('#preset-note')).toContainText('DS-160');
 });

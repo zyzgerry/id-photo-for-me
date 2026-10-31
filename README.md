@@ -11,6 +11,12 @@ A personal, mobile-friendly utility for arranging accurately sized ID photos on 
 On Windows, the specification is normally at `~/iCloudDrive/AI_Project/id-photo-for-me/id-photo-print-spec.md`.
 On macOS, it is normally at `~/Library/Mobile Documents/com~apple~CloudDocs/AI_Project/id-photo-for-me/id-photo-print-spec.md`.
 
+## Requirements-first workflow
+
+Choose a result mockup → country/document or custom requirements → upload → edit → arrange a 4×6 sheet or adjust digital pixels/file limits → export. Desktop keeps two columns; phones follow that order vertically. All sections remain visible, with later controls inactive until upload. Requirements changes preserve edits and require framing review before export. Each mode remembers its own settings during the session.
+
+Digital presets cover US online visa, a scoped China visa route and UK own-device passport uploads. Canada and Schengen show source-backed guidance/custom entry. See [digital research](research/digital-requirements.md). Presets validate actual output bounds; they do not certify acceptance.
+
 ## Confirmed direction
 
 - Static browser application; iPhone Safari first, Windows desktop browsers second.
