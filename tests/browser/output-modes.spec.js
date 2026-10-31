@@ -3,9 +3,14 @@ import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 const fixture=name=>fileURLToPath(new URL(`../fixtures/${name}`,import.meta.url));
-const single=page=>page.locator('[name=output-mode][value=single]').check();
+const single=async page=>{
+  await page.locator('[name=output-mode][value=single]').check();
+  await page.locator('#custom-requirements').click();await page.locator('#single-fit').selectOption('original');
+  await reviewFraming(page);
+  if(await page.locator('[name=output-quality][value=compress]').isEnabled()){await page.locator('[name=output-quality][value=compress]').check();await page.locator('#pixel-settings').evaluate(el=>el.open=true);}
+};
 const print=page=>page.locator('[name=output-mode][value=print]').check();
-const ready=async page=>{await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled({timeout:15000});};
+const ready=async page=>{if(await page.locator('[name=output-mode][value=single]').isChecked()){await page.locator('[name=output-quality][value=compress]').check();await page.locator('#pixel-settings').evaluate(el=>el.open=true);}await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled({timeout:15000});};
 async function noise(page) {
   return Buffer.from(await page.evaluate(()=>{
     const c=document.createElement('canvas');c.width=1200;c.height=900;
@@ -93,7 +98,7 @@ test('single JPEG byte limit respects minimums, rejects impossible targets, and 
   await page.locator('#photo').setInputFiles({name:'noise.png',mimeType:'image/png',buffer:await noise(page)});await ready(page);
   await page.locator('#allow-resize').uncheck();await page.locator('#max-kb').fill('1');
   await expect(page.locator('#single-error')).toContainText('cannot be met');await expect(page.locator('#save')).toBeDisabled();
-  await page.locator('#allow-resize').check();await page.locator('#single-settings details summary').click();
+  await page.locator('#allow-resize').check();await page.locator('#pixel-settings details summary').click();
   await page.locator('#min-width').fill('600');await page.locator('#min-height').fill('450');
   await expect(page.locator('#single-error')).toContainText('cannot be met');
   await page.locator('#min-width').fill('300');await page.locator('#min-height').fill('225');await page.locator('#max-kb').fill('100');await ready(page);
@@ -111,8 +116,8 @@ test('single crop supports exact pixel dimensions and mode changes preserve prin
   expect((await download(page)).size).toEqual([600,600]);await expect(page.locator('#crop-controls')).toBeVisible();
   await page.locator('#single-fit').selectOption('original');await ready(page);
   await expect(page.locator('#pixel-height')).toHaveValue('900');expect((await download(page)).size).toEqual([600,900]);
-  await print(page);await ready(page);await expect(page.locator('#zoom')).toHaveValue('2');expect((await download(page)).size).toEqual([1800,1200]);
-  await single(page);await ready(page);await page.locator('#language').selectOption('zh');await expect(page.locator('#sheet-title')).toHaveText('4. 调整电子照片');
+  await print(page);await ready(page);await expect(page.locator('#zoom')).toHaveValue('1');expect((await download(page)).size).toEqual([1800,1200]);
+  await single(page);await ready(page);await page.locator('#language').selectOption('zh');await expect(page.locator('#sheet-title')).toHaveText('4. 自定义输出');
 });
 
 test('a superseded compression job cannot overwrite print output or leak errors',async({page})=>{

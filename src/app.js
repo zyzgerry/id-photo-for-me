@@ -1,5 +1,5 @@
-import { PRESETS, VERIFIED } from './presets.js';
-import { DIGITAL_PRESETS, DIGITAL_UNAVAILABLE, checkDigitalOutput } from './digital-presets.js';
+import { PRESETS, PREPARATION_PRESETS, VERIFIED } from './presets.js';
+import { DIGITAL_PRESETS, checkDigitalOutput } from './digital-presets.js';
 import { messages } from './i18n.js';
 import { SHEET, layoutSheet, cropRect } from './geometry.js';
 import { renderCrop, renderSheet, exportJpeg } from './render.js';
@@ -11,12 +11,11 @@ let lang = navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
 let photo = null, preset = PRESETS[0], layout = null;
 let file = null, downloadUrl = null, revision = 0, renderTimer, loading = false;
 let statusKey = '', errorKey = '', exportKey = '';
-const printSettings = { ratio: 1, zoom: 1, x: 50, y: 50, brightness: 0, contrast: 0 };
-const singleSettings = {...printSettings};
-const requirementSelections={print:{country:PRESETS[0].country,document:PRESETS[0].id},single:{country:'custom',document:''}};
-const catalog=()=>mode==='print'?PRESETS:DIGITAL_PRESETS;
+const settings = { ratio:1,zoom:1,x:50,y:50,brightness:0,contrast:0 };
+const catalog=PREPARATION_PRESETS;
 const activeDigital=()=>mode==='single'?DIGITAL_PRESETS.find(p=>p.id===$('document').value):null;
-const activeRequirement=()=>mode==='print'?preset:activeDigital();
+const activeRequirement=()=>preset;
+const compressing=()=>document.querySelector('[name=output-quality]:checked').value==='compress';
 const effectiveSettings=()=>activeRequirement()?.restrictEdits&&!$('allow-edits').checked?{...settings,brightness:0,contrast:0}:settings;
 function markFramingReview(){if(photo) settings.review=true;}
 function updateExportAvailability(){
@@ -24,8 +23,8 @@ function updateExportAvailability(){
   $('save').disabled=!file||!!settings.review;
   $('share').disabled=!file||!!settings.review||$('share').hidden;
 }
-let settings=printSettings, mode='print', singleOptions=null, singleResult=null, requestedCopies=null, printCapacity=6;
-const canFrame=()=>mode==='print'||$('single-fit').value==='crop';
+let mode='single', singleOptions=null, singleResult=null, requestedCopies=null, printCapacity=6;
+const canFrame=()=>!preset?.noCrop&&(mode==='print'||$('single-fit').value==='crop');
 const t = key => messages[lang][key] || messages[lang].decodeError;
 const sizeLabel = () => {
   if (!layout) return '';
@@ -58,7 +57,7 @@ function updateLanguage() {
 function updateCountries() {
   const old = $('country').value;
   const names = new Intl.DisplayNames([lang], {type:'region'});
-  const countries = [...new Set([...catalog().map(p=>p.country),...(mode==='single'?['ca','schengen']:[])])]
+  const countries = [...new Set(catalog.map(p=>p.country))]
     .map(code=>({code,name:code==='schengen'?t('schengen'):names.of(code.toUpperCase())})).sort((a,b)=>a.name.localeCompare(b.name,lang));
   $('country').replaceChildren(...countries.map(({code,name})=>new Option(name,code)), new Option(t('custom'),'custom'));
   $('country').value = old || PRESETS[0].country;
@@ -66,7 +65,7 @@ function updateCountries() {
 
 function updateDocuments(reset = true) {
   const old = $('document').value;
-  $('document').replaceChildren(...catalog().filter(p => p.country === $('country').value).map(p => {
+  $('document').replaceChildren(...catalog.filter(p => p.country === $('country').value).map(p => {
     const option = document.createElement('option'); option.value = p.id;
     option.textContent = typeof p.document === 'string' ? t(p.document) : p.document[lang]; return option;
   }));
@@ -74,19 +73,19 @@ function updateDocuments(reset = true) {
 }
 
 function updatePresetDetails() {
-  const requirement=activeRequirement(), guidance=mode==='single'?DIGITAL_UNAVAILABLE[$('country').value]:null;
+  const requirement=activeRequirement();
   $('custom-fields').hidden = mode!=='print'||$('country').value !== 'custom';
   $('digital-framing').hidden=mode!=='single';
   $('ratio-fields').hidden=mode!=='single'||$('single-fit').value==='original';
-  for(const id of ['single-fit','ratio-width','ratio-height']) $(id).disabled=!!activeDigital();
+  for(const id of ['single-fit','ratio-width','ratio-height']) $(id).disabled=!!preset;
   $('country-help').textContent=t(mode==='print'?'countryHelp':'digitalCountryHelp');
   $('allow-edits').disabled=!!requirement?.noCrop;
   $('digital-route-note').hidden=!requirement?.noCrop;
-  $('document-fields').hidden = $('country').value === 'custom'||!!guidance;
+  $('document-fields').hidden = $('country').value === 'custom';
   $('preset-location').hidden = !requirement?.scope;
   $('preset-scope').hidden = !requirement?.scope;
   $('preset-scope').textContent = requirement?.scope?.[lang] || '';
-  const details=requirement||guidance;
+  const details=requirement;
   $('preset-note').textContent = details ? (typeof details.note === 'string' ? t(details.note) : details.note[lang]) : t(mode==='print'?'customNote':'digitalCustomNote');
   $('preset-reference').hidden = !details;
   if(details){
@@ -94,15 +93,17 @@ function updatePresetDetails() {
     $('reference').textContent=`${t('reference')}: ${details.sourceName}`;
     $('verified').textContent=`${t('checked')}: ${details.checked||VERIFIED}`;
   }
-  $('guide-control').hidden=mode!=='print'||!preset?.head;
+  $('guide-control').hidden=!preset?.head;
   $('allow-edits-row').hidden=!requirement?.restrictEdits;
   $('adjust-controls').disabled=!photo||(!!requirement?.restrictEdits&&!$('allow-edits').checked);
   $('output-controls').disabled=!photo;
   $('output-empty').hidden=!!photo;
   if(mode==='single'){
-    $('size-readout').textContent=requirement?`${requirement.minWidth}×${requirement.minHeight}–${requirement.maxWidth}×${requirement.maxHeight} px · ${requirement.minKB}–${requirement.maxKB} KB`:t('digitalCustomSummary');
-    if(guidance){$('size-readout').textContent=t('noDigitalPreset');$('preset-note').closest('details').open=true;}
+    const digital=activeDigital();
+    $('size-readout').textContent=digital?`${digital.minWidth}×${digital.minHeight}–${digital.maxWidth}×${digital.maxHeight} px · ${digital.minKB}–${digital.maxKB} KB`:preset?`${preset.widthMm}×${preset.heightMm} ${lang==='zh'?'毫米':'mm'}`:t('digitalCustomSummary');
   }
+  $('compression-settings').hidden=!compressing();
+  $('quality-help').textContent=t(compressing()?'compressionHelp':'qualityHelp');
 
 }
 
@@ -124,8 +125,10 @@ function updateModeLabels() {
 
 function printLayout(clamp = false) {
   const multiplier=$('units').value==='inch'?25.4:1;
-  const width=preset?.widthMm??Number($('width').value)*multiplier;
-  const height=preset?.heightMm??Number($('height').value)*multiplier;
+  if(preset?.noCrop) throw new Error('printRouteError');
+  const physical=PRESETS.find(p=>p.id===preset?.printId)||preset;
+  const width=physical?.widthMm??Number($('width').value)*multiplier;
+  const height=physical?.heightMm??Number($('height').value)*multiplier;
   const maximum=layoutSheet(width,height);
   printCapacity=maximum.capacity;
   if(clamp && requestedCopies!==null) {
@@ -136,18 +139,19 @@ function printLayout(clamp = false) {
   return layoutSheet(width,height,requestedCopies??undefined);
 }
 
-function chooseSize() {
-  markFramingReview();
+function chooseSize(review=true) {
+  if(review) markFramingReview();
   const previousRatio = settings.ratio;
-  preset = PRESETS.find(p => p.id === $('document').value) || null;
+  preset = catalog.find(p => p.id === $('document').value) || null;
   if ($('country').value === 'custom') preset = null;
   setError();
   try {
     layout = printLayout(true); settings.ratio = layout.widthMm/layout.heightMm;
+    $('single-fit').value='crop';$('ratio-width').value=layout.widthMm;$('ratio-height').value=layout.heightMm;
     if (Math.abs(previousRatio - settings.ratio) > 1e-6) {
-      if (photo) setStatus('cropChanged');
+      if (photo) {markFramingReview();setStatus('cropChanged');}
     }
-  } catch (e) { layout = null; setError(e.message === 'noFit' ? 'noFit' : 'dimensionsError'); }
+  } catch (e) { layout = null; setError(['noFit','printRouteError'].includes(e.message)?e.message:'dimensionsError'); }
   updatePresetDetails(); updateReadouts(); scheduleRender();
 }
 
@@ -156,21 +160,24 @@ function configureSingle(changed) {
   const ratio=$('single-fit').value==='original'?aspect:Number($('ratio-width').value)/Number($('ratio-height').value);
   if(['fit','ratio'].includes(changed)) markFramingReview();
   if(Number.isFinite(ratio)&&ratio>0){
+    if(changed==='mode'&&Math.abs(settings.ratio-ratio)>1e-6) markFramingReview();
     settings.ratio=ratio;
     if(changed==='pixel-height') $('pixel-width').value=Math.max(1,Math.round(Number($('pixel-height').value)*ratio));
-    else if(($('single-fit').value==='original'&&photo)||['pixel-width','fit','ratio','preset','photo'].includes(changed)) $('pixel-height').value=Math.max(1,Math.round(Number($('pixel-width').value)/ratio));
+    else if(($('single-fit').value==='original'&&photo)||['pixel-width','fit','ratio','preset','photo','mode'].includes(changed)) $('pixel-height').value=Math.max(1,Math.round(Number($('pixel-width').value)/ratio));
   }
   if(!canFrame()) Object.assign(settings,{zoom:1,x:50,y:50});
   setError();$('single-error').hidden=true;
   try {
-    if(['pixel-width','pixel-height','max-kb','min-width','min-height'].some(id=>$(id).validity.badInput)) throw new Error('singleDimensionsError');
+    if(compressing()&&['pixel-width','pixel-height','max-kb','min-width','min-height'].some(id=>$(id).validity.badInput)) throw new Error('singleDimensionsError');
     if(!Number.isFinite(ratio)||ratio<=0||(canFrame()&&['ratio-width','ratio-height'].some(id=>!$(id).checkValidity()))) throw new Error('singleDimensionsError');
-    singleOptions=validateSingle({width:Number($('pixel-width').value),height:Number($('pixel-height').value),
+    singleOptions=compressing()?validateSingle({width:Number($('pixel-width').value),height:Number($('pixel-height').value),
       maxKB:$('max-kb').value===''?null:Number($('max-kb').value),allowResize:$('allow-resize').checked,
-      minWidth:$('min-width').value===''?1:Number($('min-width').value),minHeight:$('min-height').value===''?1:Number($('min-height').value)});
+      minWidth:$('min-width').value===''?1:Number($('min-width').value),minHeight:$('min-height').value===''?1:Number($('min-height').value)}):photo?bestQualityOptions():null;
     const p=activeDigital();
-    if(p&&(singleOptions.width<p.minWidth||singleOptions.height<p.minHeight||singleOptions.width>p.maxWidth||singleOptions.height>p.maxHeight)) throw new Error('digitalConstraintsError');
-  } catch(e) {singleOptions=null;showSingleError(e.message);}
+    if(compressing()&&p&&singleOptions&&(singleOptions.width<p.minWidth||singleOptions.height<p.minHeight||singleOptions.width>p.maxWidth||singleOptions.height>p.maxHeight)) throw new Error('digitalConstraintsError');
+  } catch(e) {singleOptions=null;showSingleError(e.message);
+    if(compressing()&&['pixel-width','pixel-height','min-width','min-height'].some(id=>!$(id).checkValidity()||($(id).value!==''&&Number($(id).value)<1))) $('pixel-settings').open=true;
+  }
   updateModeLabels();updatePresetDetails();updateReadouts();scheduleRender();
 }
 
@@ -179,22 +186,30 @@ function showSingleError(key) {
 }
 
 function setMode(next) {
-  requirementSelections[mode]={country:$('country').value,document:$('document').value};
-  settings.allowEdits=$('allow-edits').checked;
-  mode=next;settings=mode==='print'?printSettings:singleSettings;
-  $('allow-edits').checked=!!settings.allowEdits;
-  updateCountries();$('country').value=requirementSelections[mode].country;updateDocuments();$('document').value=requirementSelections[mode].document;
+  mode=next;
   selectTool('framing');setError();singleResult=null;
   $('single-settings').hidden=mode!=='single';
   for(const id of ['print-output-settings','print-guides','print-note','print-summary']) $(id).hidden=mode!=='print';
   document.querySelector('.workspace').dataset.mode=mode;
   $('sheet').hidden=true;$('sheet-empty').hidden=false;
   updateModeLabels();
-  if(mode==='single') configureSingle();
-  else {
-    try {layout=printLayout(true);} catch(e) {layout=null;setError(e.message==='noFit'?'noFit':'dimensionsError');}
-    updatePresetDetails();updateReadouts();scheduleRender();
+  if(mode==='single') {
+    if(preset){$('single-fit').value=preset.fit||'crop';$('ratio-width').value=preset.width??preset.widthMm;$('ratio-height').value=preset.height??preset.heightMm;}
+    else if($('single-fit').value==='crop'){
+      const multiplier=$('units').value==='inch'?25.4:1;
+      $('ratio-width').value=Number($('width').value)*multiplier;$('ratio-height').value=Number($('height').value)*multiplier;
+    }
+    configureSingle('mode');
   }
+  else {
+    if(!preset) $('height').value=Number((Number($('width').value)/settings.ratio).toFixed(6));
+    chooseSize(false);
+  }
+}
+
+function bestQualityOptions(){
+  const rect=cropRect(photo.canvas.width,photo.canvas.height,settings.ratio,settings.zoom,settings.x,settings.y);
+  return validateSingle({width:Math.max(1,Math.floor(rect.width)),height:Math.max(1,Math.floor(rect.height)),maxKB:null,allowResize:false,minWidth:1,minHeight:1});
 }
 
 function updateReadouts() {
@@ -234,7 +249,7 @@ function updateReadouts() {
     $('single-result').textContent=`${width}×${height} px · ${(blob.size/1000).toFixed(1)} KB (${blob.size} ${t('bytes')}) · ${t('jpegQuality')}: ${Math.round(quality*100)}/100`+
       (singleOptions&&(width!==singleOptions.width||height!==singleOptions.height)?` ${t('reducedPixels')}`:'');
   }
-  const showGuides = mode==='print'&&!!photo && !!preset?.head && $('guides').checked;
+  const showGuides = !!photo && !!preset?.head && $('guides').checked;
   $('guide-overlay').hidden = $('guide-note').hidden = !showGuides;
   $('head-reference').hidden = !showGuides || !preset?.headSource;
   if(preset?.headSource) $('head-source').href = preset.headSource;
@@ -261,6 +276,7 @@ function updateReadouts() {
 }
 
 function scheduleRender() {
+  if(mode==='single'&&!compressing()&&photo&&!errorKey) singleOptions=bestQualityOptions();
   const current = ++revision;
   clearTimeout(renderTimer); discardExport(); setExport();
   singleResult=null;$('single-result').hidden=true;
@@ -283,7 +299,7 @@ function scheduleRender() {
         filename='id-photo-4x6-300ppi.jpg';
       } else {
         const result=await exportSingle(photo.canvas,{...effectiveSettings()},{...singleOptions},()=>current===revision);
-        checkDigitalOutput(activeDigital(),result);
+        if(compressing()) checkDigitalOutput(activeDigital(),result);
         if(current!==revision) return;
         await drawJpegPreview(result.blob,$('sheet'),()=>current===revision);
         if(current!==revision) return;
@@ -302,8 +318,8 @@ function scheduleRender() {
 
 function drawCrop() {
   if (!photo || !(mode==='print'?layout:singleOptions)) return;
-  const width = Math.round(600 * Math.min(1,settings.ratio));
-  const height = Math.round(width / settings.ratio);
+  const width = Math.max(1,Math.round(600*Math.min(1,settings.ratio)));
+  const height = Math.max(1,Math.round(600*Math.min(1,1/settings.ratio)));
   const preview = renderCrop(photo.canvas, effectiveSettings(), width, height, $('original').checked);
   $('crop').width = width; $('crop').height = height;
   $('crop').getContext('2d').drawImage(preview,0,0);
@@ -322,7 +338,7 @@ function clearPhoto() {
   $('crop-empty').hidden = false; $('crop-wrap').hidden = true;
   $('sheet').hidden = true; $('sheet-empty').hidden = false;
   for (const id of ['crop','sheet']) $(id).getContext('2d').clearRect(0,0,$(id).width,$(id).height);
-  for(const state of [printSettings,singleSettings]) Object.assign(state,{zoom:1,x:50,y:50,brightness:0,contrast:0,review:false,allowEdits:false});
+  Object.assign(settings,{zoom:1,x:50,y:50,brightness:0,contrast:0,review:false});
   singleResult=null;$('single-result').hidden=true;$('single-error').hidden=true;
   $('allow-edits').checked = $('original').checked = false;
   $('choose-label').textContent = t('choose'); setStatus(); setError(); setExport(); updatePresetDetails(); updateReadouts();
@@ -340,28 +356,33 @@ $('photo').addEventListener('change', async event => {
     $('crop-empty').hidden = true; $('crop-wrap').hidden = false;
     $('choose-label').textContent = t('replace'); $('photo').ariaLabel = t('replace');
     const scale=Math.min(1,1200/Math.max(photo.canvas.width,photo.canvas.height));
-    if(!activeDigital()&&!DIGITAL_PRESETS.some(p=>p.id===requirementSelections.single.document)){
+    if(!preset){
       $('pixel-width').value=Math.max(1,Math.round(photo.canvas.width*scale));
       $('pixel-height').value=Math.max(1,Math.round(photo.canvas.height*scale));
     }
     updateModeLabels();updatePresetDetails();
-    if(mode==='single') configureSingle('photo');else scheduleRender();
+    if(mode==='single') configureSingle('photo');else chooseSize(false);
     if (matchMedia('(max-width: 760px)').matches) $('crop-title').scrollIntoView({block:'start',behavior:'auto'});
   } catch (e) { setStatus(); setError(messages.en[e.message] ? e.message : 'decodeError'); }
   finally { loading = false; $('photo').disabled = false; $('photo').removeAttribute('aria-busy'); }
 });
 $('clear').onclick = clearPhoto;
 function updateRequirementSelection(){
-  if(mode==='print'){chooseSize();return;}
-  const p=activeDigital();
-  if(p){
-    $('single-fit').value=p.fit;$('ratio-width').value=p.width;$('ratio-height').value=p.height;
-    $('pixel-width').value=p.width;$('pixel-height').value=p.height;
-    $('max-kb').value=p.maxKB;$('min-width').value=p.minWidth;$('min-height').value=p.minHeight;
-    $('allow-resize').checked=false;
-    if(p.noCrop) $('allow-edits').checked=false;
+  preset=catalog.find(p=>p.id===$('document').value)||null;
+  if(preset){
+    const digital=DIGITAL_PRESETS.includes(preset);
+    $('single-fit').value=preset.fit||'crop';
+    $('ratio-width').value=digital?preset.width:preset.widthMm;
+    $('ratio-height').value=digital?preset.height:preset.heightMm;
+    $('pixel-width').value=digital?preset.width:Math.round(preset.widthMm*300/25.4);
+    $('pixel-height').value=digital?preset.height:Math.round(preset.heightMm*300/25.4);
+    $('max-kb').value=digital?preset.maxKB:300;
+    $('min-width').value=digital?preset.minWidth:'';$('min-height').value=digital?preset.minHeight:'';
+    $('allow-resize').checked=!digital;
+    if(preset.noCrop) $('allow-edits').checked=false;
   }
-  markFramingReview();configureSingle('preset');
+  if(mode==='print') chooseSize();
+  else {markFramingReview();configureSingle('preset');}
 }
 $('country').onchange = () => {updateDocuments();updateRequirementSelection();};
 $('document').onchange = ()=>updateRequirementSelection();
@@ -398,6 +419,7 @@ for(const id of ['pixel-width','pixel-height','max-kb','min-width','min-height']
 $('single-fit').onchange=()=>configureSingle('fit');
 for(const id of ['ratio-width','ratio-height']) $(id).oninput=()=>configureSingle('ratio');
 $('allow-resize').onchange=()=>configureSingle();
+for(const radio of document.querySelectorAll('[name=output-quality]')) radio.onchange=()=>configureSingle();
 function selectTool(name, focus = false) {
   if (name === 'framing' && $('original').checked) {
     $('original').checked = false;
@@ -469,7 +491,7 @@ $('crop').onkeydown = e => {
   e.preventDefault(); const [axis,delta] = moves[e.key]; settings[axis] = Math.min(100,Math.max(0,settings[axis]+delta)); scheduleRender();
 };
 
-updateCountries(); updateDocuments(); chooseSize(); updateLanguage();
+updateCountries(); updateDocuments(); updateRequirementSelection(); setMode('single'); updateLanguage();
 setStatus('decoderLoading');
 prepareDecoder().then(() => { if (statusKey === 'decoderLoading') setStatus(); }).catch(() => {
   if (!photo && !loading) setStatus('decoderError');

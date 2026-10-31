@@ -13,3 +13,7 @@ Research targets were China, United States, United Kingdom, Canada and Schengen 
 China centres publish conflicting bounds: [Manchester](https://www.visaforchina.cn/MAN3_EN/qianzhengyewu/jichuzhishi/changjianwenti/164185152103256105.html) says no greater than 354×472, while the Kuala Lumpur diagram gives a range. Do not generalize the scoped preset.
 
 Minimum byte size is checked after encoding. If real image detail cannot satisfy it at the allowed dimensions/quality, block export with a meaningful error rather than add artificial bytes. Custom mode does not make a compliance claim. Existing 4096-pixel working/output bounds remain.
+
+## General ID preparation follow-up
+
+The ID preparation mode now reuses sourced physical photo formats as framing presets and also offers the explicit online routes above. The Schengen group reuses the Portugal U.S. 35×45-mm route and its scoped sources; it does not invent shared online pixels/bytes. Canada exposes its existing printed visa format. Online constraints are enforced in Compress output size; Preserve best quality produces a maximum-quality master copy with available crop detail, which may exceed upload limits.

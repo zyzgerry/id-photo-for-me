@@ -104,3 +104,16 @@ All nine Node tests and 56 Chrome/WebKit browser checks passed, including existi
 - Standards and Spec reviews each found the replacement-aspect and hidden-input defects; both are fixed, covered by a regression, and re-reviewed with zero unresolved findings.
 - Desktop and phone screenshots are in ignored .qa/ux-desktop-<engine>.png and .qa/ux-phone-<engine>.png. Only illustrative/synthetic images were used.
 - Actual-iPhone Photos/Files, touch/share/download behavior and a measured physical 4×6 print remain pending.
+
+## General ID preparation and shared edits — October 31, 2026 follow-up
+
+- Full final Chrome/WebKit suite: **78 passed**. Ten Node geometry, image-input and digital-bound checks pass. JavaScript syntax, HTML control-reference/ID and bilingual-label checks pass.
+- Both reported symptoms were reproduced before the fix: US → Schengen retained a 1:1 crop instead of 35:45; changing output modes restored zoom 1 rather than the edited 1.7. Shared requirement/edit state and an explicit sourced Schengen framing route fix both.
+- Additional regressions cover custom print → compressed ID output proportions, oversized print formats → ID preparation, retained tonal values/permission, replacement/clear, output preference restoration, impossible compression, hidden-invalid-pixel recovery via best quality, exact downloaded dimensions/bytes and output cancellation.
+- All 103 preparation formats are exercised in both languages, including rendered crop proportions with an uploaded synthetic fixture. Quality/compression controls are tested at 320/390/1440 pixels with keyboard radio navigation and repeated mode changes.
+- Best quality is verified as quality 1.0 using available crop detail (no byte cap/upscale); compression exposes file size first, optional pixels stay collapsed, and downloaded JPEGs meet the selected cap. Existing print dimensions, guides, density and offline HEIC checks pass.
+- A phone upload assertion used a five-second wait while JPEG preparation was still in progress; it now uses the existing output-test fifteen-second allowance and passes repeated runs. Temporary diagnostic logs were removed.
+- Firefox was attempted again but fails before opening a browser with `browserType.launch: spawn UNKNOWN` on this Windows host. Firefox behavior and actual-iPhone/physical-print checks remain pending.
+- Screenshots: ignored `.qa/customize-quality-<engine>.png`, `.qa/customize-compression-<engine>.png`. Inputs are synthetic; no personal photos are included. Local preview is updated; publication was not requested.
+
+Final review: Standards and Spec reviewers found no actionable issues in this follow-up. The all-format check was additionally strengthened to verify the rendered crop after upload for every format, not just the selected controls; it passed in Chrome and WebKit (103 formats × 2 languages per engine).

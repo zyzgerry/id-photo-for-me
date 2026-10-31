@@ -13,9 +13,9 @@ On macOS, it is normally at `~/Library/Mobile Documents/com~apple~CloudDocs/AI_P
 
 ## Requirements-first workflow
 
-Choose a result mockup → country/document or custom requirements → upload → edit → arrange a 4×6 sheet or adjust digital pixels/file limits → export. Desktop keeps two columns; phones follow that order vertically. All sections remain visible, with later controls inactive until upload. Requirements changes preserve edits and require framing review before export. Each mode remembers its own settings during the session.
+Choose a result mockup → country/document or custom requirements → upload → edit → arrange a 4×6 sheet or customize the ID photo output → export. Desktop keeps two columns; phones follow that order vertically. All sections remain visible, with later controls inactive until upload. Requirements changes preserve edits and require framing review before export. Both output modes share the current photo requirements and edits. Prepare an ID photo is the first/default mode. Customize output defaults to source-detail maximum-quality JPEG; optional compression exposes the file limit first and keeps pixel settings collapsed.
 
-Digital presets cover US online visa, a scoped China visa route and UK own-device passport uploads. Canada and Schengen show source-backed guidance/custom entry. See [digital research](research/digital-requirements.md). Presets validate actual output bounds; they do not certify acceptance.
+Digital presets cover US online visa, a scoped China visa route and UK own-device passport uploads. The preparation mode also reuses the sourced physical-photo catalog, including a scoped Schengen framing format. Physical dimensions do not imply universal online-upload limits. See [digital research](research/digital-requirements.md). Presets validate actual output bounds; they do not certify acceptance.
 
 ## Confirmed direction
 

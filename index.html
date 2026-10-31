@@ -24,8 +24,8 @@
       <p class="lead" data-i18n="subtitle">Your photo. Your device. Ready for a 4×6 print.</p>
       <p id="privacy" class="privacy" data-i18n="privacy">Your photo stays on your device while you edit. This website does not upload or store photos. It only provides the editing tools that run in your browser.</p>
     <fieldset class="mode-picker"><legend data-i18n="outputMode">What are you making?</legend>
-<label><input type="radio" name="output-mode" value="print" checked><span class="mode-content"><span class="mode-example" aria-hidden="true"><span class="example-sheet"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><strong data-i18n="printMode">Print a photo sheet</strong><span data-i18n="printExample">Multiple correctly sized photos on one 4×6 sheet.</span><small data-i18n="example">Example result</small></span></label>
-<label><input type="radio" name="output-mode" value="single"><span class="mode-content"><span class="mode-example" aria-hidden="true"><span class="example-digital"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span>600×600 px · JPEG</span></span></span><strong data-i18n="singleMode">Prepare a digital ID photo</strong><span data-i18n="digitalExample">One JPEG sized for an online application.</span><small data-i18n="example">Example result</small></span></label>
+<label><input type="radio" name="output-mode" value="single" checked><span class="mode-content"><span class="mode-example" aria-hidden="true"><span class="example-digital"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span>600×600 px · JPEG</span></span></span><strong data-i18n="singleMode">Prepare an ID photo</strong><span data-i18n="digitalExample">Frame and size an ID photo, with optional file compression.</span><small data-i18n="example">Example result</small></span></label>
+<label><input type="radio" name="output-mode" value="print"><span class="mode-content"><span class="mode-example" aria-hidden="true"><span class="example-sheet"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><strong data-i18n="printMode">Print a photo sheet</strong><span data-i18n="printExample">Multiple correctly sized photos on one 4×6 sheet.</span><small data-i18n="example">Example result</small></span></label>
 </fieldset>
     </section>
     <div class="workspace">
@@ -43,7 +43,7 @@
           <label for="units" data-i18n="units">Units</label><select id="units"><option value="mm" data-i18n="mm">Millimeters</option><option value="inch" data-i18n="inch">Inches</option></select>
         </div>
         <div id="digital-framing" hidden>          <label for="single-fit" data-i18n="singleFit">Framing</label>
-          <select id="single-fit"><option value="original" data-i18n="keepFull">Keep the full photo</option><option value="crop" data-i18n="cropOutput">Crop to output ratio</option></select><div id="ratio-fields" class="two-fields"><label><span data-i18n="ratioWidth">Crop ratio: width</span><input id="ratio-width" type="number" min="1" max="4096" value="1" step="1"></label><label><span data-i18n="ratioHeight">Crop ratio: height</span><input id="ratio-height" type="number" min="1" max="4096" value="1" step="1"></label></div></div>
+          <select id="single-fit"><option value="original" data-i18n="keepFull">Keep the full photo</option><option value="crop" selected data-i18n="cropOutput">Crop to output ratio</option></select><div id="ratio-fields" class="two-fields"><label><span data-i18n="ratioWidth">Crop ratio: width</span><input id="ratio-width" type="number" min="1" max="4096" value="1" step="any"></label><label><span data-i18n="ratioHeight">Crop ratio: height</span><input id="ratio-height" type="number" min="1" max="4096" value="1" step="any"></label></div></div>
         <p id="digital-route-note" class="hint" data-i18n="keepFullRequired" hidden>Keep the full photo. The application crops it; tonal adjustments are unavailable for this route.</p>
         <p class="hint" id="preset-location" data-i18n="locationCaveat" hidden>Requirements may vary by application location.</p>
         <p class="size-readout" id="size-readout"></p>
@@ -121,15 +121,20 @@
         </div>
         <div id="single-settings" hidden>
 
-          <div class="two-fields single-fields"><label><span data-i18n="pixelWidth">Width (pixels)</span><input id="pixel-width" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label><label><span data-i18n="pixelHeight">Height (pixels)</span><input id="pixel-height" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label></div>
-          <p class="hint" data-i18n="pixelHelp">Full-photo mode keeps proportions. Maximum output edge: 4096 pixels.</p>
-          <label for="max-kb" class="field-label" data-i18n="maxKB">Maximum file size (KB)</label><input id="max-kb" type="number" inputmode="decimal" min="1" max="30000" step="any" value="300">
+          <fieldset class="quality-picker"><legend data-i18n="outputChoice">Output preference</legend>
+          <label><input type="radio" name="output-quality" value="quality" checked><span data-i18n="bestQuality">Preserve best quality</span></label>
+          <label><input type="radio" name="output-quality" value="compress"><span data-i18n="compressOutput">Compress output size</span></label></fieldset>
+          <p id="quality-help" class="hint" data-i18n="qualityHelp">Keep the available crop detail at maximum JPEG quality. Choose compression for an upload file limit.</p>
+          <div id="compression-settings" hidden>          <label for="max-kb" class="field-label" data-i18n="maxKB">Maximum file size (KB)</label><input id="max-kb" type="number" inputmode="decimal" min="1" max="30000" step="any" value="300">
           <p class="hint" data-i18n="sizeHelp">1 KB = 1,000 bytes. Leave blank for maximum JPEG quality.</p>
+<details id="pixel-settings"><summary data-i18n="pixelSettings">Adjust pixel dimensions (optional)</summary>          <div class="two-fields single-fields"><label><span data-i18n="pixelWidth">Width (pixels)</span><input id="pixel-width" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label><label><span data-i18n="pixelHeight">Height (pixels)</span><input id="pixel-height" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label></div>
+          <p class="hint" data-i18n="pixelHelp">Full-photo mode keeps proportions. Maximum output edge: 4096 pixels.</p>
           <label class="check-row"><input id="allow-resize" type="checkbox" checked><span data-i18n="allowResize">Allow smaller dimensions to meet the limit</span></label>
           <details><summary data-i18n="minimumPixels">Minimum pixel requirements</summary>
             <div class="two-fields"><label><span data-i18n="minWidth">Minimum width</span><input id="min-width" type="number" inputmode="numeric" min="1" max="4096" step="1" placeholder="1"></label><label><span data-i18n="minHeight">Minimum height</span><input id="min-height" type="number" inputmode="numeric" min="1" max="4096" step="1" placeholder="1"></label></div>
             <p class="hint" data-i18n="minimumHelp">Enter the upload portal’s minimum dimensions. For exact dimensions, turn off smaller dimensions.</p>
           </details>
+</details></div>
           <p class="hint" data-i18n="uploadRules">Check the destination’s size, pixel, and editing requirements. A smaller JPEG does not guarantee acceptance.</p>
           <p id="single-error" class="error" hidden></p>
         </div>

@@ -1,3 +1,4 @@
+import { DIGITAL_PRESETS } from './digital-presets.js';
 import { ASIA_PRESETS } from './catalog-asia.js';
 import { AMERICAS_PRESETS } from './catalog-americas.js';
 import { AFRICA_PRESETS } from './catalog-africa.js';
@@ -20,3 +21,9 @@ export const PRESETS = [
     headSource: 'https://www.vfsglobal.com/one-pager/portugal/uk/english/pdf/tech-req-for-photos.pdf', restrictEdits: false },
   ...EUROPE_PRESETS, ...EUROPE_EXTRA_PRESETS, ...PARTNER_PRESETS, ...ASIA_PRESETS, ...AMERICAS_PRESETS, ...AFRICA_PRESETS,
 ];
+
+// Reuse a sourced Schengen route for framing; it does not define universal upload limits.
+export const PREPARATION_PRESETS = [...PRESETS,{
+  ...PRESETS.find(p=>p.id==='pt-schengen'),id:'schengen-prep',country:'schengen',
+  document:{en:'Schengen Visa (Portugal, U.S. application)',zh:'申根签证（葡萄牙，在美国申请）'},
+},...DIGITAL_PRESETS];

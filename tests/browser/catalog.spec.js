@@ -1,12 +1,12 @@
 import { openApp, reviewFraming } from './open-app.js';
 import { test, expect } from '@playwright/test';
-import { PRESETS } from '../../src/presets.js';
+import { PRESETS, PREPARATION_PRESETS } from '../../src/presets.js';
 import { messages } from '../../src/i18n.js';
 import { fileURLToPath } from 'node:url';
 
 test('all sourced country/document options work in both languages without losing the selection',async({page})=>{
   test.setTimeout(120000);await openApp(page);
-  await expect(page.locator('#country option')).toHaveCount(new Set(PRESETS.map(p=>p.country)).size+1);
+  await expect(page.locator('#country option')).toHaveCount(new Set(PREPARATION_PRESETS.map(p=>p.country)).size+1);
   for(const lang of ['en','zh']) {
     await page.locator('#language').selectOption(lang);
     for(const p of PRESETS) {
