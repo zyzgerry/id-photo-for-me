@@ -1,3 +1,4 @@
+import { openApp } from './open-app.js';
 import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 
@@ -6,7 +7,7 @@ const fixture = fileURLToPath(new URL('../fixtures/orientation-6.jpg',import.met
 test('photo selection follows mode in visual and keyboard order at every layout size',async({page})=>{
   await page.emulateMedia({reducedMotion:'reduce'});
   for(const [width,height] of [[1440,1000],[1024,900],[760,900],[375,812],[320,640],[844,390]]) {
-    await page.setViewportSize({width,height});await page.goto('./');
+    await page.setViewportSize({width,height});await openApp(page);
     for(const language of ['en','zh']) {
       await page.locator('#language').selectOption(language);
       for(const mode of ['print','single']) {
@@ -46,7 +47,7 @@ test('photo selection follows mode in visual and keyboard order at every layout 
 });
 
 test('resizing retains photo, settings, focus, and exports while moving phone settings after the editor',async({page})=>{
-  await page.setViewportSize({width:1440,height:1000});await page.goto('./');
+  await page.setViewportSize({width:1440,height:1000});await openApp(page);
   const chooser=page.waitForEvent('filechooser');await page.locator('#start-photo').click();
   await (await chooser).setFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#copies').fill('4');await expect(page.locator('#copy-count')).toHaveText('4 copies');
@@ -67,7 +68,7 @@ test('resizing retains photo, settings, focus, and exports while moving phone se
 });
 
 test('mobile preview stays visible while changing tonal adjustments',async({page})=>{
-  await page.setViewportSize({width:390,height:700}); await page.goto('./');
+  await page.setViewportSize({width:390,height:700}); await openApp(page);
   await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#adjustments-tab').click();
   await page.locator('#allow-edits').check();
@@ -80,7 +81,7 @@ test('mobile preview stays visible while changing tonal adjustments',async({page
 });
 
 test('cutting guides change only cut edges and can be disabled without changing geometry',async({page})=>{
-  await page.goto('./');await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
+  await openApp(page);await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
   const sample=()=>page.locator('#sheet').evaluate(c=>{
     const x=c.getContext('2d');return {edge:[...x.getImageData(600,16,1,1).data],near:[...x.getImageData(598,16,1,1).data],inside:[...x.getImageData(200,200,1,1).data],width:c.width,height:c.height};
   });
@@ -94,7 +95,7 @@ test('cutting guides change only cut edges and can be disabled without changing 
 });
 
 test('editing tabs support keyboard navigation, retain edits, and fit narrow screens',async({page})=>{
-  await page.setViewportSize({width:320,height:640});await page.goto('./');await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
+  await page.setViewportSize({width:320,height:640});await openApp(page);await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#framing-tab').focus();await page.keyboard.press('ArrowRight');await expect(page.locator('#adjustments-tab')).toBeFocused();
   await expect(page.locator('#adjustments-panel')).toBeVisible();await expect(page.locator('#framing-panel')).toBeHidden();
   await page.locator('#allow-edits').check();await page.locator('#brightness').evaluate(el=>{el.value='8';el.dispatchEvent(new Event('input',{bubbles:true}));});

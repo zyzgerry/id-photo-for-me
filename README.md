@@ -45,7 +45,7 @@ The GitHub Actions workflow verifies the app, builds static files, and deploys `
 ## Scope and current limits
 
 - English and Simplified Chinese; 99 printed-photo presets across 95 countries and regions, plus custom dimensions. Passport and visa routes are labeled separately, including application-location restrictions. Every preset links its government, consular, or authorized application-operator source and check date. See [catalog research and benchmark](research/photo-requirements.md) for the complete list and exclusions.
-- All image processing is local. No analytics, remote fonts, image services, persistent browser storage, or service workers. A restrictive Content Security Policy disables application network connections; official sources open only when chosen.
+- All image processing is local. No analytics, remote fonts, image services, persistent browser storage, or service workers. At startup, a small same-origin GET checks the current release; no photo data is sent. A restrictive Content Security Policy blocks third-party connections; official sources open only when chosen.
 - HEIC tries native decoding first, with an unmodified, locally bundled `heic-to` fallback. The fallback module loads at startup so it is available after disconnecting. See `THIRD_PARTY.md` for licensing and source.
 - Provisional limits: 30 MiB, 50 megapixels, and 12,000 pixels per side. Images are reduced to a working edge of at most 4096 pixels. Effective crop resolution uses this working image and warns below 300 ppi.
 - Print mode stays at 300 ppi (1800×1200 pixels), uses maximum JPEG encoder quality 1.0, and has no byte cap or resolution controls. Choose an exact copy count up to the calculated grid capacity, or use maximum. Compact uniform grids consider both orientations without shrinking copies. Zero gaps; leftover paper stays white. Switchable one-pixel dashed guides outline all edges, with outer ticks in unused paper. Cut along guides to avoid traces. Metric sizes are accurate within one output pixel.
@@ -58,3 +58,9 @@ The GitHub Actions workflow verifies the app, builds static files, and deploys `
 ## Release validation
 
 See [VALIDATION.md](VALIDATION.md) for automated evidence and the remaining real-iPhone and physical-print checklist. Desktop emulation is not a substitute for those checks.
+
+## Browser updates
+
+Each build gives its scripts, nested modules, styles and decoder a shared content-derived release path. A hash-authorized inline startup script checks `release.json` with a unique request URL and `cache: no-store`. If cached HTML belongs to an older release, it navigates to a release-specific page URL before enabling the editor, keeping HTML and assets together. Repeated builds of identical inputs produce the same version. Root and repository-subpath hosting are supported.
+
+Update-check errors or a three-second timeout fall back to the page's own release. Already-open editors are not polled or automatically reloaded, preserving unsaved work; updates apply on the next normal visit/reload. This is not offline installation. Legacy unversioned assets remain available for the one-time migration; HTML cached before this updater existed can remain old until its existing cache expires (the observed GitHub Pages response allowed 600 seconds). A website cannot retroactively execute new update code inside an already cached old page.

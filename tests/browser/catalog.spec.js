@@ -1,10 +1,11 @@
+import { openApp } from './open-app.js';
 import { test, expect } from '@playwright/test';
 import { PRESETS } from '../../src/presets.js';
 import { messages } from '../../src/i18n.js';
 import { fileURLToPath } from 'node:url';
 
 test('all sourced country/document options work in both languages without losing the selection',async({page})=>{
-  test.setTimeout(120000);await page.goto('./');
+  test.setTimeout(120000);await openApp(page);
   await expect(page.locator('#country option')).toHaveCount(new Set(PRESETS.map(p=>p.country)).size+1);
   for(const lang of ['en','zh']) {
     await page.locator('#language').selectOption(lang);
@@ -30,7 +31,7 @@ test('all sourced country/document options work in both languages without losing
 });
 
 test('short document labels keep detailed scope and linked sources collapsed until requested',async({page})=>{
-  await page.setViewportSize({width:320,height:812});await page.goto('./');
+  await page.setViewportSize({width:320,height:812});await openApp(page);
   await page.locator('#country').selectOption('it');
   await expect(page.locator('#document option:checked')).toHaveText('Schengen Visa');
   await expect(page.locator('#preset-note')).toBeHidden();
@@ -55,7 +56,7 @@ test('short document labels keep detailed scope and linked sources collapsed unt
 });
 
 test('shared visa names distinguish Schengen, mixed guidance and national D routes',async({page})=>{
-  await page.goto('./');
+  await openApp(page);
   for(const lang of ['en','zh']) {
     await page.locator('#language').selectOption(lang);
     for(const [country,label] of [
@@ -78,7 +79,7 @@ test('shared visa names distinguish Schengen, mixed guidance and national D rout
 });
 
 test('new formats export offline at their stated dimensions and retain phone layout',async({page,context})=>{
-  await page.setViewportSize({width:375,height:812});await page.goto('./');await context.setOffline(true);
+  await page.setViewportSize({width:375,height:812});await openApp(page);await context.setOffline(true);
   await page.locator('#photo').setInputFiles(fileURLToPath(new URL('../fixtures/orientation-6.jpg',import.meta.url)));
   for(const id of ['cn-visa','fi-passport','ca-visa','pe-visa']) {
     const p=PRESETS.find(p=>p.id===id);

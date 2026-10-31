@@ -1,3 +1,4 @@
+import { openApp } from './open-app.js';
 import { test, expect } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -24,7 +25,7 @@ async function setRange(page,id,value) {
 test('offline crop, adjustments, JPEG geometry, density, and clear keep all photo data local',async({page,context})=>{
   const requests=[]; const errors=[];
   page.on('request',r=>requests.push(r.url()));page.on('pageerror',e=>errors.push(e.message));
-  await page.goto('./');await expect(page.locator('#status')).toBeEmpty();
+  await openApp(page);await expect(page.locator('#status')).toBeEmpty();
   const buffer=await fixture(page);
   const initialRequests=requests.length;
   await context.setOffline(true);
@@ -56,7 +57,7 @@ test('offline crop, adjustments, JPEG geometry, density, and clear keep all phot
 
 test('HEIC fallback decodes offline and EXIF orientation is normalized',async({page,context})=>{
   test.setTimeout(90000);
-  await page.goto('./');await expect(page.locator('#status')).toBeEmpty();
+  await openApp(page);await expect(page.locator('#status')).toBeEmpty();
   await context.setOffline(true);
   for (const [name,expected] of [['quadrants.heic',[255,0,0]],['orientation-6.jpg',[0,0,255]]]) {
     await page.locator('#photo').setInputFiles(fileURLToPath(new URL(`../fixtures/${name}`,import.meta.url)));
@@ -68,7 +69,7 @@ test('HEIC fallback decodes offline and EXIF orientation is normalized',async({p
 });
 
 test('adjustments always use original pixels; comparison and reset restore the original',async({page})=>{
-  await page.goto('./');await upload(page);await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();
+  await openApp(page);await upload(page);await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();
   const pixel=()=>page.locator('#crop').evaluate(c=>[...c.getContext('2d').getImageData(100,100,1,1).data]);
   const original=await pixel();
   await setRange(page,'brightness',10);const edited=await pixel();expect(edited).not.toEqual(original);
@@ -79,7 +80,7 @@ test('adjustments always use original pixels; comparison and reset restore the o
 });
 
 test('preset changes, metric dimensions, custom errors, and translated interface',async({page})=>{
-  await page.goto('./');await upload(page);
+  await openApp(page);await upload(page);
   await page.locator('#country').selectOption('pt');await expect(page.locator('#save')).toBeEnabled();
   await expect(page.locator('#size-readout')).toHaveText('35×45 mm');
   expect(await page.locator('#crop').evaluate(el=>el.width/el.height)).toBeCloseTo(35/45,2);
@@ -94,7 +95,7 @@ test('preset changes, metric dimensions, custom errors, and translated interface
 });
 
 test('rejects corrupt, unsupported, oversized files and excessive pixel headers',async({page})=>{
-  await page.goto('./');
+  await openApp(page);
   for(const [name,buffer,text] of [
     ['bad.jpg',Buffer.from([255,216,255,0]),'could not be opened'],
     ['bad.gif',Buffer.from('GIF89a'),'still JPEG'],
@@ -108,7 +109,7 @@ test('rejects corrupt, unsupported, oversized files and excessive pixel headers'
 });
 
 test('phone layout fits 320px and keyboard/pointer controls change the crop',async({page})=>{
-  await page.setViewportSize({width:320,height:740});await page.goto('./');await upload(page);
+  await page.setViewportSize({width:320,height:740});await openApp(page);await upload(page);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await setRange(page,'zoom',2);
   await page.locator('#crop').focus();await page.keyboard.press('ArrowRight');await expect(page.locator('#x')).toHaveValue('48');
@@ -119,7 +120,7 @@ test('phone layout fits 320px and keyboard/pointer controls change the crop',asy
 
 test('synthetic 12, 24, and 48 megapixel photos use bounded working images',async({page})=>{
   test.setTimeout(90000);
-  await page.goto('./');
+  await openApp(page);
   for (const [width,height,bounded,ppi] of [[4000,3000,false,1500],[6000,4000,true,1365],[8000,6000,true,1536]]) {
     await upload(page,await fixture(page,width,height));
     await expect(page.locator('#bounded')).toBeVisible({visible:bounded});

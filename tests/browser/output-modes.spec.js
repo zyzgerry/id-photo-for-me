@@ -1,3 +1,4 @@
+import { openApp } from './open-app.js';
 import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
@@ -27,7 +28,7 @@ async function download(page) {
 }
 
 test('outer cut guides cover all four metric photo boundaries',async({page})=>{
-  await page.goto('./');await page.locator('#country').selectOption('pt');
+  await openApp(page);await page.locator('#country').selectOption('pt');
   await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   const edges=await page.locator('#sheet').evaluate(c=>{
     const ctx=c.getContext('2d');return [[73,80],[1727,80],[96,69],[96,1131]].map(([x,y])=>[...ctx.getImageData(x,y,1,1).data]);
@@ -36,7 +37,7 @@ test('outer cut guides cover all four metric photo boundaries',async({page})=>{
 });
 
 test('outer cutting edges stay visible in a reduced white-photo preview',async({page})=>{
-  await page.setViewportSize({width:1280,height:900});await page.goto('./');
+  await page.setViewportSize({width:1280,height:900});await openApp(page);
   const buffer=Buffer.from(await page.evaluate(()=>{const c=document.createElement('canvas');c.width=c.height=600;const x=c.getContext('2d');x.fillStyle='white';x.fillRect(0,0,600,600);return c.toDataURL('image/png').split(',')[1];}),'base64');
   await page.locator('#photo').setInputFiles({name:'white.png',mimeType:'image/png',buffer});await ready(page);
   const shot=await page.locator('#sheet').screenshot();
@@ -51,7 +52,7 @@ test('outer cutting edges stay visible in a reduced white-photo preview',async({
 });
 
 test('Portugal offers sourced head-size guides without adding them to exports',async({page})=>{
-  await page.goto('./');await page.locator('#country').selectOption('pt');
+  await openApp(page);await page.locator('#country').selectOption('pt');
   await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   await expect(page.locator('#guide-control')).toBeVisible();
   const before=await page.locator('#sheet').evaluate(c=>c.toDataURL());
@@ -64,7 +65,7 @@ test('Portugal offers sourced head-size guides without adding them to exports',a
 });
 
 test('copy selector enforces capacity and rearranges exactly the requested photos',async({page})=>{
-  await page.goto('./');await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
+  await openApp(page);await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   await page.locator('#copies').fill('4');await ready(page);await expect(page.locator('#copy-count')).toHaveText('4 copies');
   const margin=await page.locator('#sheet').evaluate(c=>[...c.getContext('2d').getImageData(100,100,1,1).data]);expect(margin).toEqual([255,255,255,255]);
   await page.locator('#copies').fill('7');await expect(page.locator('#error')).toContainText('maximum');await expect(page.locator('#save')).toBeDisabled();
@@ -77,7 +78,7 @@ test('copy selector enforces capacity and rearranges exactly the requested photo
 });
 
 test('single mode preserves a full HEIC photo and exports offline without arrangement',async({page,context})=>{
-  await page.goto('./');await expect(page.locator('#status')).toBeEmpty();await single(page);await context.setOffline(true);
+  await openApp(page);await expect(page.locator('#status')).toBeEmpty();await single(page);await context.setOffline(true);
   await page.locator('#photo').setInputFiles(fixture('quadrants.heic'));await ready(page);
   await expect(page.locator('#pixel-width')).toHaveValue('120');await expect(page.locator('#pixel-height')).toHaveValue('80');
   await expect(page.locator('#print-settings')).toBeHidden();await expect(page.locator('#crop-controls')).toBeHidden();await expect(page.locator('#print-guides')).toBeHidden();
@@ -88,7 +89,7 @@ test('single mode preserves a full HEIC photo and exports offline without arrang
 
 test('single JPEG byte limit respects minimums, rejects impossible targets, and reports actual dimensions',async({page})=>{
   test.setTimeout(90000);
-  await page.goto('./');await single(page);
+  await openApp(page);await single(page);
   await page.locator('#photo').setInputFiles({name:'noise.png',mimeType:'image/png',buffer:await noise(page)});await ready(page);
   await page.locator('#allow-resize').uncheck();await page.locator('#max-kb').fill('1');
   await expect(page.locator('#single-error')).toContainText('cannot be met');await expect(page.locator('#save')).toBeDisabled();
@@ -103,7 +104,7 @@ test('single JPEG byte limit respects minimums, rejects impossible targets, and 
 });
 
 test('single crop supports exact pixel dimensions and mode changes preserve print edits',async({page})=>{
-  await page.goto('./');await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
+  await openApp(page);await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   await page.locator('#zoom').evaluate(el=>{el.value='2';el.dispatchEvent(new Event('input',{bubbles:true}));});await ready(page);
   await single(page);await page.locator('#single-fit').selectOption('crop');await page.locator('#pixel-width').fill('600');await page.locator('#pixel-height').fill('600');
   await page.locator('#max-kb').fill('');await page.locator('#allow-resize').uncheck();await ready(page);
@@ -115,7 +116,7 @@ test('single crop supports exact pixel dimensions and mode changes preserve prin
 });
 
 test('a superseded compression job cannot overwrite print output or leak errors',async({page})=>{
-  await page.goto('./');await single(page);await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
+  await openApp(page);await single(page);await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   await page.locator('#pixel-width').fill('2000');await page.locator('#max-kb').fill('1');await print(page);await ready(page);
   await expect(page.locator('#error')).toBeHidden();await expect(page.locator('#sheet')).toHaveAttribute('width','1800');expect((await download(page)).size).toEqual([1800,1200]);
 });

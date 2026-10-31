@@ -1,3 +1,4 @@
+import { openApp } from './open-app.js';
 import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 
@@ -8,7 +9,7 @@ const pixel = page => page.evaluate(()=>({
 }));
 
 test('leaving original comparison restores the edited preview in Framing',async({page})=>{
-  await page.goto('./');await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
+  await openApp(page);await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();
   await page.locator('#brightness').focus();await page.keyboard.press('End');await expect(page.locator('#save')).toBeEnabled();
   const edited=await pixel(page);expect(edited.crop).toEqual(edited.sheet);
@@ -19,7 +20,7 @@ test('leaving original comparison restores the edited preview in Framing',async(
 });
 
 test('transparent PNG flattens onto white and refresh leaves no photo storage',async({page})=>{
-  await page.goto('./');
+  await openApp(page);
   const buffer=Buffer.from(await page.evaluate(()=>{
     const canvas=document.createElement('canvas');canvas.width=canvas.height=600;
     const ctx=canvas.getContext('2d');ctx.fillStyle='rgba(255,0,0,0.5)';ctx.fillRect(300,0,300,600);
