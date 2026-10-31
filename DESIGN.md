@@ -23,3 +23,7 @@ Validation uses synthetic images. Personal exported sheets, their analysis, and 
 ## Document labels and source disclosure
 
 Use short document names without embassy or application-location suffixes. Preserve useful eligibility qualifiers such as child age limits. Keep dimensions visible, and show a brief location-variation caveat for location-specific presets. Requirements & sources is collapsed initially and holds the full application scope, detailed photo guidance, linked authority, and check date. Preserve that scope when simplifying a label; it is evidence for the preset rather than part of the dropdown name. Use the same behavior in English and Chinese.
+
+## Shared visa terminology
+
+Use Schengen Visa / 申根签证 for verified Schengen routes, rather than generic Visa or a purpose alone. Where the linked photo guidance covers both Schengen and national routes, use Schengen / National Visa / 申根／国家签证. National long-stay routes retain an explicit D designation and any narrow study/marriage purpose. Base these labels on the route's source, not merely country membership. Keep the existing collapsed sources and location caveats. See research/visa-labels.md.

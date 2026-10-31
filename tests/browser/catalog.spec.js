@@ -32,7 +32,7 @@ test('all sourced country/document options work in both languages without losing
 test('short document labels keep detailed scope and linked sources collapsed until requested',async({page})=>{
   await page.setViewportSize({width:320,height:812});await page.goto('./');
   await page.locator('#country').selectOption('it');
-  await expect(page.locator('#document option:checked')).toHaveText('Tourist visa');
+  await expect(page.locator('#document option:checked')).toHaveText('Schengen Visa');
   await expect(page.locator('#preset-note')).toBeHidden();
   await expect(page.locator('#preset-scope')).toBeHidden();
   await expect(page.locator('#reference')).toBeHidden();
@@ -45,13 +45,36 @@ test('short document labels keep detailed scope and linked sources collapsed unt
   await expect(page.locator('#preset-scope')).toContainText('Hong Kong / Macao');
   await expect(page.locator('#reference')).toHaveAttribute('href',PRESETS.find(p=>p.country==='it').source);
   await page.locator('#language').selectOption('zh');
-  await expect(page.locator('#document option:checked')).toHaveText('旅游签证');
+  await expect(page.locator('#document option:checked')).toHaveText('申根签证');
   await expect(disclosure).toHaveText('要求与来源');
   await expect(page.locator('#preset-scope')).toContainText('香港／澳门');
   await disclosure.click();await expect(page.locator('#preset-note')).toBeHidden();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(320);
   await page.locator('#country').selectOption('us');await expect(page.locator('#preset-location')).toBeHidden();
   await page.locator('#country').selectOption('custom');await expect(page.locator('#preset-location')).toBeHidden();
+});
+
+test('shared visa names distinguish Schengen, mixed guidance and national D routes',async({page})=>{
+  await page.goto('./');
+  for(const lang of ['en','zh']) {
+    await page.locator('#language').selectOption(lang);
+    for(const [country,label] of [
+      ['pt',['Schengen Visa','申根签证']],['ro',['Schengen Visa','申根签证']],
+      ['it',['Schengen Visa','申根签证']],['gr',['Schengen Visa','申根签证']],
+      ['de',['Schengen / National Visa','申根／国家签证']],
+      ['at',['Schengen / National Visa','申根／国家签证']],
+      ['sk',['National Visa (D)','国家签证（D类）']],
+      ['be',['National Visa (D, study)','国家签证（D类，留学）']],
+      ['ch',['National Visa (D, marriage)','国家签证（D类，结婚）']]
+    ]) {
+      await page.locator('#country').selectOption(country);
+      await expect(page.locator('#document option:checked')).toHaveText(label[lang==='en'?0:1]);
+    }
+    for(const country of ['ie','cy']) {
+      await page.locator('#country').selectOption(country);
+      await expect(page.locator('#document option:checked')).not.toContainText(/Schengen|申根/);
+    }
+  }
 });
 
 test('new formats export offline at their stated dimensions and retain phone layout',async({page,context})=>{

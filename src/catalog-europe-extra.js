@@ -18,7 +18,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "de-visa",
     "country": "de",
-    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (German missions in the UK)","zh":"签证（德国驻英国使领馆）"},
+    "document": "schengenNational", scope: {"en":"Visa (German missions in the UK)","zh":"签证（德国驻英国使领馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://uk.diplo.de/uk-en/02/visa/visa-faq-2442852",
@@ -33,7 +33,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "hu-visa",
     "country": "hu",
-    "document": {"en":"Schengen visa","zh":"申根签证"}, scope: {"en":"Schengen visa (Taipei)","zh":"申根签证（台北）"},
+    "document": "schengen", scope: {"en":"Schengen visa (Taipei)","zh":"申根签证（台北）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://tajpej.mfa.gov.hu/en/schengen-visa",
@@ -48,7 +48,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "sk-visa",
     "country": "sk",
-    "document": {"en":"National visa","zh":"国家签证"},
+    "document": "nationalVisa",
     "widthMm": 30,
     "heightMm": 35,
     "source": "https://www.mzv.sk/en/services/information-for-foreigners/national-visa",
@@ -63,7 +63,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "lt-visa",
     "country": "lt",
-    "document": {"en":"Schengen visa","zh":"申根签证"}, scope: {"en":"Schengen visa (Sovetsk)","zh":"申根签证（苏维埃茨克）"},
+    "document": "schengen", scope: {"en":"Schengen visa (Sovetsk)","zh":"申根签证（苏维埃茨克）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://consulate-sovetsk.mfa.lt/ru/glavnaya-konsulskaya-informatsiya/vizy/dokumenty-neobkhodimye-dlya-polucheniya-vizy/97",
@@ -78,7 +78,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "lu-visa",
     "country": "lu",
-    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Bangkok)","zh":"签证（曼谷）"},
+    "document": "schengenNational", scope: {"en":"Visa (Bangkok)","zh":"签证（曼谷）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://bangkok.mae.lu/fr/service_citoyens.html",
@@ -157,7 +157,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "si-visa",
     "country": "si",
-    "document": {"en":"National visa","zh":"国家签证"}, scope: {"en":"National visa (Zagreb)","zh":"国家签证（萨格勒布）"},
+    "document": "nationalVisa", scope: {"en":"National visa (Zagreb)","zh":"国家签证（萨格勒布）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.gov.si/en/representations/embassy-zagreb/visa-information-of-the-embassy-zagreb/",
@@ -203,7 +203,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "be-visa",
     "country": "be",
-    "document": {"en":"Student visa","zh":"学生签证"}, scope: {"en":"Student visa (Helsinki)","zh":"学生签证（赫尔辛基）"},
+    "document": {"en":"National Visa (D, study)","zh":"国家签证（D类，留学）"}, scope: {"en":"Student visa (Helsinki)","zh":"学生签证（赫尔辛基）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://finland.diplomatie.belgium.be/sites/default/files/2024-07/Student%20Visa_0.pdf",
@@ -218,7 +218,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "is-visa",
     "country": "is",
-    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Embassy in London)","zh":"签证（驻伦敦使馆）"},
+    "document": "schengen", scope: {"en":"Visa (Embassy in London)","zh":"签证（驻伦敦使馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.mfa.is/library/01-Ministries/Ministry-for-Foreign-Affairs/Consular-services/Tourism%20Business%20VFF%20-%20Checklist%20-%20LON%20-%2014.22.pdf",
