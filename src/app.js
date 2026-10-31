@@ -1,6 +1,6 @@
 import { PRESETS, VERIFIED } from './presets.js';
 import { messages } from './i18n.js';
-import { layoutSheet, cropRect } from './geometry.js';
+import { SHEET, layoutSheet, cropRect } from './geometry.js';
 import { renderCrop, renderSheet, exportJpeg } from './render.js';
 import { decodePhoto, prepareDecoder } from './image.js';
 import { validateSingle, exportSingle, drawJpegPreview } from './single.js';
@@ -72,6 +72,7 @@ function updateModeLabels() {
   $('size-title').textContent=t(mode==='print'?'step1':'singleStep1');
   $('sheet-title').textContent=t(mode==='print'?'step3':'singleStep3');
   $('sheet-empty').textContent=t(mode==='print'?'sheetEmpty':'singleEmpty');
+  document.querySelector('#crop-empty p').textContent=t(mode==='print'?'empty':'singleEmpty');
   $('output-info').textContent=t(mode==='print'?'output':'singleOutput');
   $('framing-help').textContent=t(canFrame()?'drag':'keepFullHint');
   $('crop-controls').hidden=!canFrame();
@@ -146,7 +147,7 @@ function setMode(next) {
   mode=next;settings=mode==='print'?printSettings:singleSettings;
   selectTool('framing');setError();singleResult=null;
   $('print-settings').hidden=mode!=='print';$('single-settings').hidden=mode!=='single';
-  for(const id of ['print-output-settings','print-guides','print-note']) $(id).hidden=mode!=='print';
+  for(const id of ['print-output-settings','print-guides','print-note','print-summary']) $(id).hidden=mode!=='print';
   document.querySelector('.workspace').dataset.mode=mode;
   $('sheet').hidden=true;$('sheet-empty').hidden=false;
   updateModeLabels();
@@ -195,6 +196,8 @@ function updateReadouts() {
   }
   const showGuides = mode==='print'&&!!photo && !!preset?.head && $('guides').checked;
   $('guide-overlay').hidden = $('guide-note').hidden = !showGuides;
+  $('head-reference').hidden = !showGuides || !preset?.headSource;
+  if(preset?.headSource) $('head-source').href = preset.headSource;
   $('guide-overlay').replaceChildren();
   if (showGuides) {
     for (const fraction of preset.head) {
@@ -202,6 +205,17 @@ function updateReadouts() {
         const line = document.createElement('div'); line.className = 'guide-line'; line.style.top = `${position*100}%`;
         $('guide-overlay').append(line);
       }
+    }
+  }
+  $('cut-preview').hidden = mode!=='print' || !photo || !layout || !$('cut-guides').checked;
+  $('cut-preview').replaceChildren();
+  if (!$('cut-preview').hidden) {
+    // Screen-pixel outlines stay legible when one-output-pixel print lines are downscaled.
+    for (const copy of layout.copies) {
+      const box = document.createElement('div'); box.className = 'cut-preview-box';
+      Object.assign(box.style, {left:`${copy.x/SHEET.width*100}%`,top:`${copy.y/SHEET.height*100}%`,
+        width:`${copy.width/SHEET.width*100}%`,height:`${copy.height/SHEET.height*100}%`});
+      $('cut-preview').append(box);
     }
   }
 }
@@ -275,7 +289,7 @@ function clearPhoto() {
 
 $('photo').addEventListener('change', async event => {
   const selected = event.target.files[0]; if (!selected || loading) return;
-  clearPhoto(); loading = true; $('photo').disabled = true; $('photo').setAttribute('aria-busy','true');
+  clearPhoto(); loading = true; $('start-photo').disabled = $('photo').disabled = true; $('photo').setAttribute('aria-busy','true');
   setStatus('loading');
   try {
     const result = await decodePhoto(selected);
@@ -291,9 +305,10 @@ $('photo').addEventListener('change', async event => {
     if(mode==='single') configureSingle();else scheduleRender();
     if (matchMedia('(max-width: 760px)').matches) $('crop-title').scrollIntoView({block:'start',behavior:'auto'});
   } catch (e) { setStatus(); setError(messages.en[e.message] ? e.message : 'decodeError'); }
-  finally { loading = false; $('photo').disabled = false; $('photo').removeAttribute('aria-busy'); }
+  finally { loading = false; $('start-photo').disabled = $('photo').disabled = false; $('photo').removeAttribute('aria-busy'); }
 });
 $('clear').onclick = clearPhoto;
+$('start-photo').onclick = () => $('photo').click();
 $('country').onchange = () => { updateDocuments(); chooseSize(); };
 $('document').onchange = chooseSize;
 for (const id of ['width','height']) $(id).oninput = chooseSize;
@@ -395,6 +410,16 @@ $('crop').onkeydown = e => {
   e.preventDefault(); const [axis,delta] = moves[e.key]; settings[axis] = Math.min(100,Math.max(0,settings[axis]+delta)); scheduleRender();
 };
 
+const phoneLayout = matchMedia('(max-width: 760px)');
+function placeSettings() {
+  const active = document.activeElement, settingsPanel = document.querySelector('.settings');
+  // Keep screen-reader and keyboard order aligned with the phone's photo-first layout.
+  if (phoneLayout.matches) document.querySelector('.editor').after(settingsPanel);
+  else document.querySelector('.setup-column').append(settingsPanel);
+  if (settingsPanel.contains(active)) active.focus({preventScroll:true});
+}
+phoneLayout.addEventListener('change', placeSettings);
+placeSettings();
 updateDocuments(); chooseSize(); updateLanguage();
 setStatus('decoderLoading');
 prepareDecoder().then(() => { if (statusKey === 'decoderLoading') setStatus(); }).catch(() => {

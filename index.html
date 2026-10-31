@@ -22,23 +22,27 @@
     <section class="intro">
       <h1 data-i18n="workspaceTitle">Prepare your photo sheet</h1>
       <p class="lead" data-i18n="subtitle">Your photo. Your device. Ready for a 4×6 print.</p>
+      <p id="privacy" class="privacy" data-i18n="privacy">Your photo stays on your device while you edit. This website does not upload or store photos. It only provides the editing tools that run in your browser.</p>
+    </section>
+    <div class="workspace">
+      <div class="setup-column">
+      <div class="setup region">
+      <fieldset class="mode-picker"><legend data-i18n="outputMode">What are you making?</legend>
+      <label><input type="radio" name="output-mode" value="print" checked><span data-i18n="printMode">4×6 print sheet</span></label>
+      <label><input type="radio" name="output-mode" value="single"><span data-i18n="singleMode">Single JPEG / upload</span></label>
+    </fieldset>
+    <div class="photo-setup">
       <div class="file-actions">
         <label class="button primary file-button" for="photo"><span id="choose-label" data-i18n="choose">Choose a photo</span><input id="photo" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" aria-describedby="formats privacy"></label>
-        <button id="clear" class="button quiet" disabled data-i18n="clear">Clear photo</button>
       </div>
-      <p id="privacy" class="privacy" data-i18n="privacy">Photos stay on this device. No uploads, accounts, or saved history.</p>
       <details class="input-help"><summary data-i18n="supportedFormats">Supported photos and limits</summary><p id="formats" class="hint" data-i18n="formats">JPEG, PNG, or HEIC/HEIF. Up to 30 MB, 50 megapixels, and 12,000 pixels per side. Still images only.</p></details>
       <p id="status" role="status" aria-live="polite"></p>
       <p id="error" class="error" role="alert" hidden></p>
       <noscript><p>JavaScript is needed to process photos locally. / 请启用 JavaScript 以在本机处理照片。</p></noscript>
-    </section>
-    <fieldset class="mode-picker"><legend data-i18n="outputMode">What are you making?</legend>
-      <label><input type="radio" name="output-mode" value="print" checked><span data-i18n="printMode">4×6 print sheet</span></label>
-      <label><input type="radio" name="output-mode" value="single"><span data-i18n="singleMode">Single JPEG / upload</span></label>
-    </fieldset>
-    <div class="workspace">
+    </div>
+      </div>
       <section class="settings region" aria-labelledby="size-title">
-        <h2 id="size-title" data-i18n="step1">1. Photo size</h2>
+        <h2 id="size-title" data-i18n="step1">Photo size</h2>
         <div id="print-settings">
         <label for="country" data-i18n="country">Country or custom size</label>
         <select id="country"><option value="us" data-i18n="us">United States</option><option value="pt" data-i18n="pt">Portugal</option><option value="custom" data-i18n="custom">Custom dimensions</option></select>
@@ -48,6 +52,16 @@
           <label for="units" data-i18n="units">Units</label><select id="units"><option value="mm" data-i18n="mm">Millimeters</option><option value="inch" data-i18n="inch">Inches</option></select>
         </div>
         <p class="size-readout" id="size-readout"></p>
+        <div id="print-output-settings">
+        <div class="copy-picker"><label for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6"><button id="use-max" class="text-button" data-i18n="useMax">Use maximum</button></div>
+        <p id="capacity" class="hint"></p>
+        <p id="copy-error" class="error" hidden></p>
+        </div>
+        <div id="print-guides">
+        <label class="check-row cut-option"><input id="cut-guides" type="checkbox" checked><span data-i18n="cutGuides">Include cutting guides</span></label>
+        <p class="hint" id="cut-note" data-i18n="cut">Fine dashed lines mark shared cut edges. Trim along them to avoid traces. Photo size and copy count stay the same.</p>
+        <p id="rotated" class="hint" data-i18n="rotated" hidden>Copies rotated on the sheet to fit more; turn the print before cutting.</p>
+        </div>
         <details class="requirements"><summary data-i18n="documentGuidance">Document guidance</summary>
         <p class="hint" id="preset-note"></p>
         <p class="hint" id="preset-reference"><a id="reference" target="_blank" rel="noopener noreferrer" data-i18n="reference">Requirements source</a><br><span id="verified"></span></p>
@@ -70,10 +84,12 @@
           <p id="single-error" class="error" hidden></p>
         </div>
       </section>
+      </div>
+      <div class="preview-column">
       <section class="editor region" aria-labelledby="crop-title">
-        <div class="section-heading"><h2 id="crop-title" data-i18n="step2">2. Framing</h2><button id="reset-crop" class="text-button" data-i18n="resetCrop" disabled>Reset framing</button></div>
+        <div class="section-heading"><h2 id="crop-title" data-i18n="step2">Your photo</h2><div class="editor-actions"><button id="reset-crop" class="text-button" data-i18n="resetCrop" disabled>Reset framing</button><button id="clear" class="text-button" disabled data-i18n="clear">Clear photo</button></div></div>
         <div id="crop-stage" class="crop-stage">
-          <div id="crop-empty" class="empty"><h3 data-i18n="emptyTitle">Start with a photo</h3><p data-i18n="empty">Choose a photo from Photos or Files. Your crop and print sheet will appear here.</p></div>
+          <div id="crop-empty" class="empty"><h3 data-i18n="emptyTitle">Start with a photo</h3><p data-i18n="empty">Choose a photo from Photos or Files. Your crop and print sheet will appear here.</p><button id="start-photo" class="button primary" data-i18n="choose">Choose a photo</button></div>
           <div id="crop-wrap" hidden><canvas id="crop" width="600" height="600" tabindex="0" role="img" aria-label="Photo crop preview"></canvas><div id="guide-overlay" aria-hidden="true" hidden></div></div>
         </div>
         <div class="tool-tabs" role="tablist" aria-label="Photo tools" id="tool-tabs">
@@ -89,7 +105,7 @@
           <label class="slider-label" for="x"><span data-i18n="horizontal">Horizontal position</span><output id="x-value">50%</output></label><input id="x" type="range" min="0" max="100" step="0.1" value="50">
           <label class="slider-label" for="y"><span data-i18n="vertical">Vertical position</span><output id="y-value">50%</output></label><input id="y" type="range" min="0" max="100" step="0.1" value="50">
           </details>
-          <label class="check-row" id="guide-control"><input id="guides" type="checkbox"><span data-i18n="guides">Show head-size guides</span></label><p id="guide-note" class="hint" data-i18n="guideNote" hidden>Dashed lines show a centered head-height range only. Align crown and chin manually; no face detection or acceptance check.</p>
+          <label class="check-row" id="guide-control"><input id="guides" type="checkbox"><span data-i18n="guides">Show head-size guides</span></label><p id="guide-note" class="hint" data-i18n="guideNote" hidden>Dashed lines show a centered head-height range only. Align crown and chin manually; no face detection or acceptance check.</p><p id="head-reference" class="hint" hidden><a id="head-source" target="_blank" rel="noopener noreferrer" data-i18n="headReference">Head-size reference: VFS Portugal (UK)</a></p>
           </div>
           </div>
           <div id="adjustments-panel" role="tabpanel" aria-labelledby="adjustments-tab" hidden>
@@ -107,25 +123,18 @@
         <p id="bounded" class="hint" data-i18n="bounded" hidden>Large photos are reduced to a maximum working edge of 4096 pixels to limit memory use.</p>
       </section>
       <section class="sheet region" aria-labelledby="sheet-title">
-        <h2 id="sheet-title" data-i18n="step3">3. Print sheet</h2>
-        <div id="print-output-settings">
-        <div class="copy-picker"><label for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6"><button id="use-max" class="text-button" data-i18n="useMax">Use maximum</button></div>
-        <p id="capacity" class="hint"></p>
-        <p id="copy-error" class="error" hidden></p>
-        <div class="sheet-meta"><strong id="copy-count"></strong><span data-i18n="sheetSize">4×6 inches</span></div>
-        </div>
-        <div class="sheet-stage"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
+        <h2 id="sheet-title" data-i18n="step3">Print sheet</h2>
+        <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
+        <div class="output-details">
+        <div class="sheet-meta" id="print-summary"><strong id="copy-count"></strong><span data-i18n="sheetSize">4×6 inches</span></div>
         <p class="hint" id="output-info" data-i18n="output">1800×1200 pixels · 300 ppi</p>
         <p id="single-result" class="hint" role="status" hidden></p>
-        <div id="print-guides">
-        <label class="check-row cut-option"><input id="cut-guides" type="checkbox" checked><span data-i18n="cutGuides">Include cutting guides</span></label>
-        <p class="hint" id="cut-note" data-i18n="cut">Fine dashed lines mark shared cut edges. Trim along them to avoid traces. Photo size and copy count stay the same.</p>
-        <p id="rotated" class="hint" data-i18n="rotated" hidden>Copies rotated on the sheet to fit more; turn the print before cutting.</p>
         </div>
         <div class="export-actions"><button id="save" class="button primary" data-i18n="save" disabled>Download JPEG</button><button id="share" class="button quiet" data-i18n="share" disabled>Share JPEG</button></div>
         <p id="export-status" class="hint" role="status" aria-live="polite"></p>
-        <aside class="print-note" id="print-note"><h3 data-i18n="printTitle">Print at exactly 4×6 inches</h3><p data-i18n="print">Keep the entire sheet. Turn off automatic cropping, enlargement, and fit/fill options. Borderless printing may trim the edges. Measure your first test print.</p></aside>
+        <details class="print-note" id="print-note"><summary data-i18n="printTitle">Print at exactly 4×6 inches</summary><p data-i18n="print">Keep the entire sheet. Turn off automatic cropping, enlargement, and fit/fill options. Borderless printing may trim the edges. Measure your first test print.</p></details>
       </section>
+      </div>
     </div>
   </main>
   <footer class="shell"><span data-i18n="local">Local processing</span><a href="./THIRD_PARTY.md" target="_blank" rel="noopener" data-i18n="source">Decoder notices</a></footer>

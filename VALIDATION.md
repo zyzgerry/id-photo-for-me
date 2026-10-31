@@ -46,7 +46,7 @@ The suite now contains twelve browser scenarios, including transparent-PNG flatt
 
 ## Two output modes
 
-The current suite has eight Node tests and eighteen browser scenarios per engine. Added checks cover:
+The current suite has eight Node tests and twenty-two browser scenarios per engine. Added checks cover:
 
 - Explicit copy counts, calculated capacity, no overlapping/out-of-sheet copies, and unchanged per-copy physical dimensions. Four U.S. copies form a 2×2 grid; an incomplete final row contains no extra image.
 - Dashed guides on all four outer boundaries of the metric photo block, in addition to existing shared edges and safe alignment ticks.
@@ -56,3 +56,17 @@ The current suite has eight Node tests and eighteen browser scenarios per engine
 - Exact crop dimensions, returning to full-photo proportions, preserved print edits across mode switches, Chinese labels, and cancellation of superseded compression work before returning to print output.
 
 Responsive review uses synthetic photos at widths 320, 390, 844 (short landscape), and 1280 pixels. Follow-up human checks must exercise both modes on actual iPhones: saved single JPEGs should reopen with the reported dimensions/bytes, and printed sheets should have visible outside guides and correct measured photo dimensions. Final file-size compliance is about the downloaded bytes; a messaging/photo app may re-encode a file after saving or sharing.
+
+## Two-column workbench
+
+The approved layout puts mode/photo selection and settings in the left column, with a larger editor and compact result/export area in the right column. Print copy count and cutting guides sit in settings. Phone order is mode/photo selection, editor, settings, result; the same settings nodes move at the breakpoint so focus, values, and screen-reader order stay consistent. The empty editor opens the native photo picker. Section names no longer imply a numbered order that differs on phones.
+
+All eight Node tests and forty browser checks passed locally in Chrome and WebKit. Layout regressions cover both languages and modes at 320, 375, 760, 844, 1024, and 1440 pixels, native file selection from the empty editor, repeated breakpoint crossings with retained values/focus, and clear/reset/export states. Seven synthetic-photo screenshots were reviewed across phone, short-landscape, tablet, and desktop sizes without horizontal overflow or page errors. Firefox, real-iPhone behavior, and physical printing were not rechecked for this layout change.
+
+## Guide visibility follow-up
+
+The reduced preview reproduced invisible outside edges on a synthetic white photo: no sufficiently dark pixels remained along the sampled outside edges, even though full-resolution raster edge checks passed. Screen-pixel overlays now outline every placed copy without changing exported lines or geometry. The screenshot regression verifies all four outside edges and the off switch; visual checks also cover five-copy Portugal layouts with a partial row and the Chinese phone layout.
+
+Final local verification passed all eight Node tests and forty-four Chrome/WebKit browser checks. Actual-iPhone and physical-print validation remain pending.
+
+Portugal's head-guide control was reproduced as hidden because the preset had no head range. It now uses the 70–80% face-height reference in [VFS Portugal UK photo guidance](https://www.vfsglobal.com/one-pager/portugal/uk/english/pdf/tech-req-for-photos.pdf), checked October 31, 2026. The existing U.S. checklist remains the dimensional reference. The UI identifies the guide source and reminds users to confirm local requirements. A regression checks the visible control, four reference lines, source link, Chinese label, single-mode hiding, and unchanged output pixels when head guides are toggled. Both new regressions failed before the fixes and pass in Chrome and WebKit.

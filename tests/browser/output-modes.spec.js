@@ -35,6 +35,34 @@ test('outer cut guides cover all four metric photo boundaries',async({page})=>{
   expect(edges).toEqual(Array(4).fill([114,114,114,255]));
 });
 
+test('outer cutting edges stay visible in a reduced white-photo preview',async({page})=>{
+  await page.setViewportSize({width:1280,height:900});await page.goto('./');
+  const buffer=Buffer.from(await page.evaluate(()=>{const c=document.createElement('canvas');c.width=c.height=600;const x=c.getContext('2d');x.fillStyle='white';x.fillRect(0,0,600,600);return c.toDataURL('image/png').split(',')[1];}),'base64');
+  await page.locator('#photo').setInputFiles({name:'white.png',mimeType:'image/png',buffer});await ready(page);
+  const shot=await page.locator('#sheet').screenshot();
+  const edges=await page.evaluate(async base64=>{
+    const image=await createImageBitmap(new Blob([Uint8Array.from(atob(base64),c=>c.charCodeAt(0))],{type:'image/png'}));
+    const c=document.createElement('canvas');c.width=image.width;c.height=image.height;const x=c.getContext('2d');x.drawImage(image,0,0);image.close();
+    const sample=(a,b,w,h)=>{const p=x.getImageData(a,b,w,h).data;let dark=0;for(let i=0;i<p.length;i+=4)if(p[i]<200)dark++;return dark/(p.length/4);};
+    return [sample(0,0,c.width,2),sample(0,c.height-2,c.width,2),sample(0,0,2,c.height),sample(c.width-2,0,2,c.height)];
+  },shot.toString('base64'));
+  for(const edge of edges)expect(edge).toBeGreaterThan(0.12);
+  await page.locator('#cut-guides').uncheck();await ready(page);await expect(page.locator('#cut-preview')).toBeHidden();
+});
+
+test('Portugal offers sourced head-size guides without adding them to exports',async({page})=>{
+  await page.goto('./');await page.locator('#country').selectOption('pt');
+  await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
+  await expect(page.locator('#guide-control')).toBeVisible();
+  const before=await page.locator('#sheet').evaluate(c=>c.toDataURL());
+  await page.locator('#guides').check();await expect(page.locator('#guide-overlay')).toBeVisible();
+  await expect(page.locator('#head-source')).toHaveAttribute('href',/portugal\/uk\/english\/pdf\/tech-req-for-photos.pdf/);
+  await expect(page.locator('.guide-line')).toHaveCount(4);
+  expect(await page.locator('#sheet').evaluate(c=>c.toDataURL())).toBe(before);
+  await page.locator('#language').selectOption('zh');await expect(page.locator('#guide-control')).toContainText('显示头部尺寸参考线');
+  await single(page);await expect(page.locator('#guide-control')).toBeHidden();
+});
+
 test('copy selector enforces capacity and rearranges exactly the requested photos',async({page})=>{
   await page.goto('./');await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   await page.locator('#copies').fill('4');await ready(page);await expect(page.locator('#copy-count')).toHaveText('4 copies');
@@ -83,7 +111,7 @@ test('single crop supports exact pixel dimensions and mode changes preserve prin
   await page.locator('#single-fit').selectOption('original');await ready(page);
   await expect(page.locator('#pixel-height')).toHaveValue('900');expect((await download(page)).size).toEqual([600,900]);
   await print(page);await ready(page);await expect(page.locator('#zoom')).toHaveValue('2');expect((await download(page)).size).toEqual([1800,1200]);
-  await single(page);await ready(page);await page.locator('#language').selectOption('zh');await expect(page.locator('#sheet-title')).toHaveText('3. JPEG 预览');
+  await single(page);await ready(page);await page.locator('#language').selectOption('zh');await expect(page.locator('#sheet-title')).toHaveText('JPEG 预览');
 });
 
 test('a superseded compression job cannot overwrite print output or leak errors',async({page})=>{
