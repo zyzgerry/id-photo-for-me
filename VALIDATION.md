@@ -117,3 +117,10 @@ All nine Node tests and 56 Chrome/WebKit browser checks passed, including existi
 - Screenshots: ignored `.qa/customize-quality-<engine>.png`, `.qa/customize-compression-<engine>.png`. Inputs are synthetic; no personal photos are included. Local preview is updated; publication was not requested.
 
 Final review: Standards and Spec reviewers found no actionable issues in this follow-up. The all-format check was additionally strengthened to verify the rendered crop after upload for every format, not just the selected controls; it passed in Chrome and WebKit (103 formats × 2 languages per engine).
+
+## File-size-only compression preservation — October 31, 2026
+
+- Reproduced unintended preset upscaling: a 400-pixel crop was changed to 413 pixels solely by selecting compression. Compression defaults now use the same available crop dimensions as best quality; explicitly edited output pixels remain supported. Verified online maximum dimensions and minimum/byte checks still apply.
+- Added a browser regression comparing downloaded JPEG bytes, dimensions, quality and result text at 300-KB and 200-KB caps. It also verifies unchanged bytes after zooming/toggling quality, then verifies explicit pixel resizing changes the output.
+- The new byte-equality regression passes in Chrome and WebKit. Ten Node checks pass. The full 80-case browser run passed 79 cases and hit a five-second print-encoding wait in the repeated-mode stress case; that test was aligned with the established fifteen-second output allowance and passed repeated Chrome/WebKit runs. No app error was reported by that timeout.
+- All 80 scenarios have passing results. Firefox launch and actual-iPhone/physical-print validation remain pending as previously recorded. No dependencies or encoder quality floors changed.

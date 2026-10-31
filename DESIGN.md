@@ -27,3 +27,7 @@ Export labels identify print sheet or ID photo. Print instructions retain whole-
 Keep 44px touch areas, visible focus, readable inactive guidance, no horizontal overflow at 320px, and English/Chinese parity. On phones the crop preview remains visible within the editor while tools scroll. Short landscape viewports use ordinary scrolling. Do not add a separate sticky preview/navigation system. Source changes, resize and language changes must not reset values or steal focus.
 
 Portugal head guides retain their distinct VFS UK source; print dimensions retain the U.S. checklist source. Preserve short document names, child eligibility qualifiers, scoped location notes, Schengen/national distinctions and collapsed source disclosures.
+
+## File-size-only compression
+
+Until the user explicitly edits output pixels, compression starts from the same available crop dimensions as best quality, with verified online maximum dimensions applied where required. Do not silently upscale to physical-preset 300-ppi dimensions. If that maximum-quality JPEG already fits the cap, retain its pixels, quality and exact bytes. Recompute default dimensions after framing changes; preserve explicit pixel overrides until requirements or the source photo change. Keep source/application minimum validation and the existing explicit-upscale warning.
