@@ -51,11 +51,21 @@ export function drawCutGuides(ctx, layout) {
   ctx.save(); ctx.fillStyle = '#727272';
   // One output pixel (0.085 mm): no gutters, scaling, or thick retained borders.
   // Each dash is placed inside the grid; outer trim ticks stay in unused paper.
-  for (const x of xs.filter(x=>x>left && x<right)) {
-    for (let y=top;y<bottom;y+=16) ctx.fillRect(x,y,1,Math.min(8,bottom-y));
+  const edges = new Map();
+  for (const c of layout.copies) {
+    for (const edge of [['v',c.x,c.y,c.y+c.height],['v',c.x+c.width,c.y,c.y+c.height],
+      ['h',c.y,c.x,c.x+c.width],['h',c.y+c.height,c.x,c.x+c.width]]) edges.set(edge.join(','),edge);
   }
-  for (const y of ys.filter(y=>y>top && y<bottom)) {
-    for (let x=left;x<right;x+=16) ctx.fillRect(x,y,Math.min(8,right-x),1);
+  for (const [axis,boundary,start,end] of edges.values()) {
+    const limit = axis==='v' ? ctx.canvas.width : ctx.canvas.height;
+    const position = Math.min(boundary,limit-1);
+    for (let p=Math.floor(start/16)*16;p<end;p+=16) {
+      const from=Math.max(p,start),to=Math.min(p+8,end);
+      if (to>from) {
+        if (axis==='v') ctx.fillRect(position,from,1,to-from);
+        else ctx.fillRect(from,position,to-from,1);
+      }
+    }
   }
   for (const x of xs) {
     if (top>=14) ctx.fillRect(Math.min(x,ctx.canvas.width-1),top-12,1,8);
@@ -68,8 +78,8 @@ export function drawCutGuides(ctx, layout) {
   ctx.restore();
 }
 
-export async function exportJpeg(canvas) {
-  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.97));
+export async function exportJpeg(canvas, quality = 1) {
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
   if (!blob) throw new Error('exportError');
   return new Blob([withJpegDensity(new Uint8Array(await blob.arrayBuffer()))], { type: 'image/jpeg' });
 }

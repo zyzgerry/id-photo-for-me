@@ -43,3 +43,16 @@ Microsoft's official `playwright-cli` skill was used to walk through the live si
 Confirmed and fixed: original comparison remained enabled after its control was hidden by switching to Framing. The preview could therefore show neutral pixels while the sheet/export retained edits. The new regression reproduced the mismatch before the fix. Returning to Framing now ends comparison and redraws the edited crop. A missing browser icon also caused a harmless root favicon 404; an explicitly referenced local icon now ships with the app.
 
 The suite now contains twelve browser scenarios, including transparent-PNG flattening and checking that refresh leaves no photo data in IndexedDB or Cache Storage. All twelve pass locally in both Chrome and WebKit. Firefox failed to launch on this Windows host (`spawn UNKNOWN`), before any app scenario ran. GitHub Actions installs and runs all three engines on Linux; WebKit automation still does not establish actual iPhone compatibility.
+
+## Two output modes
+
+The current suite has eight Node tests and eighteen browser scenarios per engine. Added checks cover:
+
+- Explicit copy counts, calculated capacity, no overlapping/out-of-sheet copies, and unchanged per-copy physical dimensions. Four U.S. copies form a 2×2 grid; an incomplete final row contains no extra image.
+- Dashed guides on all four outer boundaries of the metric photo block, in addition to existing shared edges and safe alignment ticks.
+- Offline HEIC-to-single-JPEG conversion with the complete source frame and no print arrangement, and aspect-linked pixel fields.
+- Actual downloaded JPEG dimensions and byte counts. A synthetic high-entropy photo exercises automatic compression and dimension reduction under a 100,000-byte cap.
+- Impossible targets with fixed dimensions or minimum pixel requirements block download. Clearing the byte limit restores quality setting 1.0 and requested dimensions.
+- Exact crop dimensions, returning to full-photo proportions, preserved print edits across mode switches, Chinese labels, and cancellation of superseded compression work before returning to print output.
+
+Responsive review uses synthetic photos at widths 320, 390, 844 (short landscape), and 1280 pixels. Follow-up human checks must exercise both modes on actual iPhones: saved single JPEGs should reopen with the reported dimensions/bytes, and printed sheets should have visible outside guides and correct measured photo dimensions. Final file-size compliance is about the downloaded bytes; a messaging/photo app may re-encode a file after saving or sharing.

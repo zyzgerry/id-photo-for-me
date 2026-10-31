@@ -2,7 +2,7 @@ export const PPI = 300;
 export const SHEET = { width: 1800, height: 1200, widthMm: 152.4, heightMm: 101.6 };
 export const mmToPx = mm => mm * PPI / 25.4;
 
-export function layoutSheet(widthMm, heightMm) {
+export function layoutSheet(widthMm, heightMm, requested) {
   if (![widthMm, heightMm].every(n => Number.isFinite(n) && n >= 10 && n <= 152.4)) {
     throw new Error('dimensions');
   }
@@ -13,14 +13,30 @@ export function layoutSheet(widthMm, heightMm) {
     const rows = Math.floor((SHEET.heightMm + 1e-8) / h);
     return { rotated, w, h, columns, rows, count: columns * rows };
   });
-  const best = candidates.sort((a, b) => b.count - a.count)[0];
-  if (!best.count) throw new Error('noFit');
+  const capacity = Math.max(...candidates.map(c=>c.count));
+  if (!capacity) throw new Error('noFit');
+  const count = requested ?? capacity;
+  if (!Number.isInteger(count) || count < 1 || count > capacity) throw new Error('copyLimit');
+  const arrangements = candidates.flatMap(candidate => {
+    const grids = [];
+    for (let columns=1;columns<=candidate.columns;columns++) {
+      const rows = Math.ceil(count/columns);
+      if (rows<=candidate.rows) grids.push({...candidate,columns,rows,count});
+    }
+    return grids;
+  });
+  const clearance=c=>Math.min(SHEET.widthMm-c.columns*c.w,SHEET.heightMm-c.rows*c.h);
+  // Shared cut lines first, then fewer empty cells and a compact footprint.
+  const best = arrangements.sort((a,b)=>(a.columns+a.rows)-(b.columns+b.rows) ||
+    (a.columns*a.rows)-(b.columns*b.rows) ||
+    (a.columns*a.w+a.rows*a.h)-(b.columns*b.w+b.rows*b.h) || clearance(b)-clearance(a) || Number(a.rotated)-Number(b.rotated))[0];
   // Round absolute boundaries so adjacent copies share exactly the same cut line.
   const x0 = (SHEET.widthMm - best.columns * best.w) / 2;
   const y0 = (SHEET.heightMm - best.rows * best.h) / 2;
   const copies = [];
   for (let row = 0; row < best.rows; row++) {
     for (let column = 0; column < best.columns; column++) {
+      if (copies.length === count) break;
       const x = Math.round(mmToPx(x0 + column * best.w));
       const y = Math.round(mmToPx(y0 + row * best.h));
       copies.push({ x, y,
@@ -29,7 +45,7 @@ export function layoutSheet(widthMm, heightMm) {
         rotated: best.rotated });
     }
   }
-  return { ...best, copies, widthMm, heightMm };
+  return { ...best, capacity, copies, widthMm, heightMm };
 }
 
 export function cropRect(width, height, ratio, zoom = 1, x = 50, y = 50) {

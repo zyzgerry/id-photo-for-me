@@ -45,6 +45,18 @@ button:disabled { background: var(--color-disabled); color: var(--color-muted); 
 .error { grid-column: 1 / -1; color: var(--color-error); margin-block: 12px; }
 .warning { color: var(--color-warning); font-size: 14px; margin-top: 12px; }
 .workspace { display: grid; grid-template-columns: minmax(220px,0.85fr) minmax(0,1.4fr) minmax(280px,1fr); gap: 20px; align-items: start; padding-bottom: 32px; }
+.mode-picker { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+.mode-picker legend { margin-bottom: 12px; font-size: 15px; font-weight: 600; }
+.mode-picker label { display: flex !important; align-items: center; gap: 10px; min-height: 48px; margin: 0 !important; padding: 10px 16px; border: 1px solid var(--color-rule); border-radius: 8px; cursor: pointer; background: var(--color-input); }
+.mode-picker label:has(input:checked) { border-color: var(--color-accent); color: var(--color-accent); }
+.mode-picker input { accent-color: var(--color-accent); width: 18px; height: 18px; margin: 0; }
+.single-fields, .field-label { margin-top: 20px; }
+.copy-picker { display: grid; grid-template-columns: minmax(0,1fr) auto; column-gap: 12px; align-items: center; }
+.copy-picker label { grid-column: 1 / -1; }
+.copy-picker input { min-width: 0; }
+#capacity { margin-bottom: 16px; }
+.workspace[data-mode=single] [role=tabpanel] { min-height: 0; }
+#single-result { overflow-wrap: anywhere; }
 .region { min-width: 0; background: var(--color-input); border: 1px solid var(--color-rule); border-radius: 14px; padding: 24px; box-shadow: 0 3px 12px var(--color-shadow); }
 .region > h2, .section-heading { margin-bottom: 20px; }
 .section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
@@ -99,9 +111,7 @@ footer { display: flex; justify-content: space-between; gap: 16px; padding-block
 @media (max-width: 1180px) and (min-width: 761px) {
   .workspace { grid-template-columns: minmax(0,1.3fr) minmax(0,1fr); }
   .settings { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); column-gap: 24px; }
-  .settings > h2, .settings > .size-readout, .settings > .requirements { grid-column: 1 / -1; }
-  #document-fields { margin-top: 0; grid-column: 2; grid-row: 2 / 4; }
-  .settings > label, .settings > select { grid-column: 1; }
+  .settings > h2, #print-settings, #single-settings { grid-column: 1 / -1; }
   .file-actions { grid-column: 1 / -1; grid-row: auto; margin-top: 20px; }
 }
 @media (max-width: 760px) {
