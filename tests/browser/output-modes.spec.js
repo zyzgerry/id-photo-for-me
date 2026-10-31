@@ -65,19 +65,19 @@ test('Portugal offers sourced head-size guides without adding them to exports',a
   await expect(page.locator('#head-source')).toHaveAttribute('href',/portugal\/uk\/english\/pdf\/tech-req-for-photos.pdf/);
   await expect(page.locator('.guide-line')).toHaveCount(4);
   expect(await page.locator('#sheet').evaluate(c=>c.toDataURL())).toBe(before);
-  await page.locator('#language').selectOption('zh');await expect(page.locator('#guide-control')).toContainText('显示头部尺寸参考线');
+  await page.locator('#language').selectOption('zh');await expect(page.locator('#guide-control')).toContainText('头部位置参考线');
   await single(page);await expect(page.locator('#guide-control')).toBeHidden();
 });
 
 test('copy selector enforces capacity and rearranges exactly the requested photos',async({page})=>{
   await openApp(page);await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
-  await page.locator('#copies').fill('4');await ready(page);await expect(page.locator('#copy-count')).toHaveText('4 copies');
+  await page.locator('#copies').fill('4');await ready(page);await expect(page.locator('#copies')).toHaveValue('4');
   const margin=await page.locator('#sheet').evaluate(c=>[...c.getContext('2d').getImageData(100,100,1,1).data]);expect(margin).toEqual([255,255,255,255]);
   await page.locator('#copies').fill('7');await expect(page.locator('#error')).toContainText('maximum');await expect(page.locator('#save')).toBeDisabled();
   await expect(page.locator('#copy-error')).toBeVisible();
-  await page.locator('#use-max').click();await ready(page);await expect(page.locator('#copies')).toHaveValue('6');
-  await page.locator('#country').selectOption('pt');await ready(page);await expect(page.locator('#copies')).toHaveValue('8');
-  await page.locator('#copies').fill('5');await ready(page);await expect(page.locator('#copy-count')).toHaveText('5 copies');
+  await page.locator('#copies').fill('6');await ready(page);await expect(page.locator('#copies')).toHaveValue('6');
+  await page.locator('#country').selectOption('pt');await ready(page);await expect(page.locator('#copies')).toHaveValue('6');
+  await page.locator('#copies').fill('5');await ready(page);await expect(page.locator('#copies')).toHaveValue('5');
   expect(await page.locator('#sheet').evaluate(c=>[...c.getContext('2d').getImageData(1300,850,1,1).data])).toEqual([255,255,255,255]);
   const result=await download(page);expect(result.size).toEqual([1800,1200]);expect([...result.bytes.subarray(13,18)]).toEqual([1,1,44,1,44]);
 });

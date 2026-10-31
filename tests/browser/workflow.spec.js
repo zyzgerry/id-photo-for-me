@@ -30,7 +30,7 @@ test('offline crop, adjustments, JPEG geometry, density, and clear keep all phot
   const initialRequests=requests.length;
   await context.setOffline(true);
   await upload(page,buffer);
-  await expect(page.locator('#copy-count')).toHaveText('6 copies');
+  await expect(page.locator('#copies')).toHaveValue('6');
   await setRange(page,'zoom',2);await setRange(page,'x',100);await setRange(page,'y',0);
   await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();
   await setRange(page,'brightness',10);await setRange(page,'contrast',-5);
@@ -84,12 +84,12 @@ test('preset changes, metric dimensions, custom errors, and translated interface
   await page.locator('#country').selectOption('pt');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   await expect(page.locator('#size-readout')).toHaveText('35×45 mm');
   expect(await page.locator('#crop').evaluate(el=>el.width/el.height)).toBeCloseTo(35/45,2);
-  await expect(page.locator('#copy-count')).toHaveText('8 copies');
+  await expect(page.locator('#copies')).toHaveValue('8');
   await page.locator('#country').selectOption('custom');await page.locator('#width').fill('110');await page.locator('#height').fill('110');
   await expect(page.locator('#error')).toContainText('does not fit');await expect(page.locator('#save')).toBeDisabled();
   await page.locator('#width').fill('35');await page.locator('#height').fill('45');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
-  await page.locator('#units').selectOption('inch');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();await expect(page.locator('#copy-count')).toHaveText('8 copies');
-  await page.locator('#language').selectOption('zh');await expect(page.locator('#save')).toHaveText('下载打印排版');await expect(page.locator('#copy-count')).toHaveText('8 张');
+  await page.locator('#units').selectOption('inch');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();await expect(page.locator('#copies')).toHaveValue('8');
+  await page.locator('#language').selectOption('zh');await expect(page.locator('#save')).toHaveText('下载打印排版');await expect(page.locator('#copies')).toHaveValue('8');
   await page.locator('#country').selectOption('us');await page.locator('#document').selectOption('us-visa');
   await expect(page.locator('#preset-note')).toContainText('DS-160');
 });

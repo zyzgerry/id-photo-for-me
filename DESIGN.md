@@ -31,3 +31,11 @@ Portugal head guides retain their distinct VFS UK source; print dimensions retai
 ## File-size-only compression
 
 Until the user explicitly edits output pixels, compression starts from the same available crop dimensions as best quality, with verified online maximum dimensions applied where required. Do not silently upscale to physical-preset 300-ppi dimensions. If that maximum-quality JPEG already fits the cap, retain its pixels, quality and exact bytes. Recompute default dimensions after framing changes; preserve explicit pixel overrides until requirements or the source photo change. Keep source/application minimum validation and the existing explicit-upscale warning.
+
+## Compact editor and sheet controls
+
+At wide desktop widths, put the crop preview and tool tabs/controls in adjacent columns inside the editor. Keep a bounded preview, compact spacing, short instructions and two-column tonal sliders; retain 44px targets, keyboard access, restriction notices and the phone sticky-preview behavior. Narrow layouts stack the same components in document order.
+
+Make the copy number itself editable beside the sheet preview, followed by the localized dynamic sentence stating how many copies a 4×6-inch photo fits at maximum. Default to maximum until the user edits the count; retain/clamp explicit counts across size changes. Remove Use maximum and the separate top copy-count block. Put cutting-guide controls beside the preview and keep their detailed explanation disclosed. Count validation and print geometry remain unchanged.
+
+Offer head-placement guides for every preset, including full-photo online routes. Only custom requirements hide the control. Keep verified centered head-height ranges where available; otherwise show adjustable manual crown/chin reference lines plus a center line, with a clear note that the preset has no verified range. Manual crown stays above chin. Keep guide controls outside the crop-only controls so full-photo mode can use them. These overlays never enter the JPEG or change framing.

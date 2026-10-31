@@ -94,10 +94,11 @@ function updatePresetDetails() {
     $('reference').textContent=`${t('reference')}: ${details.sourceName}`;
     $('verified').textContent=`${t('checked')}: ${details.checked||VERIFIED}`;
   }
-  $('guide-control').hidden=!preset?.head;
+  $('guide-control').hidden=!preset;
   $('allow-edits-row').hidden=!requirement?.restrictEdits;
   $('adjust-controls').disabled=!photo||(!!requirement?.restrictEdits&&!$('allow-edits').checked);
   $('output-controls').disabled=!photo;
+  $('copies').disabled=$('cut-guides').disabled=!photo;
   $('output-empty').hidden=!!photo;
   if(mode==='single'){
     const digital=activeDigital();
@@ -185,7 +186,8 @@ function setMode(next) {
   mode=next;
   selectTool('framing');setError();singleResult=null;
   $('single-settings').hidden=mode!=='single';
-  for(const id of ['print-output-settings','print-guides','print-note','print-summary']) $(id).hidden=mode!=='print';
+  $('output-controls').hidden=mode==='print';
+  for(const id of ['print-guides','print-note','print-summary']) $(id).hidden=mode!=='print';
   document.querySelector('.workspace').dataset.mode=mode;
   $('sheet').hidden=true;$('sheet-empty').hidden=false;
   updateModeLabels();
@@ -241,8 +243,7 @@ function updateReadouts() {
   $('copy-error').hidden=mode!=='print'||!!layout||!errorKey;
   if(!$('copy-error').hidden) $('copy-error').textContent=t(errorKey);
   if(layout) $('copies').value=layout.count;
-  $('capacity').textContent=`${t('maximumCopies')}: ${printCapacity}. ${t('capacityNote')}`;
-  $('copy-count').textContent = layout ? `${layout.count} ${t('copies')}` : '';
+  $('capacity').textContent=t('sheetCapacity').replace('{count}',printCapacity);
   $('rotated').hidden = !layout?.rotated;
   $('bounded').hidden = !photo || Math.max(photo.originalWidth,photo.originalHeight) <= 4096;
   $('resolution').textContent = '';
@@ -264,18 +265,20 @@ function updateReadouts() {
     $('single-result').textContent=`${width}×${height} px · ${(blob.size/1000).toFixed(1)} KB (${blob.size} ${t('bytes')}) · ${t('jpegQuality')}: ${Math.round(quality*100)}/100`+
       (singleOptions&&(width!==singleOptions.width||height!==singleOptions.height)?` ${t('reducedPixels')}`:'');
   }
-  const showGuides = !!photo && !!preset?.head && $('guides').checked;
+  const showGuides = !!photo && !!preset && $('guides').checked;
+  $('manual-guide-controls').hidden=!showGuides||!!preset?.head;
+  $('guide-note').textContent=t(preset?.head?'guideNote':'manualGuideNote');
+  for(const id of ['guide-crown','guide-chin']) $(`${id}-value`).textContent=`${$(id).value}%`;
   $('guide-overlay').hidden = $('guide-note').hidden = !showGuides;
   $('head-reference').hidden = !showGuides || !preset?.headSource;
   if(preset?.headSource) $('head-source').href = preset.headSource;
   $('guide-overlay').replaceChildren();
   if (showGuides) {
-    for (const fraction of preset.head) {
-      for (const position of [(1 - fraction)/2, (1 + fraction)/2]) {
-        const line = document.createElement('div'); line.className = 'guide-line'; line.style.top = `${position*100}%`;
-        $('guide-overlay').append(line);
-      }
+    const positions=preset.head?preset.head.flatMap(fraction=>[(1-fraction)/2,(1+fraction)/2]):[Number($('guide-crown').value)/100,Number($('guide-chin').value)/100];
+    for(const position of positions){
+      const line=document.createElement('div');line.className='guide-line';line.style.top=`${position*100}%`;$('guide-overlay').append(line);
     }
+    const center=document.createElement('div');center.className='guide-center';$('guide-overlay').append(center);
   }
   $('cut-preview').hidden = mode!=='print' || !photo || !layout || !$('cut-guides').checked;
   $('cut-preview').replaceChildren();
@@ -426,13 +429,20 @@ $('allow-edits').onchange = () => {
 };
 $('original').onchange = () => { if (photo) drawCrop(); };
 $('guides').onchange = updateReadouts;
+for(const id of ['guide-crown','guide-chin']) $(id).oninput=()=>{
+  if(Number($('guide-crown').value)>=Number($('guide-chin').value)){
+    if(id==='guide-crown') $('guide-chin').value=Number($('guide-crown').value)+1;
+    else $('guide-crown').value=Number($('guide-chin').value)-1;
+  }
+  updateReadouts();
+};
 $('cut-guides').onchange = () => { updateReadouts(); scheduleRender(); };
-function chooseCopies(maximum = false) {
-  requestedCopies=maximum?null:Number($('copies').value);setError();
+function chooseCopies() {
+  requestedCopies=Number($('copies').value);setError();
   try {layout=printLayout();} catch(e) {layout=null;setError(['copyLimit','noFit'].includes(e.message)?e.message:'dimensionsError');}
   updateReadouts();scheduleRender();
 }
-$('copies').oninput=()=>chooseCopies();$('use-max').onclick=()=>chooseCopies(true);
+$('copies').oninput=chooseCopies;
 for(const radio of document.querySelectorAll('[name=output-mode]')) radio.onchange=()=>setMode(radio.value);
 for(const id of ['pixel-width','pixel-height','max-kb','min-width','min-height']) $(id).oninput=()=>configureSingle(id);
 $('single-fit').onchange=()=>configureSingle('fit');

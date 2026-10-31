@@ -55,10 +55,6 @@ button:disabled { background: var(--color-disabled); color: var(--color-muted); 
 .mode-picker label:has(input:checked) { border-color: var(--color-accent); color: var(--color-accent); }
 .mode-picker input { accent-color: var(--color-accent); width: 18px; height: 18px; margin: 0; }
 .single-fields, .field-label { margin-top: 20px; }
-.copy-picker { display: grid; grid-template-columns: minmax(0,1fr) auto; column-gap: 12px; align-items: center; }
-.copy-picker label { grid-column: 1 / -1; }
-.copy-picker input { min-width: 0; }
-#capacity { margin-bottom: 16px; }
 #single-result { overflow-wrap: anywhere; }
 .region { min-width: 0; background: var(--color-input); border: 1px solid var(--color-rule); border-radius: 14px; padding: 24px; box-shadow: 0 3px 12px var(--color-shadow); }
 .region > h2, .section-heading { margin-bottom: 20px; }
@@ -99,8 +95,6 @@ input[type=checkbox] { width: 20px; height: 20px; flex-shrink: 0; accent-color: 
 .text-button:disabled { background: var(--color-input); }
 details { margin-top: 12px; }
 summary { cursor: pointer; min-height: 44px; display: list-item; align-content: center; font-size: 14px; font-weight: 600; }
-.sheet-meta { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 16px; font-size: 13px; color: var(--color-muted); }
-.sheet-meta strong { font-size: 23px; color: var(--color-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 .sheet-stage { padding: 16px; background: var(--color-stage); min-height: 180px; display: grid; place-items: center; border-radius: 10px; }
 .sheet-stage canvas { width: 100%; height: auto; display: block; box-shadow: 0 2px 8px var(--color-shadow); }
 .sheet-preview { position: relative; display: grid; place-items: center; width: 100%; }
@@ -122,8 +116,7 @@ footer { display: flex; justify-content: space-between; gap: 16px; padding-block
   .sheet-stage {grid-column:1;min-height:140px;margin:0;padding:12px;}
   .sheet-stage canvas {width:100%;height:auto;}
   .output-details {grid-column:2;}
-  .sheet-meta {flex-wrap:wrap;}
-  .print-note {padding-top:8px;}
+    .print-note {padding-top:8px;}
 }
 @media (max-width: 760px) {
   :root { --gutter: 16px; --preview-height: clamp(120px,32svh,240px); }
@@ -183,3 +176,40 @@ footer { display: flex; justify-content: space-between; gap: 16px; padding-block
 .quality-picker input {width:18px;height:18px;margin:0;accent-color:var(--color-accent);flex-shrink:0;}
 #compression-settings {margin-top:12px;}
 #pixel-settings {border-top:1px solid var(--color-rule);padding-top:8px;}
+
+/* Compact editor: preview and tools share a row when the workbench has room. */
+.editor-workspace,.editor-tools {min-width:0;}
+.editor .section-heading {margin-bottom:12px;}
+.editor .crop-stage {min-height:280px;padding:12px;}
+.editor .tool-tabs {margin-block:12px 8px;}
+.editor .hint {margin-top:8px;}
+.editor .slider-label {margin-top:4px;}
+.editor details {margin-top:4px;}
+.editor-actions {gap:12px;}
+.tonal-sliders {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;}
+.guide-tools {border-top:1px solid var(--color-rule);margin-top:4px;padding-top:4px;}
+#guide-control {margin:0;}
+#guide-note {font-size:13px;}
+.guide-center {position:absolute;left:50%;top:0;bottom:0;border-left:1px dashed var(--color-guide);filter:drop-shadow(0 1px 0 var(--color-guide-shadow));}
+.copy-picker {display:flex;align-items:center;gap:10px;}
+.copy-picker #copies {width:90px;min-width:0;min-height:46px;padding:6px 10px;text-align:center;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;}
+.copy-picker > span {font-size:20px;font-weight:600;}
+#capacity {margin:8px 0 0;}
+#print-guides {border-top:1px solid var(--color-rule);padding-top:8px;margin-top:12px;}
+.cut-help {margin-top:0;}
+.cut-help summary {font-weight:400;}
+.output-details {min-width:0;}
+@media (min-width:1100px){
+  .editor {--preview-height:300px;}
+  .editor-workspace {display:grid;grid-template-columns:minmax(180px,0.9fr) minmax(240px,1fr);gap:20px;align-items:start;}
+  .editor .crop-stage {min-height:324px;}
+  .editor .tool-tabs {margin-top:0;}
+  #resolution:empty {display:none;}
+}
+@media (max-width:760px){
+  .editor .crop-stage {margin-bottom:12px;min-height:0;}
+  .editor:has(#crop-wrap[hidden]) .crop-stage {min-height:160px;}
+  .editor .tool-tabs {margin-top:0;}
+  .tonal-sliders {gap:12px;}
+  .sheet .output-details {margin-top:12px;}
+}

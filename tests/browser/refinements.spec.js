@@ -28,7 +28,7 @@ test('requirements and upload precede editing at every layout size',async({page}
 test('resizing retains photo, settings, focus and exports in the requirements-first layout',async({page})=>{
   await page.setViewportSize({width:1440,height:1000});await openApp(page);
   const chooser=page.waitForEvent('filechooser');await page.locator('#photo').click();await (await chooser).setFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
-  await page.locator('#copies').fill('4');await expect(page.locator('#copy-count')).toHaveText('4 copies');
+  await page.locator('#copies').fill('4');await expect(page.locator('#copies')).toHaveValue('4');
   await expect(page.locator('.sheet #copies')).toBeVisible();await expect(page.locator('.sheet #cut-guides')).toBeVisible();
   for(const width of [375,1440,320,1024]){
     await page.locator('#copies').focus();await page.setViewportSize({width,height:900});await expect(page.locator('#copies')).toBeFocused();
@@ -60,10 +60,10 @@ test('cutting guides change only cut edges and can be disabled without changing 
   const guided=await sample();expect(guided.edge).toEqual([114,114,114,255]);
   await page.locator('#cut-guides').uncheck();await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   const plain=await sample();expect(plain.edge).not.toEqual(guided.edge);expect(plain.near).toEqual(guided.near);expect(plain.inside).toEqual(guided.inside);
-  expect([plain.width,plain.height]).toEqual([1800,1200]);await expect(page.locator('#copy-count')).toHaveText('6 copies');
+  expect([plain.width,plain.height]).toEqual([1800,1200]);await expect(page.locator('#copies')).toHaveValue('6');
   await page.locator('#country').selectOption('pt');await page.locator('#cut-guides').check();await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   const margin=await page.locator('#sheet').evaluate(c=>[...c.getContext('2d').getImageData(73,57,1,1).data]);
-  expect(margin).toEqual([114,114,114,255]);await expect(page.locator('#copy-count')).toHaveText('8 copies');
+  expect(margin).toEqual([114,114,114,255]);await expect(page.locator('#copies')).toHaveValue('8');
 });
 
 test('editing tabs support keyboard navigation, retain edits, and fit narrow screens',async({page})=>{

@@ -71,11 +71,11 @@
       <div class="preview-column">
       <section class="editor region" aria-labelledby="crop-title">
         <div class="section-heading"><h2 id="crop-title" data-i18n="step2">Your photo</h2><div class="editor-actions"><button id="reset-crop" class="text-button" data-i18n="resetCrop" disabled>Reset framing</button><button id="clear" class="text-button" disabled data-i18n="clear">Clear photo</button></div></div>
-        <div id="crop-stage" class="crop-stage">
+        <div class="editor-workspace"><div id="crop-stage" class="crop-stage">
           <div id="crop-empty" class="empty"><h3 data-i18n="emptyTitle">Start with a photo</h3><p data-i18n="empty">Choose a photo from Photos or Files. Your crop and print sheet will appear here.</p></div>
           <div id="crop-wrap" hidden><canvas id="crop" width="600" height="600" tabindex="0" role="img" aria-label="Photo crop preview"></canvas><div id="guide-overlay" aria-hidden="true" hidden></div></div>
         </div>
-        <div id="framing-review" class="review-notice" role="status" hidden><p data-i18n="reviewNeeded">Requirements changed. Review your framing before exporting.</p><button id="review-framing" class="text-button" data-i18n="reviewFraming">Review framing</button><button id="confirm-framing" class="button quiet" data-i18n="framingReviewed">Framing reviewed</button></div>
+        <div class="editor-tools"><div id="framing-review" class="review-notice" role="status" hidden><p data-i18n="reviewNeeded">Requirements changed. Review your framing before exporting.</p><button id="review-framing" class="text-button" data-i18n="reviewFraming">Review framing</button><button id="confirm-framing" class="button quiet" data-i18n="framingReviewed">Framing reviewed</button></div>
         <div class="tool-tabs" role="tablist" aria-label="Photo tools" id="tool-tabs">
           <button id="framing-tab" role="tab" aria-selected="true" aria-controls="framing-panel" data-i18n="framingTool">Framing</button>
           <button id="adjustments-tab" role="tab" aria-selected="false" aria-controls="adjustments-panel" tabindex="-1" data-i18n="adjustmentsTool">Adjustments</button>
@@ -89,37 +89,29 @@
           <label class="slider-label" for="x"><span data-i18n="horizontal">Horizontal position</span><output id="x-value">50%</output></label><input id="x" type="range" min="0" max="100" step="0.1" value="50">
           <label class="slider-label" for="y"><span data-i18n="vertical">Vertical position</span><output id="y-value">50%</output></label><input id="y" type="range" min="0" max="100" step="0.1" value="50">
           </details>
-          <label class="check-row" id="guide-control"><input id="guides" type="checkbox"><span data-i18n="guides">Show head-size guides</span></label><p id="guide-note" class="hint" data-i18n="guideNote" hidden>Dashed lines show a centered head-height range only. Align crown and chin manually; no face detection or acceptance check.</p><p id="head-reference" class="hint" hidden><a id="head-source" target="_blank" rel="noopener noreferrer" data-i18n="headReference">Head-size reference: VFS Portugal (UK)</a></p>
+
           </div>
+          <div class="guide-tools">          <label class="check-row" id="guide-control"><input id="guides" type="checkbox"><span data-i18n="guides">Show head-size guides</span></label><p id="guide-note" class="hint" data-i18n="guideNote" hidden>Dashed lines show a centered head-height range only. Align crown and chin manually; no face detection or acceptance check.</p><p id="head-reference" class="hint" hidden><a id="head-source" target="_blank" rel="noopener noreferrer" data-i18n="headReference">Head-size reference: VFS Portugal (UK)</a></p><details id="manual-guide-controls" hidden><summary data-i18n="manualGuideSettings">Position guide lines</summary><label class="slider-label" for="guide-crown"><span data-i18n="guideCrown">Crown line</span><output id="guide-crown-value">15%</output></label><input id="guide-crown" type="range" min="0" max="99" step="1" value="15"><label class="slider-label" for="guide-chin"><span data-i18n="guideChin">Chin line</span><output id="guide-chin-value">85%</output></label><input id="guide-chin" type="range" min="1" max="100" step="1" value="85"></details></div>
           </div>
           <div id="adjustments-panel" role="tabpanel" aria-labelledby="adjustments-tab" hidden>
             <p class="hint" data-i18n="editWarning">Document rules may restrict edits. Neutral settings are recommended.</p>
             <label class="check-row" id="allow-edits-row"><input id="allow-edits" type="checkbox"><span data-i18n="allowEdits">Enable adjustments despite document editing restrictions</span></label>
             <fieldset id="adjust-controls" disabled>
-              <label class="slider-label" for="brightness"><span data-i18n="brightness">Brightness</span><output id="brightness-value">0</output></label><input id="brightness" type="range" min="-15" max="15" value="0">
-              <label class="slider-label" for="contrast"><span data-i18n="contrast">Contrast</span><output id="contrast-value">0</output></label><input id="contrast" type="range" min="-15" max="15" value="0">
-              <button id="reset-edits" class="text-button" data-i18n="resetEdits">Reset adjustments</button>
+              <div class="tonal-sliders"><div><label class="slider-label" for="brightness"><span data-i18n="brightness">Brightness</span><output id="brightness-value">0</output></label><input id="brightness" type="range" min="-15" max="15" value="0">
+              </div><div><label class="slider-label" for="contrast"><span data-i18n="contrast">Contrast</span><output id="contrast-value">0</output></label><input id="contrast" type="range" min="-15" max="15" value="0">
+              </div></div><button id="reset-edits" class="text-button" data-i18n="resetEdits">Reset adjustments</button>
             </fieldset>
             <label class="check-row"><input id="original" type="checkbox"><span data-i18n="original">Compare original</span></label>
           </div>
         </fieldset>
         <p id="resolution" class="hint"></p><p id="upscale" class="warning" data-i18n="upscale" hidden>Below 300 ppi: this crop will be enlarged. Zoom out or use a higher-resolution photo; enlargement cannot restore detail.</p>
         <p id="bounded" class="hint" data-i18n="bounded" hidden>Large photos are reduced to a maximum working edge of 4096 pixels to limit memory use.</p>
+        </div></div>
       </section>
       <section class="sheet region" aria-labelledby="sheet-title">
         <h2 id="sheet-title" data-i18n="step3">Print sheet</h2>
         <p id="output-empty" class="hint" data-i18n="outputInactive">Upload a photo to prepare the output.</p>
-        <fieldset id="output-controls" disabled>        <div id="print-output-settings">
-        <div class="copy-picker"><label for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6"><button id="use-max" class="text-button" data-i18n="useMax">Use maximum</button></div>
-        <p id="capacity" class="hint"></p>
-        <p id="copy-error" class="error" hidden></p>
-        </div>
-        <div id="print-guides">
-        <label class="check-row cut-option"><input id="cut-guides" type="checkbox" checked><span data-i18n="cutGuides">Include cutting guides</span></label>
-        <p class="hint" id="cut-note" data-i18n="cut">Fine dashed lines mark shared cut edges. Trim along them to avoid traces. Photo size and copy count stay the same.</p>
-        <p id="rotated" class="hint" data-i18n="rotated" hidden>Copies rotated on the sheet to fit more; turn the print before cutting.</p>
-        </div>
-        <div id="single-settings" hidden>
+        <fieldset id="output-controls" disabled>        <div id="single-settings" hidden>
 
           <fieldset class="quality-picker"><legend data-i18n="outputChoice">Output preference</legend>
           <label><input type="radio" name="output-quality" value="quality" checked><span data-i18n="bestQuality">Preserve best quality</span></label>
@@ -141,7 +133,13 @@
 </fieldset>
         <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
         <div class="output-details">
-        <div class="sheet-meta" id="print-summary"><strong id="copy-count"></strong><span data-i18n="sheetSize">4×6 inches</span></div>
+        <div id="print-summary"><div class="copy-picker"><label class="visually-hidden" for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6" aria-describedby="capacity copy-error" disabled><span data-i18n="copies" aria-hidden="true">copies</span></div><p id="capacity" class="hint"></p><p id="copy-error" class="error" hidden></p></div>
+        <div id="print-guides">
+        <label class="check-row cut-option"><input id="cut-guides" type="checkbox" checked disabled><span data-i18n="cutGuides">Include cutting guides</span></label>
+        <details class="cut-help"><summary data-i18n="cutGuideHelp">Cutting guide details</summary><p class="hint" id="cut-note" data-i18n="cut">Fine dashed lines mark shared cut edges. Trim along them to avoid traces. Photo size and copy count stay the same.</p>
+        </details><p id="rotated" class="hint" data-i18n="rotated" hidden>Copies rotated on the sheet to fit more; turn the print before cutting.</p>
+        </div>
+
         <p class="hint" id="output-info" data-i18n="output">1800×1200 pixels · 300 ppi</p>
         <p id="single-result" class="hint" role="status" hidden></p>
         </div>
