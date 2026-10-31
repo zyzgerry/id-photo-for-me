@@ -64,6 +64,9 @@ function updateDocuments(reset = true) {
 function updatePresetDetails() {
   $('custom-fields').hidden = $('country').value !== 'custom';
   $('document-fields').hidden = $('country').value === 'custom';
+  $('preset-location').hidden = !preset?.scope;
+  $('preset-scope').hidden = !preset?.scope;
+  $('preset-scope').textContent = preset?.scope?.[lang] || '';
   $('preset-note').textContent = preset ? (typeof preset.note === 'string' ? t(preset.note) : preset.note[lang]) : t('customNote');
   $('preset-reference').hidden = !preset;
   if (preset) {

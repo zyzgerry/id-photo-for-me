@@ -2,10 +2,7 @@ export const ASIA_PRESETS = [
   {
     "id": "cn-visa",
     "country": "cn",
-    "document": {
-      "en": "Visa — Sydney application centre",
-      "zh": "签证 — 悉尼申请中心"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa — Sydney application centre","zh":"签证 — 悉尼申请中心"},
     "widthMm": 33,
     "heightMm": 48,
     "source": "https://bio.visaforchina.cn/SYD4_EN/qianzhengyewu/jichuzhishi/changjianwenti/552371235904950309.html",
@@ -20,10 +17,7 @@ export const ASIA_PRESETS = [
   {
     "id": "jp-visa-serbia",
     "country": "jp",
-    "document": {
-      "en": "Visa — Embassy in Serbia",
-      "zh": "签证 — 驻塞尔维亚使馆"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa — Embassy in Serbia","zh":"签证 — 驻塞尔维亚使馆"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.yu.emb-japan.go.jp/visa/Documents_List_2025/Standards_Application_Form_Photos_2025.pdf",
@@ -38,10 +32,7 @@ export const ASIA_PRESETS = [
   {
     "id": "jp-passport-nz",
     "country": "jp",
-    "document": {
-      "en": "Passport — paper application in New Zealand",
-      "zh": "护照 — 在新西兰提交纸质申请"
-    },
+    "document": {"en":"Passport","zh":"护照"}, scope: {"en":"Passport — paper application in New Zealand","zh":"护照 — 在新西兰提交纸质申请"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.nz.emb-japan.go.jp/itpr_ja/ryoji-passport-new.html",
@@ -75,10 +66,7 @@ export const ASIA_PRESETS = [
   {
     "id": "kr-visa-hk",
     "country": "kr",
-    "document": {
-      "en": "Visa — Consulate in Hong Kong",
-      "zh": "签证 — 驻香港总领馆"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa — Consulate in Hong Kong","zh":"签证 — 驻香港总领馆"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.mofa.go.kr/upload/cntnts/hk-en/Visa_Application_Form.pdf",
@@ -93,10 +81,7 @@ export const ASIA_PRESETS = [
   {
     "id": "in-visa-auckland",
     "country": "in",
-    "document": {
-      "en": "Regular visa — Auckland checklist",
-      "zh": "普通签证 — 奥克兰清单"
-    },
+    "document": {"en":"Regular visa","zh":"普通签证"}, scope: {"en":"Regular visa — Auckland checklist","zh":"普通签证 — 奥克兰清单"},
     "widthMm": 51,
     "heightMm": 51,
     "source": "https://www.cgiauckland.gov.in/content/1673397067Visa-Checklist-2023.pdf",
@@ -126,10 +111,7 @@ export const ASIA_PRESETS = [
   {
     "id": "lk-residence-visa",
     "country": "lk",
-    "document": {
-      "en": "Residence visa — photo capturing paper",
-      "zh": "居留签证 — 照片采集附页"
-    },
+    "document": {"en":"Residence visa","zh":"居留签证"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.immigration.gov.lk/content/files/visa/residence_visa.pdf",
@@ -144,10 +126,7 @@ export const ASIA_PRESETS = [
   {
     "id": "np-visa-beijing",
     "country": "np",
-    "document": {
-      "en": "Tourist visa — Embassy in Beijing",
-      "zh": "旅游签证 — 驻北京使馆"
-    },
+    "document": {"en":"Tourist visa","zh":"旅游签证"}, scope: {"en":"Tourist visa — Embassy in Beijing","zh":"旅游签证 — 驻北京使馆"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://cn.nepalembassy.gov.np/pages/visa/",
@@ -162,10 +141,7 @@ export const ASIA_PRESETS = [
   {
     "id": "np-passport-under5",
     "country": "np",
-    "document": {
-      "en": "Passport — newborns and children under 5",
-      "zh": "护照 — 新生儿及5岁以下儿童"
-    },
+    "document": {"en":"Passport (under 5)","zh":"护照（5岁以下）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://nepalpassport.gov.np/en/process/what-kind-of-photo-is-required-for-the-passport",
@@ -180,10 +156,7 @@ export const ASIA_PRESETS = [
   {
     "id": "bt-passport-paper",
     "country": "bt",
-    "document": {
-      "en": "Passport — assisted paper route only",
-      "zh": "护照 — 仅限协助办理的纸质途径"
-    },
+    "document": {"en":"Passport","zh":"护照"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.mfa.gov.bt/passport-application/",
@@ -198,10 +171,7 @@ export const ASIA_PRESETS = [
   {
     "id": "id-official-visa-mexico",
     "country": "id",
-    "document": {
-      "en": "Official/diplomatic visa — Mexico City",
-      "zh": "公务／外交签证 — 墨西哥城"
-    },
+    "document": {"en":"Official/diplomatic visa","zh":"公务／外交签证"}, scope: {"en":"Official/diplomatic visa — Mexico City","zh":"公务／外交签证 — 墨西哥城"},
     "widthMm": 40,
     "heightMm": 60,
     "source": "https://kemlu.go.id/files-service/storage/submenu/additional_file/1729875925671bcfd597a5b_2024__VISA__Informasi_Visa_Official___Diplomatik.pdf",
@@ -216,10 +186,7 @@ export const ASIA_PRESETS = [
   {
     "id": "kh-k-visa-dc",
     "country": "kh",
-    "document": {
-      "en": "K visa — Cambodian origin, Washington DC",
-      "zh": "K签证 — 柬埔寨血统，华盛顿特区"
-    },
+    "document": {"en":"K visa (Cambodian origin)","zh":"K签证（柬埔寨血统）"}, scope: {"en":"K visa — Cambodian origin, Washington DC","zh":"K签证 — 柬埔寨血统，华盛顿特区"},
     "widthMm": 50.8,
     "heightMm": 50.8,
     "source": "https://www.embassyofcambodiadc.org/uploads/9/8/1/8/98182996/recdc_khmer_visa_application_form_nov2024.pdf",
@@ -234,10 +201,7 @@ export const ASIA_PRESETS = [
   {
     "id": "ph-visa-seoul",
     "country": "ph",
-    "document": {
-      "en": "9(a) visitor visa — Seoul",
-      "zh": "9(a)访问签证 — 首尔"
-    },
+    "document": {"en":"9(a) visitor visa","zh":"9(a)访问签证"}, scope: {"en":"9(a) visitor visa — Seoul","zh":"9(a)访问签证 — 首尔"},
     "widthMm": 50.8,
     "heightMm": 50.8,
     "source": "https://www.philembassy-seoul.com/visa",
@@ -252,10 +216,7 @@ export const ASIA_PRESETS = [
   {
     "id": "tw-visa-mongolia",
     "country": "tw",
-    "document": {
-      "en": "Visa — Taipei office in Mongolia",
-      "zh": "签证 — 驻蒙古代表处"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa — Taipei office in Mongolia","zh":"签证 — 驻蒙古代表处"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.taiwanembassy.org/uploads/sites/137/2023/06/20250206%E7%B0%BD%E8%AD%89%E8%A6%8F%E5%AE%9A%E4%B8%AD%E8%92%99%E8%8B%B1.pdf",
@@ -308,10 +269,7 @@ export const ASIA_PRESETS = [
   {
     "id": "nz-passport-paper",
     "country": "nz",
-    "document": {
-      "en": "Passport — paper adult renewal",
-      "zh": "护照 — 成人纸质换发"
-    },
+    "document": {"en":"Passport","zh":"护照"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.passports.govt.nz/__data/assets/pdf_file/0024/54753/PAS300-Application-for-a-NZ-passport-Adult-renewal.pdf",
@@ -326,10 +284,7 @@ export const ASIA_PRESETS = [
   {
     "id": "pg-passport-adult",
     "country": "pg",
-    "document": {
-      "en": "Passport — first application, age 19+",
-      "zh": "护照 — 19岁以上首次申请"
-    },
+    "document": {"en":"Passport (first application, 19+)","zh":"护照（19岁以上首次申请）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://ica.gov.pg/uploads/media/post_file_6070572-6.-checklist---ordinary-png-passport-first-time-19-years-older-1-.pdf",
@@ -344,10 +299,7 @@ export const ASIA_PRESETS = [
   {
     "id": "kz-visa-ekaterinburg",
     "country": "kz",
-    "document": {
-      "en": "Visa — Consulate in Yekaterinburg",
-      "zh": "签证 — 驻叶卡捷琳堡领馆"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa — Consulate in Yekaterinburg","zh":"签证 — 驻叶卡捷琳堡领馆"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.gov.kz/memleket/entities/mfa-ekaterinburg/press/article/details/166318?lang=ru",
@@ -362,10 +314,7 @@ export const ASIA_PRESETS = [
   {
     "id": "uz-consular-visa",
     "country": "uz",
-    "document": {
-      "en": "Visa — consular paper application",
-      "zh": "签证 — 领事纸质申请"
-    },
+    "document": {"en":"Visa","zh":"签证"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://gov.uz/en/mfa/activity_page/o-zbekiston-respublikasi-vizasi",
@@ -380,10 +329,7 @@ export const ASIA_PRESETS = [
   {
     "id": "mm-tourist-visa-kunming",
     "country": "mm",
-    "document": {
-      "en": "Tourist visa — Consulate in Kunming",
-      "zh": "旅游签证 — 驻昆明总领馆"
-    },
+    "document": {"en":"Tourist visa","zh":"旅游签证"}, scope: {"en":"Tourist visa — Consulate in Kunming","zh":"旅游签证 — 驻昆明总领馆"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://mcgkunming.org/tourist-visa/",
@@ -398,10 +344,7 @@ export const ASIA_PRESETS = [
   {
     "id": "sg-passport-paper",
     "country": "sg",
-    "document": {
-      "en": "Passport — paper application",
-      "zh": "护照 — 纸质申请"
-    },
+    "document": {"en":"Passport","zh":"护照"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.ica.gov.sg/docs/default-source/ica/forms/imm_%28e%29_11.pdf",
@@ -421,10 +364,7 @@ export const ASIA_PRESETS = [
 {
   "id": "tm-visa-dc",
   "country": "tm",
-  "document": {
-    "en": "Visa — Embassy in Washington DC",
-    "zh": "签证 — 驻华盛顿特区使馆"
-  },
+  "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa — Embassy in Washington DC","zh":"签证 — 驻华盛顿特区使馆"},
   "widthMm": 38.1,
   "heightMm": 50.8,
   "source": "https://usa.tmembassy.gov.tm/en/attachments/11038/download",

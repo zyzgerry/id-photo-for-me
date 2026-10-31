@@ -2,10 +2,7 @@ export const PARTNER_PRESETS = [
   {
     "id": "fr-visa-libreville",
     "country": "fr",
-    "document": {
-      "en": "Short-stay scientific visa — Libreville",
-      "zh": "短期科研签证 — 利伯维尔"
-    },
+    "document": {"en":"Short-stay scientific visa","zh":"短期科研签证"}, scope: {"en":"Short-stay scientific visa — Libreville","zh":"短期科研签证 — 利伯维尔"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://france-visas.gouv.fr/documents/d/france-visas/iso_iec_normes_photos_fr",
@@ -24,10 +21,7 @@ export const PARTNER_PRESETS = [
   {
     "id": "gr-visa-uk",
     "country": "gr",
-    "document": {
-      "en": "Tourist visa — GVCW United Kingdom",
-      "zh": "旅游签证 — 英国GVCW中心"
-    },
+    "document": {"en":"Tourist visa","zh":"旅游签证"}, scope: {"en":"Tourist visa — GVCW United Kingdom","zh":"旅游签证 — 英国GVCW中心"},
     "widthMm": 35,
     "heightMm": 40,
     "source": "https://uk-gr.gvcworld.eu/en/visa-info-tourism",

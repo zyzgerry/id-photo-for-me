@@ -52,7 +52,7 @@
           <div class="two-fields"><label><span data-i18n="width">Width</span><input id="width" type="number" inputmode="decimal" value="35" step="any" min="10" max="152.4"></label><label><span data-i18n="height">Height</span><input id="height" type="number" inputmode="decimal" value="45" step="any" min="10" max="152.4"></label></div>
           <label for="units" data-i18n="units">Units</label><select id="units"><option value="mm" data-i18n="mm">Millimeters</option><option value="inch" data-i18n="inch">Inches</option></select>
         </div>
-        <p class="hint" id="preset-note"></p>
+        <p class="hint" id="preset-location" data-i18n="locationCaveat" hidden>Requirements may vary by application location.</p>
         <p class="size-readout" id="size-readout"></p>
         <div id="print-output-settings">
         <div class="copy-picker"><label for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6"><button id="use-max" class="text-button" data-i18n="useMax">Use maximum</button></div>
@@ -64,7 +64,9 @@
         <p class="hint" id="cut-note" data-i18n="cut">Fine dashed lines mark shared cut edges. Trim along them to avoid traces. Photo size and copy count stay the same.</p>
         <p id="rotated" class="hint" data-i18n="rotated" hidden>Copies rotated on the sheet to fit more; turn the print before cutting.</p>
         </div>
-        <details class="requirements"><summary data-i18n="documentGuidance">Document guidance</summary>
+        <details class="requirements"><summary data-i18n="documentGuidance">Requirements &amp; sources</summary>
+        <p class="hint" id="preset-scope" hidden></p>
+        <p class="hint" id="preset-note"></p>
         <p class="hint" id="preset-reference"><a id="reference" target="_blank" rel="noopener noreferrer" data-i18n="reference">Requirements source</a><br><span id="verified"></span></p>
         <p class="hint" data-i18n="acceptance">Correct size does not guarantee document acceptance. Check the linked requirements.</p>
         </details>

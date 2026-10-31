@@ -3,10 +3,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "ca-visa",
     "country": "ca",
-    "document": {
-      "en": "Visa (printed temporary resident application)",
-      "zh": "签证（纸质临时居民申请）"
-    },
+    "document": {"en":"Temporary resident visa","zh":"临时居民签证"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.canada.ca/en/immigration-refugees-citizenship/services/application/application-forms-guides/temporary-resident-visa-application-photograph-specifications.html",
@@ -25,10 +22,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "br-visa",
     "country": "br",
-    "document": {
-      "en": "Visitor visa (Abu Dhabi)",
-      "zh": "访问签证（阿布扎比）"
-    },
+    "document": {"en":"Visitor visa","zh":"访问签证"}, scope: {"en":"Visitor visa (Abu Dhabi)","zh":"访问签证（阿布扎比）"},
     "widthMm": 30,
     "heightMm": 40,
     "source": "https://www.gov.br/mre/pt-br/embaixada-abu-dhabi/abu-dhabi-arquivos/english/consular-services/visa/types-of-visa/visitor-visa-vivis",
@@ -43,10 +37,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "ar-visa",
     "country": "ar",
-    "document": {
-      "en": "Visa (Cádiz, working holiday)",
-      "zh": "签证（加的斯，打工度假）"
-    },
+    "document": {"en":"Working holiday visa","zh":"打工度假签证"}, scope: {"en":"Visa (Cádiz, working holiday)","zh":"签证（加的斯，打工度假）"},
     "widthMm": 40,
     "heightMm": 40,
     "source": "https://ccadi.cancilleria.gob.ar/es/visas-14",
@@ -61,10 +52,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "pe-visa",
     "country": "pe",
-    "document": {
-      "en": "Tourist visa (Guayaquil)",
-      "zh": "旅游签证（瓜亚基尔）"
-    },
+    "document": {"en":"Tourist visa","zh":"旅游签证"}, scope: {"en":"Tourist visa (Guayaquil)","zh":"旅游签证（瓜亚基尔）"},
     "widthMm": 50,
     "heightMm": 50,
     "source": "https://www.gob.pe/113826-consulado-general-del-peru-en-guayaquil-solicitar-visa-de-turista-para-ingresar-al-peru",
@@ -79,10 +67,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "bo-visa",
     "country": "bo",
-    "document": {
-      "en": "Visa (Embassy in Uruguay)",
-      "zh": "签证（驻乌拉圭使馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Embassy in Uruguay)","zh":"签证（驻乌拉圭使馆）"},
     "widthMm": 30,
     "heightMm": 30,
     "source": "https://www.embajadadebolivia.uy/wp-content/uploads/2023/04/VISA.pdf",
@@ -97,10 +82,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "py-visa",
     "country": "py",
-    "document": {
-      "en": "Diplomatic/official visa (São Paulo)",
-      "zh": "外交／公务签证（圣保罗）"
-    },
+    "document": {"en":"Diplomatic/official visa","zh":"外交／公务签证"}, scope: {"en":"Diplomatic/official visa (São Paulo)","zh":"外交／公务签证（圣保罗）"},
     "widthMm": 50,
     "heightMm": 50,
     "source": "https://www.mre.gov.py/san-pablo/index.php/download_file/view_inline/161",
@@ -115,10 +97,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "cr-visa",
     "country": "cr",
-    "document": {
-      "en": "Tourist visa (Embassy in Bogotá)",
-      "zh": "旅游签证（驻波哥大使馆）"
-    },
+    "document": {"en":"Tourist visa","zh":"旅游签证"}, scope: {"en":"Tourist visa (Embassy in Bogotá)","zh":"旅游签证（驻波哥大使馆）"},
     "widthMm": 50,
     "heightMm": 50,
     "source": "https://www.embajadadecostarica.org/wp-content/uploads/2026/02/Requisitos-visa-de-turismo-pagina-web-V01II-VI.pdf",
@@ -133,10 +112,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "do-visa",
     "country": "do",
-    "document": {
-      "en": "Tourist visa",
-      "zh": "旅游签证"
-    },
+    "document": {"en":"Tourist visa","zh":"旅游签证"},
     "widthMm": 40,
     "heightMm": 50,
     "source": "https://www.gob.do/servicios/visa-de-turismo-simple-ts-o-turismo-multiple-tm",
@@ -211,10 +187,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "gd-passport",
     "country": "gd",
-    "document": {
-      "en": "Passport renewal (printed option)",
-      "zh": "护照续期（纸质照片选项）"
-    },
+    "document": {"en":"Passport renewal","zh":"护照续期"},
     "widthMm": 38.1,
     "heightMm": 50.8,
     "source": "https://gndembassyprc.mofa.gov.gd/wp-content/uploads/2023/09/Schedule-I-Passport-Renewal-Application-Aug-2018.pdf.pdf",
@@ -229,7 +202,7 @@ export const AMERICAS_PRESETS = [
   {
     "id": "bs-passport",
     "country": "bs",
-    "document": {"en":"Passport — paper application","zh":"护照 — 纸质申请"},
+    "document": {"en":"Passport","zh":"护照"},
     "widthMm": 50.8,
     "heightMm": 50.8,
     "source": "https://www.immigration.gov.bs/wp-content/uploads/2016/02/PassportRules_1.pdf",

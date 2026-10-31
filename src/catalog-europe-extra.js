@@ -3,10 +3,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "fi-passport",
     "country": "fi",
-    "document": {
-      "en": "Passport (printed photo at police service point)",
-      "zh": "护照（警察服务点纸质照片）"
-    },
+    "document": {"en":"Passport","zh":"护照"},
     "widthMm": 36,
     "heightMm": 47,
     "source": "https://poliisi.fi/documents/25235045/31329600/Passport-photograph-instructions-by-the-police-2020-EN-fixed.pdf",
@@ -21,10 +18,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "de-visa",
     "country": "de",
-    "document": {
-      "en": "Visa (German missions in the UK)",
-      "zh": "签证（德国驻英国使领馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (German missions in the UK)","zh":"签证（德国驻英国使领馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://uk.diplo.de/uk-en/02/visa/visa-faq-2442852",
@@ -39,10 +33,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "hu-visa",
     "country": "hu",
-    "document": {
-      "en": "Schengen visa (Taipei)",
-      "zh": "申根签证（台北）"
-    },
+    "document": {"en":"Schengen visa","zh":"申根签证"}, scope: {"en":"Schengen visa (Taipei)","zh":"申根签证（台北）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://tajpej.mfa.gov.hu/en/schengen-visa",
@@ -57,10 +48,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "sk-visa",
     "country": "sk",
-    "document": {
-      "en": "National visa",
-      "zh": "国家签证"
-    },
+    "document": {"en":"National visa","zh":"国家签证"},
     "widthMm": 30,
     "heightMm": 35,
     "source": "https://www.mzv.sk/en/services/information-for-foreigners/national-visa",
@@ -75,10 +63,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "lt-visa",
     "country": "lt",
-    "document": {
-      "en": "Schengen visa (Sovetsk)",
-      "zh": "申根签证（苏维埃茨克）"
-    },
+    "document": {"en":"Schengen visa","zh":"申根签证"}, scope: {"en":"Schengen visa (Sovetsk)","zh":"申根签证（苏维埃茨克）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://consulate-sovetsk.mfa.lt/ru/glavnaya-konsulskaya-informatsiya/vizy/dokumenty-neobkhodimye-dlya-polucheniya-vizy/97",
@@ -93,10 +78,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "lu-visa",
     "country": "lu",
-    "document": {
-      "en": "Visa (Bangkok)",
-      "zh": "签证（曼谷）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Bangkok)","zh":"签证（曼谷）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://bangkok.mae.lu/fr/service_citoyens.html",
@@ -115,10 +97,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "ba-visa",
     "country": "ba",
-    "document": {
-      "en": "Tourist visa (Copenhagen)",
-      "zh": "旅游签证（哥本哈根）"
-    },
+    "document": {"en":"Tourist visa","zh":"旅游签证"}, scope: {"en":"Tourist visa (Copenhagen)","zh":"旅游签证（哥本哈根）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.embassybh.dk/konzularne-usluge/visa/",
@@ -133,10 +112,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "rs-visa",
     "country": "rs",
-    "document": {
-      "en": "Visa (paper consular application)",
-      "zh": "签证（纸质领事申请）"
-    },
+    "document": {"en":"Visa","zh":"签证"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.mfa.rs/sites/default/files/inline-files/visaform_lat3.pdf",
@@ -151,10 +127,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "md-visa",
     "country": "md",
-    "document": {
-      "en": "Visa (Embassy in India)",
-      "zh": "签证（驻印度使馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Embassy in India)","zh":"签证（驻印度使馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.india.mfa.gov.md/ro/content/tipurile-de-vizecerin%C8%9Be",
@@ -169,10 +142,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "az-visa",
     "country": "az",
-    "document": {
-      "en": "Visa (Embassy in Tokyo)",
-      "zh": "签证（驻东京使馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Embassy in Tokyo)","zh":"签证（驻东京使馆）"},
     "widthMm": 30,
     "heightMm": 40,
     "source": "https://tokyo.mfa.gov.az/az/content/36/visa-issues",
@@ -187,10 +157,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "si-visa",
     "country": "si",
-    "document": {
-      "en": "National visa (Zagreb)",
-      "zh": "国家签证（萨格勒布）"
-    },
+    "document": {"en":"National visa","zh":"国家签证"}, scope: {"en":"National visa (Zagreb)","zh":"国家签证（萨格勒布）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.gov.si/en/representations/embassy-zagreb/visa-information-of-the-embassy-zagreb/",
@@ -205,10 +172,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "am-visa",
     "country": "am",
-    "document": {
-      "en": "Visa extension (Yerevan)",
-      "zh": "签证延期（埃里温）"
-    },
+    "document": {"en":"Visa extension","zh":"签证延期"}, scope: {"en":"Visa extension (Yerevan)","zh":"签证延期（埃里温）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://migration.mia.gov.am/en/applying-for-the-extension-of-ra-entry-visa",
@@ -224,10 +188,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "mx-visa",
     "country": "mx",
-    "document": {
-      "en": "Visa (Embassy in Baku)",
-      "zh": "签证（驻巴库使馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Embassy in Baku)","zh":"签证（驻巴库使馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://embamex.sre.gob.mx/azerbaiyan/index.php/foreign-nationals",
@@ -242,10 +203,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "be-visa",
     "country": "be",
-    "document": {
-      "en": "Student visa (Helsinki)",
-      "zh": "学生签证（赫尔辛基）"
-    },
+    "document": {"en":"Student visa","zh":"学生签证"}, scope: {"en":"Student visa (Helsinki)","zh":"学生签证（赫尔辛基）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://finland.diplomatie.belgium.be/sites/default/files/2024-07/Student%20Visa_0.pdf",
@@ -260,10 +218,7 @@ export const EUROPE_EXTRA_PRESETS = [
   {
     "id": "is-visa",
     "country": "is",
-    "document": {
-      "en": "Visa (Embassy in London)",
-      "zh": "签证（驻伦敦使馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Embassy in London)","zh":"签证（驻伦敦使馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.mfa.is/library/01-Ministries/Ministry-for-Foreign-Affairs/Consular-services/Tourism%20Business%20VFF%20-%20Checklist%20-%20LON%20-%2014.22.pdf",

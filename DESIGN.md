@@ -19,3 +19,7 @@ Small sheet previews add screen-pixel dashed outlines on every copy, including o
 Portugal offers optional 70–80% centered head/face-size references from the linked VFS Portugal UK photo guide. Keep that source distinct from the U.S. checklist that supplies the 35×45-mm dimensions; requirements depend on application location. Head references appear only in the editor, never in the JPEG.
 
 Validation uses synthetic images. Personal exported sheets, their analysis, and screenshots containing personal photos remain outside Git.
+
+## Document labels and source disclosure
+
+Use short document names without embassy or application-location suffixes. Preserve useful eligibility qualifiers such as child age limits. Keep dimensions visible, and show a brief location-variation caveat for location-specific presets. Requirements & sources is collapsed initially and holds the full application scope, detailed photo guidance, linked authority, and check date. Preserve that scope when simplifying a label; it is evidence for the preset rather than part of the dropdown name. Use the same behavior in English and Chinese.

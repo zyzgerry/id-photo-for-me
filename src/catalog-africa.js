@@ -36,10 +36,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "tn-passport-us",
     "country": "tn",
-    "document": {
-      "en": "Passport (Washington embassy)",
-      "zh": "护照（华盛顿使馆）"
-    },
+    "document": {"en":"Passport","zh":"护照"}, scope: {"en":"Passport (Washington embassy)","zh":"护照（华盛顿使馆）"},
     "widthMm": 50.8,
     "heightMm": 50.8,
     "source": "https://www.tunisianembassy.org/passport-services",
@@ -54,10 +51,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "eg-visa-doha",
     "country": "eg",
-    "document": {
-      "en": "Visa (Doha embassy)",
-      "zh": "签证（多哈使馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Doha embassy)","zh":"签证（多哈使馆）"},
     "widthMm": 40,
     "heightMm": 60,
     "source": "https://cs.mfa.gov.eg/en/QAT/faq",
@@ -72,10 +66,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "ng-visa-moscow",
     "country": "ng",
-    "document": {
-      "en": "Visa (Moscow embassy)",
-      "zh": "签证（莫斯科使馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Moscow embassy)","zh":"签证（莫斯科使馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://nigerianembassy.ru/consular-and-immigration/visa-application-3/",
@@ -90,10 +81,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "gh-visa-arkansas",
     "country": "gh",
-    "document": {
-      "en": "Visa (Arkansas honorary consulate)",
-      "zh": "签证（阿肯色名誉领事馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Arkansas honorary consulate)","zh":"签证（阿肯色名誉领事馆）"},
     "widthMm": 50.8,
     "heightMm": 50.8,
     "source": "https://www.ghanaconsulatear.org/media/d30bgflc/ghana-visa-application-05202025.pdf",
@@ -108,10 +96,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "za-passport-toronto",
     "country": "za",
-    "document": {
-      "en": "Maxi passport (Toronto consulate)",
-      "zh": "加页护照（多伦多领事馆）"
-    },
+    "document": {"en":"Maxi passport","zh":"加页护照"}, scope: {"en":"Maxi passport (Toronto consulate)","zh":"加页护照（多伦多领事馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://dirco.gov.za/toronto/maxi-passports/",
@@ -126,10 +111,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "zm-passport-child",
     "country": "zm",
-    "document": {
-      "en": "Passport (under 16, paper application)",
-      "zh": "护照（16岁以下纸质申请）"
-    },
+    "document": {"en":"Passport (under 16)","zh":"护照（16岁以下）"},
     "widthMm": 38,
     "heightMm": 51,
     "source": "https://www.mohais.gov.zm/?page_id=1610",
@@ -144,10 +126,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "zw-passport-ottawa",
     "country": "zw",
-    "document": {
-      "en": "Passport (Ottawa embassy)",
-      "zh": "护照（渥太华使馆）"
-    },
+    "document": {"en":"Passport","zh":"护照"}, scope: {"en":"Passport (Ottawa embassy)","zh":"护照（渥太华使馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.zimembassyottawa.com/passport-services",
@@ -162,10 +141,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "na-visa-berlin",
     "country": "na",
-    "document": {
-      "en": "Tourism visa (Berlin embassy)",
-      "zh": "旅游签证（柏林使馆）"
-    },
+    "document": {"en":"Tourism visa","zh":"旅游签证"}, scope: {"en":"Tourism visa (Berlin embassy)","zh":"旅游签证（柏林使馆）"},
     "widthMm": 50.8,
     "heightMm": 50.8,
     "source": "https://www.namibia-botschaft.de/application-for-visa/",
@@ -180,10 +156,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "mu-passport-renewal",
     "country": "mu",
-    "document": {
-      "en": "Passport renewal (paper form)",
-      "zh": "护照换发（纸质表格）"
-    },
+    "document": {"en":"Passport renewal","zh":"护照换发"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://passport.govmu.org/passport/?mdocs-file=704",
@@ -202,10 +175,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "mz-visa-tokyo",
     "country": "mz",
-    "document": {
-      "en": "Visa (Tokyo embassy)",
-      "zh": "签证（东京使馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Tokyo embassy)","zh":"签证（东京使馆）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://embamoc.jp/visas",
@@ -220,10 +190,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "ao-visa-brasilia",
     "country": "ao",
-    "document": {
-      "en": "Visa (Brasília embassy)",
-      "zh": "签证（巴西利亚使馆）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Brasília embassy)","zh":"签证（巴西利亚使馆）"},
     "widthMm": 30,
     "heightMm": 40,
     "source": "https://embaixadadeangola.com.br/2022/wp-content/uploads/2022/08/FORMUARIO-PARA-VISTOS-TIPO-3.pdf",
@@ -238,10 +205,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "il-visa-berlin",
     "country": "il",
-    "document": {
-      "en": "Visitor visa (Berlin embassy)",
-      "zh": "访问签证（柏林使馆）"
-    },
+    "document": {"en":"Visitor visa","zh":"访问签证"}, scope: {"en":"Visitor visa (Berlin embassy)","zh":"访问签证（柏林使馆）"},
     "widthMm": 50,
     "heightMm": 50,
     "source": "https://embassies.gov.il/berlin/en/services/foreign-citizens/entry-visa-visiting-or-touring-israel",
@@ -256,10 +220,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "tr-visa",
     "country": "tr",
-    "document": {
-      "en": "Sticker visa (consular photo)",
-      "zh": "贴纸签证（领事照片）"
-    },
+    "document": {"en":"Sticker visa","zh":"贴纸签证"},
     "widthMm": 50,
     "heightMm": 60,
     "source": "https://losangeles-cg.mfa.gov.tr/Mission/ShowInfoNote/411309",
@@ -274,10 +235,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "jo-visa-washington",
     "country": "jo",
-    "document": {
-      "en": "Visa (Washington paper form)",
-      "zh": "签证（华盛顿纸质表格）"
-    },
+    "document": {"en":"Visa","zh":"签证"}, scope: {"en":"Visa (Washington paper form)","zh":"签证（华盛顿纸质表格）"},
     "widthMm": 50.8,
     "heightMm": 50.8,
     "source": "https://mfa.gov.jo/documents/180222Jordan%20Pass.pdf",
@@ -292,10 +250,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "lb-visa-india",
     "country": "lb",
-    "document": {
-      "en": "Tourist visa (Embassy to India checklist)",
-      "zh": "旅游签证（驻印度使馆清单）"
-    },
+    "document": {"en":"Tourist visa","zh":"旅游签证"}, scope: {"en":"Tourist visa (Embassy to India checklist)","zh":"旅游签证（驻印度使馆清单）"},
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://www.vfsglobal.com/lebanon/srilanka/pdf/CHECKLIST-FOR-TOURIST-VISA.pdf",
@@ -325,10 +280,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "om-visa-temporary-work",
     "country": "om",
-    "document": {
-      "en": "Temporary work visa (paper photos)",
-      "zh": "临时工作签证（纸质照片）"
-    },
+    "document": {"en":"Temporary work visa","zh":"临时工作签证"},
     "widthMm": 40,
     "heightMm": 60,
     "source": "https://www.rop.gov.om/english/Visas.aspx?VisaName=TemporaryWorkVisa",
@@ -343,10 +295,7 @@ export const AFRICA_PRESETS = [
   {
     "id": "sy-passport-mission",
     "country": "sy",
-    "document": {
-      "en": "Passport renewal (mission abroad)",
-      "zh": "护照换发（海外使领馆）"
-    },
+    "document": {"en":"Passport renewal","zh":"护照换发"},
     "widthMm": 40,
     "heightMm": 40,
     "source": "https://mofaex.gov.sy/en/services/%D8%AA%D8%AC%D8%AF%D9%8A%D8%AF-%D8%AC%D9%88%D8%A7%D8%B2-%D8%A7%D9%84%D8%B3%D9%81%D8%B1-%D8%A8%D8%AF%D9%84-%D8%B9%D9%86-%D9%85%D9%86%D8%AA%D9%87%D9%8A",
