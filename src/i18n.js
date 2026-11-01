@@ -1,5 +1,6 @@
 export const messages = {
   en: {
+    exportSizeNote:"Saving an image to iPhone Photos may slightly change its file size. Download to Files or a drive to preserve the exact size.",
     outputHelp:"Output guidance",previewUpdating:"Updating… Previous result shown.",previewPrevious:"Previous result shown. Fix the settings to update.",
     autoCompression:"Auto compression",customCompression:"Full custom compression",
     qualitySetting:"JPEG quality setting (1–100)",qualitySettingError:"Enter a whole JPEG quality setting from 1–100.",
@@ -113,6 +114,7 @@ export const messages = {
     local:'Local processing', source:'Decoder notices', noScript:'JavaScript is needed to process photos locally. Enable it and reload.',
   },
   zh: {
+    exportSizeNote:"将图像存入 iPhone「照片」后，文件大小可能略有变化。下载到「文件」或云盘可保留准确的文件大小。",
     outputHelp:"输出说明",previewUpdating:"正在更新… 当前显示上次结果。",previewPrevious:"当前显示上次结果，请修正设置后更新。",
     autoCompression:"自动压缩",customCompression:"完全自定义压缩",
     qualitySetting:"JPEG 编码质量（1–100）",qualitySettingError:"请输入 1–100 的整数 JPEG 编码质量。",
