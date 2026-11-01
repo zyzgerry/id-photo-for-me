@@ -1,5 +1,14 @@
 # Validation and release checklist
 
+## Audit fixes — October 31, 2026 (local, not published)
+
+- All 10 Node checks, 100 Chrome/WebKit browser checks, syntax checks and the production build pass. A frozen offline dependency install passes.
+- Failed corrupt/oversized replacements preserve the previous crop, tonal edits and byte-identical JPEG. Successful replacements still reset edits; the picker permits retrying the same file.
+- HEIC setup now has a 45-second timeout. Timeout and worker errors reset the decoder and release the picker; stalled/failed setup followed by successful retry is covered.
+- Failed app-module downloads show a focused Reload button and an error in English or Chinese. Both localized recovery paths reload successfully and then process a photo.
+- Synthetic 10,000×1 and 1×10,000 PNGs retain nonzero working dimensions and export. No personal photos were used.
+- Removed unused puppeteer-core and its dependency tree; regenerated the lockfile. Firefox could not launch during the preceding audit (spawn UNKNOWN); actual-iPhone and measured physical-print checks remain pending.
+
 ## Automated verification
 
 Run `pnpm test`, `pnpm build`, and `pnpm test:browser` from the repository. The browser checks cover:

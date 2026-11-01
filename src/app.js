@@ -367,10 +367,11 @@ function clearPhoto() {
 
 $('photo').addEventListener('change', async event => {
   const selected = event.target.files[0]; if (!selected || loading) return;
-  clearPhoto(); loading = true; $('photo').disabled = true; $('photo').setAttribute('aria-busy','true');
+  loading = true; $('photo').disabled = $('clear').disabled = true; $('photo').setAttribute('aria-busy','true');
   setStatus('loading');
   try {
     const result = await decodePhoto(selected);
+    clearPhoto();
     photo = result; setStatus('ready');
     document.querySelector('.file-button').classList.replace('primary','quiet');
     $('clear').disabled = $('edit-controls').disabled = $('reset-crop').disabled = false;
@@ -384,8 +385,8 @@ $('photo').addEventListener('change', async event => {
     updateModeLabels();updatePresetDetails();
     if(mode==='single') configureSingle('photo');else chooseSize(false);
     if (matchMedia('(max-width: 760px)').matches) $('crop-title').scrollIntoView({block:'start',behavior:'auto'});
-  } catch (e) { setStatus(); setError(messages.en[e.message] ? e.message : 'decodeError'); }
-  finally { loading = false; $('photo').disabled = false; $('photo').removeAttribute('aria-busy'); }
+  } catch (e) { setStatus(photo?'ready':''); setError(messages.en[e.message] ? e.message : 'decodeError'); }
+  finally { loading = false; $('photo').disabled = false; $('clear').disabled = !photo; $('photo').value = ''; $('photo').removeAttribute('aria-busy'); }
 });
 $('clear').onclick = clearPhoto;
 function updateRequirementSelection(){

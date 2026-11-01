@@ -8,8 +8,12 @@ export function prepareDecoder() {
   if (decoderReady) return decoderReady;
   decoderReady = new Promise((resolve, reject) => {
     worker = new Worker(new URL('./decode-worker.js', import.meta.url), { type: 'module' });
-    worker.onmessage = event => { if (event.data.ready) resolve(); };
-    worker.onerror = () => { reject(new Error('decoderError')); };
+    const timer = setTimeout(() => reject(new Error('decoderError')), 45000);
+    worker.onmessage = event => { if (event.data.ready) { clearTimeout(timer); resolve(); } };
+    worker.onerror = () => { clearTimeout(timer); reject(new Error('decoderError')); };
+  }).catch(error => {
+    worker?.terminate(); worker = null; decoderReady = null;
+    throw error;
   });
   return decoderReady;
 }
@@ -95,7 +99,7 @@ export async function decodePhoto(file) {
         clearTimeout(timer);
         if (data.bitmap) resolve(data.bitmap); else reject(new Error('decodeError'));
       };
-      worker.onerror = () => { clearTimeout(timer); reject(new Error('decoderError')); };
+      worker.onerror = () => { clearTimeout(timer); worker.terminate(); worker = null; decoderReady = null; reject(new Error('decoderError')); };
       worker.postMessage({ file });
     });
   }
@@ -105,7 +109,7 @@ export async function decodePhoto(file) {
     checkSize(width, height);
     const scale = Math.min(1, 4096 / Math.max(width, height));
     const canvas = document.createElement('canvas');
-    canvas.width = Math.round(width * scale); canvas.height = Math.round(height * scale);
+    canvas.width = Math.max(1,Math.round(width * scale)); canvas.height = Math.max(1,Math.round(height * scale));
     const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.drawImage(image,0,0,canvas.width,canvas.height);
