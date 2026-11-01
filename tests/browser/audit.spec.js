@@ -38,10 +38,15 @@ test('failed replacements preserve the current crop, edits and downloaded JPEG',
 
 test('stalled HEIC setup times out, unlocks selection and can retry',async({page})=>{
   await page.clock.install();
+  await page.addInitScript(()=>{
+    const decode=HTMLImageElement.prototype.decode;
+    HTMLImageElement.prototype.decode=function(){return decode.call(this).finally(()=>{window.photoDecodeFinished=true;});};
+  });
   await page.route('**/src/decode-worker.js',route=>route.fulfill({contentType:'text/javascript',body:'await new Promise(() => {});'}));
   await page.goto('./');await expect(page.locator('body')).not.toHaveAttribute('inert');
   await page.locator('#photo').setInputFiles(fileURLToPath(new URL('../fixtures/quadrants.heic',import.meta.url)));
   await expect(page.locator('#photo')).toBeDisabled();
+  await page.waitForFunction(()=>window.photoDecodeFinished);
   await page.clock.fastForward(45001);
   await expect(page.locator('#photo')).toBeEnabled();await expect(page.locator('#error')).toContainText('HEIC');
   await page.unroute('**/src/decode-worker.js');await page.clock.resume();
