@@ -482,7 +482,9 @@ $('output-controls').addEventListener('focusin',event=>{
   requestAnimationFrame(()=>{
     if(mode!=='single'||document.activeElement!==target||getComputedStyle($('output-preview')).position!=='sticky')return;
     const preview=$('output-preview').getBoundingClientRect(),field=target.getBoundingClientRect();
-    if(field.top<preview.bottom+12)window.scrollBy({top:field.top-preview.bottom-12,behavior:'instant'});
+    const label=target.labels?.[0];
+    const top=label&&!label.classList.contains('visually-hidden')?label.getBoundingClientRect().top:field.top;
+    if(top<preview.bottom+12)window.scrollBy({top:top-preview.bottom-12,behavior:'instant'});
   });
 });
 $('single-fit').onchange=()=>configureSingle('fit');

@@ -40,6 +40,6 @@ test('compact preview sticks during settings and remains visibly marked while ou
   await page.locator('.sheet').screenshot({path:'.qa/output-custom-320-'+info.project.name+'.png'});
   await page.setViewportSize({width:812,height:375});await page.locator('#reset-pixels').scrollIntoViewIfNeeded();expect(await page.locator('#output-preview').evaluate(el=>getComputedStyle(el).position)).toBe('sticky');
   expect((await page.locator('#output-preview').boundingBox()).height).toBeLessThan(140);
-  await page.locator('#pixel-width').focus();await expect.poll(async()=>{const field=await page.locator('#pixel-width').boundingBox(),pinned=await page.locator('#output-preview').boundingBox();return field.y-pinned.y-pinned.height;}).toBeGreaterThanOrEqual(0);
+  await page.locator('#pixel-width').focus();await expect.poll(async()=>{const field=await page.locator('#pixel-width').locator('..').boundingBox(),pinned=await page.locator('#output-preview').boundingBox();return field.y-pinned.y-pinned.height;}).toBeGreaterThanOrEqual(0);
   await page.screenshot({path:'.qa/output-custom-landscape-'+info.project.name+'.png'});
 });
