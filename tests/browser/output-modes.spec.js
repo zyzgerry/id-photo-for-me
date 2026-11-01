@@ -88,7 +88,7 @@ test('single mode preserves a full HEIC photo and exports offline without arrang
   await expect(page.locator('#pixel-width')).toHaveValue('120');await expect(page.locator('#pixel-height')).toHaveValue('80');
   await expect(page.locator('#custom-fields')).toBeHidden();await expect(page.locator('#crop-controls')).toBeHidden();await expect(page.locator('#print-guides')).toBeHidden();
   const result=await download(page);expect(result.size).toEqual([120,80]);expect(result.bytes.length).toBeLessThanOrEqual(300000);expect(result.name).toBe('photo-120x80.jpg');
-  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('90');await ready(page);await expect(page.locator('#pixel-height')).toHaveValue('60');
+  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-width').fill('90');await ready(page);await expect(page.locator('#pixel-height')).toHaveValue('60');
   expect((await download(page)).size).toEqual([90,60]);
 });
 
@@ -102,10 +102,10 @@ test('file-size and exact-pixel targets apply exclusively and show the encoded f
   await expect(page.locator('#result-size')).toHaveText((limited.bytes.length/1000).toFixed(1)+' KB');
   await page.locator('#max-kb').fill('0');await expect(page.locator('#save')).toBeDisabled();
   await page.locator('[name=compression-target][value=pixels]').check();
-  await expect(page.locator('#max-kb')).toBeHidden();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('1200');await ready(page);
+  await expect(page.locator('#max-kb')).toBeHidden();await page.locator('#pixel-width').fill('1200');await ready(page);
   const exact=await download(page);expect(exact.size).toEqual([1200,900]);expect(exact.bytes.length).toBeGreaterThan(100000);
   await page.locator('.sheet').screenshot({path:`.qa/compression-pixels-${info.project.name}.png`});
-  await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('0');await expect(page.locator('#save')).toBeDisabled();
+  await page.locator('#pixel-width').fill('0');await expect(page.locator('#save')).toBeDisabled();
   await page.locator('[name=compression-target][value=file]').check();await page.locator('#max-kb').fill('100');await ready(page);
   expect((await download(page)).bytes.length).toBeLessThanOrEqual(100000);await expect(page.locator('#pixel-width')).toBeHidden();
   await page.setViewportSize({width:320,height:900});await page.locator('#language').check();
@@ -116,7 +116,7 @@ test('file-size and exact-pixel targets apply exclusively and show the encoded f
 test('single crop supports exact pixel dimensions and mode changes preserve print edits',async({page})=>{
   await openApp(page);await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   await page.locator('#zoom').evaluate(el=>{el.value='2';el.dispatchEvent(new Event('input',{bubbles:true}));});await ready(page);
-  await single(page);await page.locator('#single-fit').selectOption('crop');await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('600');
+  await single(page);await page.locator('#single-fit').selectOption('crop');await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-width').fill('600');
   await ready(page);
   expect((await download(page)).size).toEqual([600,600]);await expect(page.locator('#crop-controls')).toBeVisible();
   await page.locator('#single-fit').selectOption('original');await ready(page);

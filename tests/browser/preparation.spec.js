@@ -46,7 +46,7 @@ test('ID preparation is first and defaults to source-detail JPEG quality; compre
   await page.locator('#photo').setInputFiles({name:'detail.png',mimeType:'image/png',buffer:await detailPhoto(page)});await expect(page.locator('#save')).toBeEnabled();
   await expect(page.locator('[name=output-quality][value=quality]')).toBeChecked();
   await expect(page.locator('#compression-settings')).toBeHidden();
-  const preview=await page.locator('.sheet-stage').boundingBox();expect(preview.height).toBeLessThanOrEqual(210);
+  const preview=await page.locator('.sheet-stage').boundingBox();expect(preview.height).toBeLessThanOrEqual(270); // Includes the 44px Inspect JPEG action.
   const exportHeading=await page.locator('.export-title').boundingBox(), actions=await page.locator('.export-actions').boundingBox();expect(actions.y).toBeGreaterThanOrEqual(exportHeading.y+exportHeading.height);
   const best=await downloadInfo(page);expect([best.width,best.height]).toEqual([1200,1200]);await expect(page.locator('#single-result')).toContainText(new Intl.NumberFormat('en',{minimumFractionDigits:1,maximumFractionDigits:1}).format(best.bytes/1000)+' KB');await expect(page.locator('#single-result')).toContainText('100/100');
   await page.locator('#sheet-title').scrollIntoViewIfNeeded();await page.locator('.sheet').screenshot({path:`.qa/customize-quality-${testInfo.project.name}.png`});
@@ -55,11 +55,11 @@ test('ID preparation is first and defaults to source-detail JPEG quality; compre
   const compressed=await downloadInfo(page);expect(compressed.bytes).toBeLessThanOrEqual(300000);expect(compressed.bytes).toBeLessThan(best.bytes);
   await page.locator('#max-kb').fill('100');await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).bytes).toBeLessThanOrEqual(100000);
   await page.locator('.sheet').screenshot({path:`.qa/customize-compression-${testInfo.project.name}.png`});
-  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('400');await expect(page.locator('#pixel-height')).toHaveValue('400');await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBeLessThanOrEqual(400);
-  await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('0');await expect(page.locator('#save')).toBeDisabled();
+  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-width').fill('400');await expect(page.locator('#pixel-height')).toHaveValue('400');await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBeLessThanOrEqual(400);
+  await page.locator('#pixel-width').fill('0');await expect(page.locator('#save')).toBeDisabled();
   await page.locator('[name=output-quality][value=quality]').check();await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBe(1200);
   await page.locator('[name=output-quality][value=compress]').check();await expect(page.locator('#save')).toBeDisabled();await expect(page.locator('#pixel-width')).toBeVisible();
-  await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('600');await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('#pixel-width').fill('600');await expect(page.locator('#save')).toBeEnabled();
   await page.locator('[name=output-mode][value=print]').check();await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBe(1800);
   await page.locator('[name=output-mode][value=single]').check();await expect(page.locator('[name=output-quality][value=compress]')).toBeChecked();await expect(page.locator('#max-kb')).toHaveValue('100');
   await page.locator('#clear').click();await expect(page.locator('#save')).toBeDisabled();await expect(page.locator('#crop-wrap')).toBeHidden();
@@ -124,7 +124,7 @@ test('file-size-only compression keeps an already-small best-quality JPEG byte-f
   await page.locator('#zoom').fill('1.2');await expect(page.locator('#save')).toBeEnabled();const zoomed=await take();
   await page.locator('[name=output-quality][value=quality]').check();await expect(page.locator('#save')).toBeEnabled();expect((await take()).equals(zoomed)).toBe(true);
   await page.locator('#zoom').fill('1');await page.locator('[name=output-quality][value=compress]').check();await expect(page.locator('#save')).toBeEnabled();expect((await take()).equals(best)).toBe(true);
-  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('413');await expect(page.locator('#pixel-height')).toHaveValue('531');await expect(page.locator('#save')).toBeEnabled();expect((await take()).equals(best)).toBe(false);
+  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-width').fill('413');await expect(page.locator('#pixel-height')).toHaveValue('531');await expect(page.locator('#save')).toBeEnabled();expect((await take()).equals(best)).toBe(false);
 });
 
 test('reset pixels recovers invalid overrides without changing framing',async({page})=>{
@@ -132,7 +132,7 @@ test('reset pixels recovers invalid overrides without changing framing',async({p
   await page.locator('[name=output-quality][value=compress]').check();
   await page.locator('#max-kb').fill('200');await page.locator('[name=compression-target][value=pixels]').check();
   const width=await page.locator('#pixel-width').inputValue(),height=await page.locator('#pixel-height').inputValue();
-  await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('1');await page.locator('#pixel-axis').selectOption('height');await page.locator('#pixel-height').fill('');await expect(page.locator('#save')).toBeDisabled();
+  await page.locator('#pixel-width').fill('1');await page.locator('#pixel-height').fill('');await expect(page.locator('#save')).toBeDisabled();
   await page.locator('#reset-pixels').click();
   await expect(page.locator('#pixel-width')).toHaveValue(width);await expect(page.locator('#pixel-height')).toHaveValue(height);
   await expect(page.locator('#max-kb')).toHaveValue('200');await expect(page.locator('#single-error')).toBeHidden();await expect(page.locator('#save')).toBeEnabled();

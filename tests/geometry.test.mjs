@@ -149,3 +149,11 @@ test('JPEG respects minimum pixels, rejects impossible caps and cancels stale wo
   await assert.rejects(encodedWith(()=>200000,{minWidth:400,minHeight:500}),/fileTargetError/);
   await assert.rejects(encodedWith(()=>100000,{},()=>false),{name:'AbortError'});
 });
+
+
+test('custom JPEG exports the chosen quality without a cap, search or resizing',async()=>{
+  const calls=[];
+  const result=await encodedWith((w,h,q)=>{calls.push(q);return 200000;},{maxBytes:Infinity,allowResize:false,quality:0.01});
+  assert.deepEqual(calls,[0.01]);assert.equal(result.quality,0.01);assert.equal(result.width,400);assert.equal(result.blob.size,200000);
+  for(const quality of [0,1.01,NaN,Infinity]) assert.throws(()=>validateSingle({width:400,height:500,maxKB:null,allowResize:false,minWidth:1,minHeight:1,quality}),/singleDimensionsError/);
+});

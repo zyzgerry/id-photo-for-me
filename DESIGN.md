@@ -46,6 +46,9 @@ The header uses a native checkbox switch styled as an English / 中文 pill, wit
 
 Section 1 is Photo Dimensions Requirements. A keyboard-accessible two-tab switch defaults to Pick by document (country/document, sourced dimensions). Custom dimensions exposes only editable framing/ratio fields for single output or physical dimensions/units for sheets. Custom is not a country. Country/document selection survives switching to custom and back; current photo edits retain existing review safeguards.
 
-Pixel dimensions are a separate compression target. Reset restores automatic crop-derived dimensions without changing the crop or the saved value in the inactive KB field.
+Full custom compression combines a synchronized quality slider/number input (1–100) and two compact, editable, linked pixel inputs. The other side is labeled calculated after either is edited. Reset restores automatic crop-derived dimensions without changing quality or the inactive Auto KB value.
 
-Digital-only presets and their validation module are removed. Printed document choices remain for crop proportions/physical printing. In pixel mode show the linked crop ratio and Change crop ratio action above a width/height basis selector. Only the chosen side is editable; the other is readonly and explicitly labeled calculated. Preserve the chosen edge when editing the crop ratio. Document selection must not silently replace the user’s KB limit.
+Digital-only presets and their validation module are removed. Printed document choices remain for crop proportions/physical printing. In Custom show the linked crop ratio and editable width/height inputs; remove the basis selector and Change crop ratio link. Preserve the chosen edge when editing the crop ratio. Document selection must not silently replace the user’s KB limit.
+
+
+The close-up viewer uses a native full-screen dialog and the full-resolution encoded export blob. Clear Close, Fit, actual-pixel 100%, zoom buttons/readout and a neutral image stage support quality inspection. Preserve native focus trapping/Escape, explicitly restore opener focus in Safari, and provide keyboard panning alongside pinch/drag. Controls are at least 44px, wrap on small screens, honor safe-area insets and reduced motion, and release blob URLs when closed or invalidated.

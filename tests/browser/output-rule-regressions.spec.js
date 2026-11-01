@@ -24,17 +24,17 @@ test('printed document selection adds no digital byte, compression or pixel limi
   await photo(page,256);await page.locator('#max-kb').fill('1000');await expect(page.locator('#save')).toBeEnabled({timeout:15000});
   const result=await download(page);expect(result.bytes).toBeGreaterThan(240000);expect(result.bytes).toBeLessThanOrEqual(1000000);
   await page.locator('#country').selectOption('cn');await expect(page.locator('#max-kb')).toHaveValue('1000');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled({timeout:15000});
-  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('100');
+  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-width').fill('100');
   await expect(page.locator('#save')).toBeEnabled();expect((await download(page)).size[0]).toBe(100);
 });
 test('one pixel dimension is calculated and changing ratio retains the chosen editable edge',async({page},info)=>{
   await openApp(page,'single');await page.locator('#country').selectOption('schengen');await photo(page,4);
   await page.locator('[name=output-quality][value=compress]').check();await page.locator('[name=compression-target][value=pixels]').check();
-  await expect(page.locator('#pixel-height')).toHaveAttribute('readonly','');await page.locator('#pixel-width').fill('600');
+  await expect(page.locator('#pixel-height')).not.toHaveAttribute('readonly','');await page.locator('#pixel-width').fill('600');
   await expect(page.locator('#pixel-height')).toHaveValue('771');await expect(page.locator('#pixel-ratio')).toContainText('35 : 45');
-  await page.locator('#pixel-axis').selectOption('height');await expect(page.locator('#pixel-width')).toHaveAttribute('readonly','');await page.locator('#pixel-height').fill('600');await expect(page.locator('#pixel-width')).toHaveValue('467');
+  await expect(page.locator('#pixel-width')).not.toHaveAttribute('readonly','');await page.locator('#pixel-height').fill('600');await expect(page.locator('#pixel-width')).toHaveValue('467');
   await page.locator('.sheet').screenshot({path:`.qa/pixel-linked-${info.project.name}.png`});
-  await page.locator('#change-output-ratio').click();await expect(page.locator('#ratio-width')).toBeFocused();
+  await expect(page.locator('#change-output-ratio')).toHaveCount(0);await page.locator('#custom-requirements').click();await page.locator('#single-fit').selectOption('crop');
   await page.locator('#ratio-width').fill('1');await page.locator('#ratio-height').fill('1');await reviewFraming(page);
   await expect(page.locator('#pixel-width')).toHaveValue('600');await expect(page.locator('#pixel-height')).toHaveValue('600');await expect(page.locator('#save')).toBeEnabled();
   expect((await download(page)).size).toEqual([600,600]);

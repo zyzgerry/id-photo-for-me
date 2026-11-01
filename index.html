@@ -130,18 +130,20 @@
           <p id="quality-help" class="hint" data-i18n="qualityHelp">Keep the available crop detail at maximum JPEG quality. Choose compression for an upload file limit.</p>
           <div id="compression-settings" hidden>
             <fieldset class="compression-picker"><legend data-i18n="compressionTarget">What do you want to set?</legend>
-              <label><input type="radio" name="compression-target" value="file" checked><span data-i18n="setFileSize">Set maximum file size</span></label>
-              <label><input type="radio" name="compression-target" value="pixels"><span data-i18n="setPixels">Set pixel dimensions</span></label>
+              <label><input type="radio" name="compression-target" value="file" checked><span data-i18n="autoCompression">Auto compression</span></label>
+              <label><input type="radio" name="compression-target" value="pixels"><span data-i18n="customCompression">Full custom compression</span></label>
             </fieldset>
             <div id="file-size-settings">
               <label for="max-kb" data-i18n="maxKB">Maximum file size (KB)</label><input id="max-kb" type="number" inputmode="decimal" min="1" max="30000" step="any" value="300">
               <p class="hint" data-i18n="sizeHelp">Enter the upload site's file-size limit. We reduce JPEG quality and, if needed, pixel dimensions to fit.</p>
             </div>
             <div id="pixel-settings" hidden>
-              <p class="hint" data-i18n="pixelPurpose">Set the exact pixel size your application asks for. File size is not limited in this mode.</p>
-              <p id="pixel-ratio" class="ratio-notice"></p><button id="change-output-ratio" type="button" class="text-button" data-i18n="changeRatio">Change crop ratio</button>
-              <label for="pixel-axis" data-i18n="pixelAxis">Which side do you want to set?</label><select id="pixel-axis"><option value="width" data-i18n="setWidth">Set width; calculate height</option><option value="height" data-i18n="setHeight">Set height; calculate width</option></select>
-              <div class="two-fields single-fields"><label><span id="pixel-width-label" data-i18n="pixelWidth">Width (pixels)</span><input id="pixel-width" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label><label><span id="pixel-height-label" data-i18n="pixelHeight">Height (pixels)</span><input id="pixel-height" type="number" readonly inputmode="numeric" min="1" max="4096" step="1" value="1200"></label></div>
+              <p class="hint" data-i18n="pixelPurpose">Choose quality and pixels, then inspect the actual JPEG and file size. No file-size cap applies.</p>
+              <label for="jpeg-quality" data-i18n="qualitySetting">JPEG quality setting (1–100)</label>
+              <div class="quality-controls"><input id="jpeg-quality-slider" type="range" min="1" max="100" step="1" value="100" aria-labelledby="custom-quality-label"><label class="visually-hidden" id="custom-quality-label" for="jpeg-quality-slider" data-i18n="qualitySetting">JPEG quality setting (1–100)</label><input id="jpeg-quality" type="number" inputmode="numeric" min="1" max="100" step="1" value="100" aria-describedby="custom-quality-help"></div>
+              <p id="custom-quality-help" class="hint" data-i18n="qualityMeaning"></p>
+              <p id="pixel-ratio" class="ratio-notice"></p>
+              <div class="two-fields single-fields"><label><span id="pixel-width-label" data-i18n="pixelWidth">Width (pixels)</span><input id="pixel-width" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label><label><span id="pixel-height-label" data-i18n="pixelHeight">Height (pixels)</span><input id="pixel-height" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label></div>
               <button id="reset-pixels" type="button" class="text-button" data-i18n="resetPixels">Reset pixel dimensions</button>
               <p class="hint" data-i18n="pixelHelp">Width and height stay linked to your crop. Change the crop proportions in section 1. Maximum: 4096 pixels per side.</p>
             </div>
@@ -150,7 +152,7 @@
           <p id="single-error" class="error" hidden></p>
         </div>
 </fieldset>
-        <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
+        <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><button id="inspect-output" type="button" class="inspect-output" data-i18n="inspectJpeg" hidden>Inspect JPEG</button><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
         <div class="output-details">
         <div id="print-summary"><div class="copy-picker"><label class="visually-hidden" for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6" aria-describedby="capacity copy-error" disabled><span data-i18n="copies" aria-hidden="true">copies</span></div><p id="capacity" class="hint"></p><p id="copy-error" class="error" hidden></p></div>
         <div id="print-guides">
@@ -170,6 +172,11 @@
       </div>
     </div>
   </main>
+  <dialog id="jpeg-viewer" aria-labelledby="viewer-title" aria-describedby="viewer-meta viewer-help">
+    <header class="viewer-header"><div><h2 id="viewer-title" data-i18n="inspectJpeg">Inspect JPEG</h2><p id="viewer-meta"></p></div><button id="viewer-close" type="button" class="button quiet" data-i18n="closeViewer" autofocus>Close</button></header>
+    <div id="viewer-viewport" tabindex="0" role="region" aria-label="JPEG preview"><div class="viewer-surface"><img id="viewer-image" alt="" draggable="false"></div></div>
+    <footer class="viewer-footer"><div class="viewer-controls"><button id="viewer-fit" type="button" data-i18n="fitView">Fit</button><button id="viewer-actual" type="button" data-i18n="actualView">100%</button><button id="viewer-out" type="button" aria-label="Zoom out">−</button><output id="viewer-zoom" aria-live="polite">100%</output><button id="viewer-in" type="button" aria-label="Zoom in">+</button></div><p id="viewer-help" data-i18n="viewerHelp">Pinch or use + / − to zoom. Drag or use arrow keys to explore.</p></footer>
+  </dialog>
   <footer class="shell"><span data-i18n="local">Local processing</span><a href="./THIRD_PARTY.md" target="_blank" rel="noopener" data-i18n="source">Decoder notices</a></footer>
 </body>
 </html>

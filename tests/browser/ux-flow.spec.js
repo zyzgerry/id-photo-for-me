@@ -36,7 +36,7 @@ test('changing requirements preserves edits, blocks export for review, and retai
   await expect(page.locator('#zoom')).toHaveValue('1.5');await page.locator('#confirm-framing').click();await expect(page.locator('#save')).toBeEnabled();
   await page.locator('[value=single][name=output-mode]').check();await page.locator('#custom-requirements').click();await page.locator('#single-fit').selectOption('crop');
   await page.locator('#ratio-width').fill('3');await page.locator('#ratio-height').fill('4');
-  await page.locator('#confirm-framing').click();await page.locator('[name=output-quality][value=compress]').check();await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('600');await expect(page.locator('#pixel-height')).toHaveValue('800');
+  await page.locator('#confirm-framing').click();await page.locator('[name=output-quality][value=compress]').check();await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-width').fill('600');await expect(page.locator('#pixel-height')).toHaveValue('800');
   await page.locator('[value=print][name=output-mode]').check();await expect(page.locator('#custom-requirements')).toHaveAttribute('aria-selected','true');
   await expect(page.locator('#zoom')).toHaveValue('1.5');
   await page.locator('[value=single][name=output-mode]').check();await expect(page.locator('#custom-requirements')).toHaveAttribute('aria-selected','true');

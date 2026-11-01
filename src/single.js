@@ -1,10 +1,11 @@
 import { renderCrop, exportJpeg } from './render.js';
 
-export function validateSingle({width,height,maxKB,allowResize,minWidth,minHeight}) {
+export function validateSingle({width,height,maxKB,allowResize,minWidth,minHeight,quality=1}) {
   if (![width,height,minWidth,minHeight].every(n=>Number.isInteger(n)&&n>=1&&n<=4096) ||
       minWidth>width || minHeight>height ||
+      (!Number.isFinite(quality)||quality<0.01||quality>1) ||
       (maxKB!==null && (!Number.isFinite(maxKB)||maxKB<1||maxKB>30000))) throw new Error('singleDimensionsError');
-  return {width,height,maxBytes:maxKB===null?Infinity:Math.floor(maxKB*1000),allowResize,minWidth,minHeight};
+  return {width,height,maxBytes:maxKB===null?Infinity:Math.floor(maxKB*1000),allowResize,minWidth,minHeight,quality};
 }
 
 export async function exportSingle(image, settings, options, isCurrent = ()=>true) {
@@ -12,6 +13,12 @@ export async function exportSingle(image, settings, options, isCurrent = ()=>tru
   let canvas;
   const active=()=>{if(!isCurrent()) throw new DOMException('Superseded','AbortError');};
   try {
+    if(options.maxBytes===Infinity) {
+      active();canvas=renderCrop(image,settings,width,height);
+      const quality=options.quality??1;
+      const blob=await exportJpeg(canvas,quality);active();
+      return {blob,width,height,quality};
+    }
     const minimumScale=Math.max(options.minWidth/options.width,options.minHeight/options.height);
     let scale=1;
     for (;;) {

@@ -152,3 +152,11 @@ Pre-push November 1 verification: build, diff/syntax checks, all 10 Node tests a
 ## November 1 — staged quality and dimension search
 
 All 15 Node tests, 108 existing Chromium/WebKit scenarios and two new real-encoder scenarios passed. Deterministic pipeline tests cover a narrow quality step above 0.9995, unchanged maximum-quality output, 5% resizing before strong compression, fixed pixels, minimum dimensions, impossible caps and cancellation. Real encoders verify near-maximum and tight byte caps, unchanged fitting bytes and decoded dimensions. Build, JavaScript syntax and diff checks pass. Actual-iPhone visual evaluation remains pending; Linux CI runs Firefox before publishing.
+
+## November 1 — full custom compression and close-up JPEG viewer
+
+Recorded the agreed design in the canonical specification before implementation. Auto's byte-cap algorithm remains unchanged. Custom directly encodes quality 1–100 and linked editable pixels with no cap; mode settings persist, crop changes retain the edited edge, reset restores automatic pixels, and successful replacement resets Custom. Removed pixel-axis and Change crop ratio controls. Added a full-resolution native-dialog viewer with Fit/100%, zoom buttons, pinch/drag, keyboard panning, Escape/Close, Safari focus restoration and object URL cleanup.
+
+All 16 Node checks pass. All 116 Chromium/WebKit cases have passing results: full run 115 passed, with one obsolete 210px preview-height assertion updated to include the 44px inspect button; that complete workflow then passed in both engines. New tests compare the viewer blob with the actual download, cover quality endpoints/invalid inputs, mode retention, reset/replacement, keyboard operation, pointer gestures, reduced motion, portrait/landscape and 320px Chinese layout. Screenshots visually reviewed with synthetic fixtures. Build/syntax/diff checks and HTML IDs/control references/bilingual labels pass. npm's advisory service returned no matching advisories for installed versions.
+
+Full repository Ponytail audit recorded in canonical CUSTOM_COMPRESSION_AUDIT.md: no outstanding reproducible defects. Third-party decoder internals, current legal validity of each catalog source, physical iPhone/VoiceOver/HDR/memory/native-share behavior and physical prints were not revalidated. Linux CI supplies the full three-browser pre-deployment run.
