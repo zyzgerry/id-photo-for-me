@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { layoutSheet, cropRect, withJpegDensity, mmToPx } from '../src/geometry.js';
 import { inspectImage } from '../src/image.js';
-import { validateSingle } from '../src/single.js';
+import { validateSingle, exportSingle } from '../src/single.js';
 import { PRESETS, PREPARATION_PRESETS, VERIFIED } from '../src/presets.js';
 import { messages } from '../src/i18n.js';
 
@@ -104,4 +104,48 @@ test('preparation catalog contains physical formats without digital upload limit
     assert.ok(!p.id.includes('digital'));
     for(const key of ['maxKB','minKB','minWidth','maxWidth','maxCompression','noCrop']) assert.equal(p[key],undefined);
   }
+});
+
+// Exercise the real export pipeline with deterministic encoder steps, independent of browser codecs.
+async function encodedWith(sizeFor, options={}, isCurrent) {
+  const previous=globalThis.document;
+  globalThis.document={createElement:()=>({width:0,height:0,
+    getContext:()=>({fillRect(){},drawImage(){}}),
+    toBlob(callback,type,quality) {
+      const bytes=new Uint8Array(Math.max(4,Math.round(sizeFor(this.width,this.height,quality))-18));
+      bytes.set([255,216,255,217]);callback(new Blob([bytes],{type}));
+    }
+  })};
+  try {
+    return await exportSingle({width:400,height:500},{ratio:0.8},
+      {width:400,height:500,maxBytes:140000,allowResize:true,minWidth:1,minHeight:1,...options},isCurrent);
+  } finally {globalThis.document=previous;}
+}
+
+test('JPEG search catches a narrow setting immediately below maximum quality',async()=>{
+  const result=await encodedWith((w,h,q)=>q===1?141200:q>=0.9995?139500:56900);
+  assert.equal(result.blob.size,139500);assert.equal(result.width,400);
+  assert.ok(result.quality>=0.9995 && result.quality<1);
+});
+
+test('JPEG keeps maximum quality unchanged when it fits',async()=>{
+  const result=await encodedWith(()=>141200,{maxBytes:200000});
+  assert.equal(result.quality,1);assert.equal(result.width,400);assert.equal(result.blob.size,141200);
+});
+
+test('JPEG tries modest resizing before strong compression',async()=>{
+  const result=await encodedWith((w,h,q)=>w===400?(q>=0.9?160000:100000):130000);
+  assert.equal(result.width,380);assert.equal(result.height,475);assert.equal(result.quality,1);
+});
+
+test('JPEG retains fixed pixels and can relax quality when resizing is forbidden',async()=>{
+  const result=await encodedWith((w,h,q)=>q>=0.9?160000:130000,{allowResize:false});
+  assert.equal(result.width,400);assert.ok(result.quality<0.9 && result.quality>=0.8);
+});
+
+test('JPEG respects minimum pixels, rejects impossible caps and cancels stale work',async()=>{
+  const result=await encodedWith((w,h,q)=>w*h*2,{maxBytes:10000,minWidth:40,minHeight:50});
+  assert.ok(result.width>=40 && result.height>=50 && result.blob.size<=10000);
+  await assert.rejects(encodedWith(()=>200000,{minWidth:400,minHeight:500}),/fileTargetError/);
+  await assert.rejects(encodedWith(()=>100000,{},()=>false),{name:'AbortError'});
 });
