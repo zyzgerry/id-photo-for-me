@@ -9,10 +9,11 @@ test('requirements and upload precede editing at every layout size',async({page}
   for(const [width,height] of [[1440,1000],[1024,900],[760,900],[375,812],[320,640],[844,390]]){
     await page.setViewportSize({width,height});await openApp(page);
     for(const language of ['en','zh']){
-      await page.locator('#language').selectOption(language);
+      await page.locator('#language').setChecked((language)==='zh');
       for(const mode of ['print','single']){
         const radio=page.locator(`[name=output-mode][value=${mode}]`);
-        await radio.check();await radio.focus();await page.keyboard.press('Tab');await expect(page.locator('#custom-requirements')).toBeFocused();
+        await radio.check();await radio.focus();await expect(radio).toBeFocused();
+        expect(await page.locator('.mode-picker').evaluate(el=>!!(document.querySelector('.editor').compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
         const [settings,setup,editor,sheet]=await page.evaluate(()=>['.settings','.setup','.editor','.sheet'].map(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
         expect(setup.y).toBeGreaterThanOrEqual(settings.y+settings.height);
         if(width>760){expect(editor.y).toBeCloseTo(settings.y);expect(editor.x).toBeGreaterThan(settings.x+settings.width);}

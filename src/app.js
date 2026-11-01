@@ -1,5 +1,4 @@
 import { PRESETS, PREPARATION_PRESETS, VERIFIED } from './presets.js';
-import { DIGITAL_PRESETS, checkDigitalOutput } from './digital-presets.js';
 import { messages } from './i18n.js';
 import { SHEET, layoutSheet, cropRect } from './geometry.js';
 import { renderCrop, renderSheet, exportJpeg } from './render.js';
@@ -13,8 +12,8 @@ let file = null, downloadUrl = null, revision = 0, renderTimer, loading = false;
 let statusKey = '', errorKey = '', exportKey = '';
 const settings = { ratio:1,zoom:1,x:50,y:50,brightness:0,contrast:0 };
 const catalog=PREPARATION_PRESETS;
-const activeDigital=()=>mode==='single'?DIGITAL_PRESETS.find(p=>p.id===$('document').value):null;
 const activeRequirement=()=>preset;
+const pixelTarget=()=>document.querySelector('[name=compression-target]:checked').value==='pixels';
 const compressing=()=>document.querySelector('[name=output-quality]:checked').value==='compress';
 const effectiveSettings=()=>activeRequirement()?.restrictEdits&&!$('allow-edits').checked?{...settings,brightness:0,contrast:0}:settings;
 function markFramingReview(){if(photo) settings.review=true;}
@@ -23,9 +22,9 @@ function updateExportAvailability(){
   $('save').disabled=!file||!!settings.review;
   $('share').disabled=!file||!!settings.review||$('share').hidden;
 }
-let pixelsEdited=false;
+let pixelsEdited=false, customRequirements=false, customFraming=null;
 let mode='single', singleOptions=null, singleResult=null, requestedCopies=null, printCapacity=6;
-const canFrame=()=>!preset?.noCrop&&(mode==='print'||$('single-fit').value==='crop');
+const canFrame=()=>mode==='print'||$('single-fit').value==='crop';
 const t = key => messages[lang][key] || messages[lang].decodeError;
 const sizeLabel = () => {
   if (!layout) return '';
@@ -42,7 +41,7 @@ function discardExport() {
 }
 function updateLanguage() {
   document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
-  document.title = t('title'); $('language').value = lang;
+  document.title = t('title'); $('language').checked = lang === 'zh';
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
   $('crop').ariaLabel = lang === 'zh' ? '裁剪预览，可用方向键移动照片' : 'Crop preview; use arrow keys to move the photo';
   $('sheet').ariaLabel = t(mode==='print'?'sheetPreview':'singlePreview');
@@ -60,7 +59,7 @@ function updateCountries() {
   const names = new Intl.DisplayNames([lang], {type:'region'});
   const countries = [...new Set(catalog.map(p=>p.country))]
     .map(code=>({code,name:code==='schengen'?t('schengen'):names.of(code.toUpperCase())})).sort((a,b)=>a.name.localeCompare(b.name,lang));
-  $('country').replaceChildren(...countries.map(({code,name})=>new Option(name,code)), new Option(t('custom'),'custom'));
+  $('country').replaceChildren(...countries.map(({code,name})=>new Option(name,code)));
   $('country').value = old || PRESETS[0].country;
 }
 
@@ -75,14 +74,16 @@ function updateDocuments(reset = true) {
 
 function updatePresetDetails() {
   const requirement=activeRequirement();
-  $('custom-fields').hidden = mode!=='print'||$('country').value !== 'custom';
-  $('digital-framing').hidden=mode!=='single';
+  $('document-requirements-panel').hidden=customRequirements;
+  $('custom-requirements-panel').hidden=!customRequirements;
+  for(const [id,selected] of [['document-requirements',!customRequirements],['custom-requirements',customRequirements]]) {$(id).setAttribute('aria-selected',String(selected));$(id).tabIndex=selected?0:-1;}
+  document.querySelector('.requirements-tabs').ariaLabel=t('step1');
+  $('custom-fields').hidden = mode!=='print'||!customRequirements;
+  $('digital-framing').hidden=mode!=='single'||!customRequirements;
   $('ratio-fields').hidden=mode!=='single'||$('single-fit').value==='original';
   for(const id of ['single-fit','ratio-width','ratio-height']) $(id).disabled=!!preset;
   $('country-help').textContent=t(mode==='print'?'countryHelp':'digitalCountryHelp');
-  $('allow-edits').disabled=!!requirement?.noCrop;
-  $('digital-route-note').hidden=!requirement?.noCrop;
-  $('document-fields').hidden = $('country').value === 'custom';
+  $('document-fields').hidden = customRequirements;
   $('preset-location').hidden = !requirement?.scope;
   $('preset-scope').hidden = !requirement?.scope;
   $('preset-scope').textContent = requirement?.scope?.[lang] || '';
@@ -101,17 +102,23 @@ function updatePresetDetails() {
   $('copies').disabled=$('cut-guides').disabled=!photo;
   $('output-empty').hidden=!!photo;
   if(mode==='single'){
-    const digital=activeDigital();
-    $('size-readout').textContent=digital?`${digital.minWidth}×${digital.minHeight}–${digital.maxWidth}×${digital.maxHeight} px · ${digital.minKB}–${digital.maxKB} KB`:preset?`${preset.widthMm}×${preset.heightMm} ${lang==='zh'?'毫米':'mm'}`:t('digitalCustomSummary');
+    $('size-readout').textContent=preset?`${preset.widthMm}×${preset.heightMm} ${lang==='zh'?'毫米':'mm'}`:t('digitalCustomSummary');
   }
   $('compression-settings').hidden=!compressing();
+  $('file-size-settings').hidden=pixelTarget();$('pixel-settings').hidden=!pixelTarget();
+  const heightAxis=$('pixel-axis').value==='height';
+  $('pixel-width').readOnly=heightAxis;$('pixel-height').readOnly=!heightAxis;
+  $('pixel-width-label').textContent=t(heightAxis?'calculatedWidth':'pixelWidth');
+  $('pixel-height-label').textContent=t(heightAxis?'pixelHeight':'calculatedHeight');
+  const ratioWidth=canFrame()?$('ratio-width').value:photo?.canvas.width;
+  const ratioHeight=canFrame()?$('ratio-height').value:photo?.canvas.height;
+  $('pixel-ratio').textContent=ratioWidth&&ratioHeight?`${t('linkedRatio')}: ${ratioWidth} : ${ratioHeight}`:t('pixelHelp');
   $('quality-help').textContent=t(compressing()?'compressionHelp':'qualityHelp');
 
 }
 
 function updateModeLabels() {
   document.querySelector('.intro h1').textContent=t('workspaceTitle');
-  document.querySelector('.intro .lead').textContent=t('subtitle');
   $('size-title').textContent=t('step1');
   $('save').textContent=t(mode==='print'?'savePrint':'saveSingle');
   $('sheet').ariaLabel=t(mode==='print'?'sheetPreview':'singlePreview');
@@ -127,8 +134,7 @@ function updateModeLabels() {
 
 function printLayout(clamp = false) {
   const multiplier=$('units').value==='inch'?25.4:1;
-  if(preset?.noCrop) throw new Error('printRouteError');
-  const physical=PRESETS.find(p=>p.id===preset?.printId)||preset;
+  const physical=preset;
   const width=physical?.widthMm??Number($('width').value)*multiplier;
   const height=physical?.heightMm??Number($('height').value)*multiplier;
   const maximum=layoutSheet(width,height);
@@ -145,7 +151,7 @@ function chooseSize(review=true) {
   if(review) markFramingReview();
   const previousRatio = settings.ratio;
   preset = catalog.find(p => p.id === $('document').value) || null;
-  if ($('country').value === 'custom') preset = null;
+  if (customRequirements) preset = null;
   setError();
   try {
     layout = printLayout(true); settings.ratio = layout.widthMm/layout.heightMm;
@@ -153,7 +159,7 @@ function chooseSize(review=true) {
     if (Math.abs(previousRatio - settings.ratio) > 1e-6) {
       if (photo) {markFramingReview();setStatus('cropChanged');}
     }
-  } catch (e) { layout = null; setError(['noFit','printRouteError'].includes(e.message)?e.message:'dimensionsError'); }
+  } catch (e) { layout = null; setError(e.message==='noFit'?e.message:'dimensionsError'); }
   updatePresetDetails(); updateReadouts(); scheduleRender();
 }
 
@@ -165,7 +171,7 @@ function configureSingle(changed) {
   if(Number.isFinite(ratio)&&ratio>0){
     if(changed==='mode'&&Math.abs(settings.ratio-ratio)>1e-6) markFramingReview();
     settings.ratio=ratio;
-    if(changed==='pixel-height') $('pixel-width').value=Math.max(1,Math.round(Number($('pixel-height').value)*ratio));
+    if(changed==='pixel-height'||(pixelTarget()&&pixelsEdited&&$('pixel-axis').value==='height'&&changed!=='pixel-width')) $('pixel-width').value=Math.max(1,Math.round(Number($('pixel-height').value)*ratio));
     else if(($('single-fit').value==='original'&&photo)||['pixel-width','fit','ratio','preset','photo','mode'].includes(changed)) $('pixel-height').value=Math.max(1,Math.round(Number($('pixel-width').value)/ratio));
   }
   if(!canFrame()) Object.assign(settings,{zoom:1,x:50,y:50});
@@ -173,7 +179,7 @@ function configureSingle(changed) {
   try {
     singleOptions=singleOutputOptions();
   } catch(e) {singleOptions=null;showSingleError(e.message);
-    if(compressing()&&['pixel-width','pixel-height','min-width','min-height'].some(id=>!$(id).checkValidity()||($(id).value!==''&&Number($(id).value)<1))) $('pixel-settings').open=true;
+
   }
   updateModeLabels();updatePresetDetails();updateReadouts();scheduleRender();
 }
@@ -192,7 +198,7 @@ function setMode(next) {
   $('sheet').hidden=true;$('sheet-empty').hidden=false;
   updateModeLabels();
   if(mode==='single') {
-    if(preset){$('single-fit').value=preset.fit||'crop';$('ratio-width').value=preset.width??preset.widthMm;$('ratio-height').value=preset.height??preset.heightMm;}
+    if(preset){$('single-fit').value='crop';$('ratio-width').value=preset.widthMm;$('ratio-height').value=preset.heightMm;}
     else if($('single-fit').value==='crop'){
       const multiplier=$('units').value==='inch'?25.4:1;
       $('ratio-width').value=Number($('width').value)*multiplier;$('ratio-height').value=Number($('height').value)*multiplier;
@@ -214,18 +220,15 @@ function singleOutputOptions(){
   if(!Number.isFinite(settings.ratio)||settings.ratio<=0||
     (canFrame()&&['ratio-width','ratio-height'].some(id=>!Number($(id).value)||!$(id).checkValidity()))) throw new Error('singleDimensionsError');
   if(!compressing()) return photo?bestQualityOptions():null;
-  const p=activeDigital();
-  if(['pixel-width','pixel-height','max-kb','min-width','min-height'].some(id=>$(id).validity.badInput)) throw new Error('singleDimensionsError');
-  if(photo&&!pixelsEdited){
-    const natural=bestQualityOptions();
-    const scale=p?Math.min(1,p.maxWidth/natural.width,p.maxHeight/natural.height):1;
-    $('pixel-width').value=Math.max(1,Math.floor(natural.width*scale));
-    $('pixel-height').value=Math.max(1,Math.floor(natural.height*scale));
-  }
-  const options=validateSingle({width:Number($('pixel-width').value),height:Number($('pixel-height').value),
-    maxKB:$('max-kb').value===''?null:Number($('max-kb').value),allowResize:$('allow-resize').checked,
-    minWidth:$('min-width').value===''?1:Number($('min-width').value),minHeight:$('min-height').value===''?1:Number($('min-height').value)});
-  if(p&&(options.width<p.minWidth||options.height<p.minHeight||options.width>p.maxWidth||options.height>p.maxHeight)) throw new Error('digitalConstraintsError');
+  if(!photo) return null;
+  const pixels=pixelTarget(), automatic=bestQualityOptions();
+  if(!pixelsEdited){$('pixel-width').value=automatic.width;$('pixel-height').value=automatic.height;}
+  const fields=pixels?['pixel-width','pixel-height']:['max-kb'];
+  if(fields.some(id=>!$(id).checkValidity()||!Number($(id).value))) throw new Error(pixels?'pixelDimensionsError':'fileSizeError');
+  const width=pixels?Number($('pixel-width').value):automatic.width,height=pixels?Number($('pixel-height').value):automatic.height;
+  const options=validateSingle({width,height,
+    maxKB:pixels?null:Number($('max-kb').value),allowResize:!pixels,
+    minWidth:1,minHeight:1});
   return options;
 }
 
@@ -262,7 +265,9 @@ function updateReadouts() {
   $('single-result').hidden=mode!=='single'||!singleResult;
   if(singleResult) {
     const {width,height,blob,quality}=singleResult;
-    $('single-result').textContent=`${width}×${height} px · ${(blob.size/1000).toFixed(1)} KB (${blob.size} ${t('bytes')}) · ${t('jpegQuality')}: ${Math.round(quality*100)}/100`+
+    $('result-size').textContent=new Intl.NumberFormat(lang,{maximumFractionDigits:1,minimumFractionDigits:1}).format(blob.size/1000)+' KB';
+    $('result-pixels').textContent=`${width}×${height} px`;
+    $('result-quality').textContent=`${t('jpegQuality')}: ${Math.round(quality*100)}/100`+
       (singleOptions&&(width!==singleOptions.width||height!==singleOptions.height)?` ${t('reducedPixels')}`:'');
   }
   const showGuides = !!photo && !!preset && $('guides').checked;
@@ -319,7 +324,6 @@ function scheduleRender() {
         filename='id-photo-4x6-300ppi.jpg';
       } else {
         const result=await exportSingle(photo.canvas,{...effectiveSettings()},{...singleOptions},()=>current===revision);
-        if(compressing()) checkDigitalOutput(activeDigital(),result);
         if(current!==revision) return;
         await drawJpegPreview(result.blob,$('sheet'),()=>current===revision);
         if(current!==revision) return;
@@ -331,7 +335,7 @@ function scheduleRender() {
       $('share').hidden = !navigator.canShare || !navigator.canShare({ files: [file] });
       $('share').disabled = $('share').hidden;
       setExport();updateReadouts();
-    } catch(e) { if (current === revision) { if(mode==='single') showSingleError(['fileTargetError','digitalConstraintsError'].includes(e.message)?e.message:'exportError');else setError('exportError'); setExport(); $('sheet').hidden = true; $('sheet-empty').hidden = false; } }
+    } catch(e) { if (current === revision) { if(mode==='single') showSingleError(e.message==='fileTargetError'?e.message:'exportError');else setError('exportError'); setExport(); $('sheet').hidden = true; $('sheet-empty').hidden = false; } }
     finally { if (sheet) sheet.width = sheet.height = 1; }
   }, 110);
 }
@@ -391,25 +395,33 @@ $('photo').addEventListener('change', async event => {
 $('clear').onclick = clearPhoto;
 function updateRequirementSelection(){
   pixelsEdited=false;
-  preset=catalog.find(p=>p.id===$('document').value)||null;
+  preset=customRequirements?null:catalog.find(p=>p.id===$('document').value)||null;
   if(preset){
-    const digital=DIGITAL_PRESETS.includes(preset);
     $('single-fit').value=preset.fit||'crop';
-    $('ratio-width').value=digital?preset.width:preset.widthMm;
-    $('ratio-height').value=digital?preset.height:preset.heightMm;
-    $('pixel-width').value=digital?preset.width:Math.round(preset.widthMm*300/25.4);
-    $('pixel-height').value=digital?preset.height:Math.round(preset.heightMm*300/25.4);
-    $('max-kb').value=digital?preset.maxKB:300;
-    $('min-width').value=digital?preset.minWidth:'';$('min-height').value=digital?preset.minHeight:'';
-    $('allow-resize').checked=!digital;
-    if(preset.noCrop) $('allow-edits').checked=false;
+    $('ratio-width').value=preset.widthMm;
+    $('ratio-height').value=preset.heightMm;
   }
   if(mode==='print') chooseSize();
   else {markFramingReview();configureSingle('preset');}
 }
 $('country').onchange = () => {updateDocuments();updateRequirementSelection();};
 $('document').onchange = ()=>updateRequirementSelection();
-$('custom-requirements').onclick=()=>{$('country').value='custom';updateDocuments();updateRequirementSelection();updatePresetDetails();};
+function selectRequirementsTab(custom){
+  if(customRequirements===custom) return;
+  const fields=['single-fit','ratio-width','ratio-height'];
+  if(customRequirements) customFraming=fields.map(id=>$(id).value);
+  else if(customFraming) fields.forEach((id,index)=>{$(id).value=customFraming[index];});
+  customRequirements=custom;updateRequirementSelection();updatePresetDetails();
+}
+for(const [id,custom] of [['document-requirements',false],['custom-requirements',true]]) {
+  $(id).onclick=()=>selectRequirementsTab(custom);
+  $(id).onkeydown=e=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+    e.preventDefault();
+    const next=e.key==='Home'?false:e.key==='End'?true:!custom;
+    selectRequirementsTab(next);$(next?'custom-requirements':'document-requirements').focus();
+  };
+}
 $('review-framing').onclick=()=>{selectTool('framing');$('crop-title').scrollIntoView({block:'start'});$('crop').focus({preventScroll:true});};
 $('confirm-framing').onclick=()=>{settings.review=false;updateExportAvailability();};
 for (const id of ['width','height']) $(id).oninput = chooseSize;
@@ -445,10 +457,26 @@ function chooseCopies() {
 }
 $('copies').oninput=chooseCopies;
 for(const radio of document.querySelectorAll('[name=output-mode]')) radio.onchange=()=>setMode(radio.value);
-for(const id of ['pixel-width','pixel-height','max-kb','min-width','min-height']) $(id).oninput=()=>configureSingle(id);
+for(const id of ['pixel-width','pixel-height','max-kb']) $(id).oninput=()=>configureSingle(id);
 $('single-fit').onchange=()=>configureSingle('fit');
 for(const id of ['ratio-width','ratio-height']) $(id).oninput=()=>configureSingle('ratio');
-$('allow-resize').onchange=()=>configureSingle();
+$('pixel-axis').onchange=updatePresetDetails;
+$('change-output-ratio').onclick=()=>{
+  const width=canFrame()?$('ratio-width').value:photo.canvas.width;
+  const height=canFrame()?$('ratio-height').value:photo.canvas.height;
+  const outputWidth=$('pixel-width').value,outputHeight=$('pixel-height').value,edited=pixelsEdited;
+  selectRequirementsTab(true);$('single-fit').value='crop';
+  pixelsEdited=edited;$('pixel-width').value=outputWidth;$('pixel-height').value=outputHeight;
+  $('ratio-width').value=width;$('ratio-height').value=height;configureSingle('ratio');
+  $('ratio-width').scrollIntoView({block:'center'});$('ratio-width').focus({preventScroll:true});
+};
+$('reset-pixels').onclick=()=>{
+  const natural=bestQualityOptions();
+  pixelsEdited=false;
+  $('pixel-width').value=natural.width;$('pixel-height').value=natural.height;
+  configureSingle();
+};
+for(const radio of document.querySelectorAll('[name=compression-target]')) radio.onchange=()=>configureSingle();
 for(const radio of document.querySelectorAll('[name=output-quality]')) radio.onchange=()=>configureSingle();
 function selectTool(name, focus = false) {
   if (name === 'framing' && $('original').checked) {
@@ -471,7 +499,7 @@ for (const name of ['framing','adjustments']) {
     }
   };
 }
-$('language').onchange = () => { lang = $('language').value; updateLanguage(); };
+$('language').onchange = () => { lang = $('language').checked ? 'zh' : 'en'; updateLanguage(); };
 $('save').onclick = () => {
   if (!file||settings.review) return;
   if (downloadUrl) URL.revokeObjectURL(downloadUrl);

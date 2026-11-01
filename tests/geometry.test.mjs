@@ -1,10 +1,9 @@
-import { DIGITAL_PRESETS, checkDigitalOutput } from '../src/digital-presets.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { layoutSheet, cropRect, withJpegDensity, mmToPx } from '../src/geometry.js';
 import { inspectImage } from '../src/image.js';
 import { validateSingle } from '../src/single.js';
-import { PRESETS, VERIFIED } from '../src/presets.js';
+import { PRESETS, PREPARATION_PRESETS, VERIFIED } from '../src/presets.js';
 import { messages } from '../src/i18n.js';
 
 test('every document preset has unique identity, bilingual guidance, dated sources and valid print geometry',()=>{
@@ -98,13 +97,11 @@ test('single-JPEG validation enforces pixel minimums and decimal-KB byte limits'
   for(const change of [{width:0},{height:4097},{width:1.5},{minWidth:1201},{minHeight:901},{maxKB:0},{maxKB:Infinity}]) assert.throws(()=>validateSingle({...base,...change}),/singleDimensionsError/);
 });
 
-test('digital preset limits reject byte underflow, compression violations and pixel overflow',()=>{
-  const cn=DIGITAL_PRESETS.find(p=>p.country==='cn'),us=DIGITAL_PRESETS.find(p=>p.country==='us');
-  const result=(width,height,size)=>({width,height,blob:{size}});
-  assert.doesNotThrow(()=>checkDigitalOutput(cn,result(420,560,40000)));
-  assert.doesNotThrow(()=>checkDigitalOutput(cn,result(354,472,120000)));
-  for(const output of [result(420,560,39999),result(420,560,120001),result(421,560,80000),result(353,472,80000)]) assert.throws(()=>checkDigitalOutput(cn,output),/digitalConstraintsError/);
-  assert.throws(()=>checkDigitalOutput(us,result(600,600,53999)),/digitalConstraintsError/);
-  assert.doesNotThrow(()=>checkDigitalOutput(us,result(600,600,54000)));
-  assert.doesNotThrow(()=>checkDigitalOutput(null,result(90,60,1000)));
+
+test('preparation catalog contains physical formats without digital upload limits',()=>{
+  for(const p of PREPARATION_PRESETS){
+    assert.ok(p.widthMm>0 && p.heightMm>0);
+    assert.ok(!p.id.includes('digital'));
+    for(const key of ['maxKB','minKB','minWidth','maxWidth','maxCompression','noCrop']) assert.equal(p[key],undefined);
+  }
 });

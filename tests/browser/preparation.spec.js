@@ -41,23 +41,25 @@ test('ID preparation is first and defaults to source-detail JPEG quality; compre
   await page.goto('./');await expect(page.locator('body')).not.toHaveAttribute('inert');
   await expect(page.locator('[name=output-mode]').first()).toHaveValue('single');
   await expect(page.locator('[name=output-mode][value=single]')).toBeChecked();
-  await expect(page.locator('.mode-picker')).toContainText('Prepare an ID photo');
+  await expect(page.locator('.mode-picker')).toContainText('Single photo');
   await expect(page.locator('#sheet-title')).toHaveText('4. Customize output');
   await page.locator('#photo').setInputFiles({name:'detail.png',mimeType:'image/png',buffer:await detailPhoto(page)});await expect(page.locator('#save')).toBeEnabled();
   await expect(page.locator('[name=output-quality][value=quality]')).toBeChecked();
   await expect(page.locator('#compression-settings')).toBeHidden();
-  const best=await downloadInfo(page);expect([best.width,best.height]).toEqual([1200,1200]);await expect(page.locator('#single-result')).toContainText(`${best.bytes} bytes`);await expect(page.locator('#single-result')).toContainText('100/100');
+  const preview=await page.locator('.sheet-stage').boundingBox();expect(preview.height).toBeLessThanOrEqual(210);
+  const exportHeading=await page.locator('.export-title').boundingBox(), actions=await page.locator('.export-actions').boundingBox();expect(actions.y).toBeGreaterThanOrEqual(exportHeading.y+exportHeading.height);
+  const best=await downloadInfo(page);expect([best.width,best.height]).toEqual([1200,1200]);await expect(page.locator('#single-result')).toContainText(new Intl.NumberFormat('en',{minimumFractionDigits:1,maximumFractionDigits:1}).format(best.bytes/1000)+' KB');await expect(page.locator('#single-result')).toContainText('100/100');
   await page.locator('#sheet-title').scrollIntoViewIfNeeded();await page.locator('.sheet').screenshot({path:`.qa/customize-quality-${testInfo.project.name}.png`});
   await page.locator('[name=output-quality][value=compress]').check();await expect(page.locator('#save')).toBeEnabled();
   await expect(page.locator('#max-kb')).toBeVisible();await expect(page.locator('#pixel-width')).toBeHidden();
   const compressed=await downloadInfo(page);expect(compressed.bytes).toBeLessThanOrEqual(300000);expect(compressed.bytes).toBeLessThan(best.bytes);
   await page.locator('#max-kb').fill('100');await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).bytes).toBeLessThanOrEqual(100000);
   await page.locator('.sheet').screenshot({path:`.qa/customize-compression-${testInfo.project.name}.png`});
-  await page.locator('#pixel-settings summary').first().click();await page.locator('#pixel-width').fill('400');await expect(page.locator('#pixel-height')).toHaveValue('400');await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBeLessThanOrEqual(400);
-  await page.locator('#pixel-width').fill('0');await expect(page.locator('#save')).toBeDisabled();
+  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('400');await expect(page.locator('#pixel-height')).toHaveValue('400');await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBeLessThanOrEqual(400);
+  await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('0');await expect(page.locator('#save')).toBeDisabled();
   await page.locator('[name=output-quality][value=quality]').check();await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBe(1200);
   await page.locator('[name=output-quality][value=compress]').check();await expect(page.locator('#save')).toBeDisabled();await expect(page.locator('#pixel-width')).toBeVisible();
-  await page.locator('#pixel-width').fill('600');await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('600');await expect(page.locator('#save')).toBeEnabled();
   await page.locator('[name=output-mode][value=print]').check();await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBe(1800);
   await page.locator('[name=output-mode][value=single]').check();await expect(page.locator('[name=output-quality][value=compress]')).toBeChecked();await expect(page.locator('#max-kb')).toHaveValue('100');
   await page.locator('#clear').click();await expect(page.locator('#save')).toBeDisabled();await expect(page.locator('#crop-wrap')).toBeHidden();
@@ -67,14 +69,14 @@ test('every photo format applies its own ratio in preparation mode in both langu
   test.setTimeout(120000);const {PREPARATION_PRESETS}=await import('../../src/presets.js');await openApp(page,'single');
   await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled({timeout:15000});
   for(const lang of ['en','zh']){
-    await page.locator('#language').selectOption(lang);
+    await page.locator('#language').setChecked((lang)==='zh');
     for(const p of PREPARATION_PRESETS){
       await page.locator('#country').selectOption(p.country);await page.locator('#document').selectOption(p.id);
       await expect(page.locator('#document')).toHaveValue(p.id);await expect(page.locator('#error')).toBeHidden();
       await expect(page.locator('#single-fit')).toHaveValue(p.fit||'crop');
-      const expected=p.noCrop?2/3:p.width?p.width/p.height:p.widthMm/p.heightMm;
+      const expected=p.widthMm/p.heightMm;
       await expect.poll(()=>page.locator('#crop').evaluate(c=>c.width/c.height)).toBeCloseTo(expected,2);
-      if(!p.noCrop){const ratio=await page.locator('#ratio-width').inputValue()/await page.locator('#ratio-height').inputValue();expect(ratio).toBeCloseTo(p.width?p.width/p.height:p.widthMm/p.heightMm,6);}
+      {const ratio=await page.locator('#ratio-width').inputValue()/await page.locator('#ratio-height').inputValue();expect(ratio).toBeCloseTo(p.widthMm/p.heightMm,6);}
     }
   }
 });
@@ -85,7 +87,7 @@ test('phone layouts, keyboard output choices, replacement and repeated mode swit
   for(const width of [320,390,1440]){
     await page.setViewportSize({width,height:900});
     for(const lang of ['en','zh']){
-      await page.locator('#language').selectOption(lang);
+      await page.locator('#language').setChecked((lang)==='zh');
       for(const mode of ['print','single','print','single']){await page.locator(`[name=output-mode][value=${mode}]`).check();await expect(page.locator('#zoom')).toHaveValue('1.4');await expect(page.locator('#contrast')).toHaveValue('9');await expect(page.locator('#save')).toBeEnabled({timeout:15000});}
       await page.locator('[name=output-quality][value=quality]').focus();await page.keyboard.press('ArrowRight');await expect(page.locator('[name=output-quality][value=compress]')).toBeChecked();
       await page.keyboard.press('ArrowLeft');await expect(page.locator('[name=output-quality][value=quality]')).toBeChecked();
@@ -122,5 +124,20 @@ test('file-size-only compression keeps an already-small best-quality JPEG byte-f
   await page.locator('#zoom').fill('1.2');await expect(page.locator('#save')).toBeEnabled();const zoomed=await take();
   await page.locator('[name=output-quality][value=quality]').check();await expect(page.locator('#save')).toBeEnabled();expect((await take()).equals(zoomed)).toBe(true);
   await page.locator('#zoom').fill('1');await page.locator('[name=output-quality][value=compress]').check();await expect(page.locator('#save')).toBeEnabled();expect((await take()).equals(best)).toBe(true);
-  await page.locator('#pixel-settings summary').first().click();await page.locator('#pixel-width').fill('413');await expect(page.locator('#pixel-height')).toHaveValue('531');await expect(page.locator('#save')).toBeEnabled();expect((await take()).equals(best)).toBe(false);
+  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('413');await expect(page.locator('#pixel-height')).toHaveValue('531');await expect(page.locator('#save')).toBeEnabled();expect((await take()).equals(best)).toBe(false);
+});
+
+test('reset pixels recovers invalid overrides without changing framing',async({page})=>{
+  await openApp(page,'single');await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('[name=output-quality][value=compress]').check();
+  await page.locator('#max-kb').fill('200');await page.locator('[name=compression-target][value=pixels]').check();
+  const width=await page.locator('#pixel-width').inputValue(),height=await page.locator('#pixel-height').inputValue();
+  await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('1');await page.locator('#pixel-axis').selectOption('height');await page.locator('#pixel-height').fill('');await expect(page.locator('#save')).toBeDisabled();
+  await page.locator('#reset-pixels').click();
+  await expect(page.locator('#pixel-width')).toHaveValue(width);await expect(page.locator('#pixel-height')).toHaveValue(height);
+  await expect(page.locator('#max-kb')).toHaveValue('200');await expect(page.locator('#single-error')).toBeHidden();await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('#zoom').fill('1.5');await page.locator('#reset-pixels').click();
+  await expect(page.locator('#zoom')).toHaveValue('1.5');expect(Number(await page.locator('#pixel-width').inputValue())).toBeLessThan(Number(width));
+  await expect(page.locator('#min-width')).toHaveCount(0);await expect(page.locator('#allow-resize')).toHaveCount(0);
+  await page.locator('#language').check();await expect(page.locator('#reset-pixels')).toHaveText('重置像素尺寸');
 });

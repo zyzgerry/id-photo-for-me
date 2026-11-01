@@ -142,3 +142,9 @@ Final review: Standards and Spec reviewers found no actionable issues in this fo
 - Wide desktop editor preview/tools share a row, measuring about 440px in the screenshot scenario. Tonal sliders use compact columns, hints are shorter, and 44px touch targets remain. Existing sticky-phone-preview/keyboard/focus and 320px overflow tests pass. Desktop/phone screenshots were visually reviewed; the final phone spacing tweak passed the focused layout scenario again in both engines.
 - Ignored synthetic screenshots: .qa/editor-compact-<engine>.png, editor-compact-phone-<engine>.png, sheet-inline-count-<engine>.png and sheet-inline-count-phone-<engine>.png. No personal photos were used. Existing JPEG geometry, density, cutting guides, HEIC, shared edits and compression byte-preservation checks pass.
 - Not published. Firefox launch, actual-iPhone and measured physical-print checks remain pending as recorded previously.
+
+## November 1 — digital upload presets removed and output controls clarified
+
+Supersedes earlier digital-preset validation requirements. Printed document formats remain; no country-specific digital byte, pixel or compression-ratio bounds apply. New browser regressions cover the audited 150 KB false rejection, output above the former 240 KB ceiling, preserved user KB across document changes, small explicit pixel sizes, readonly calculated dimensions, and direct aspect-ratio changes retaining the selected editable edge. Current catalog schema tests reject reintroduced digital constraints. Synthetic desktop/320px Chinese screenshots reviewed. Physical-print and actual-iPhone checks remain pending.
+
+Pre-push November 1 verification: build, diff/syntax checks, all 10 Node tests and all 108 Chromium/WebKit browser cases passed on the final source. Local Firefox launch still fails with spawn UNKNOWN; the existing Linux CI workflow runs the complete Chromium/WebKit/Firefox matrix before deployment.

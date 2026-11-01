@@ -7,10 +7,10 @@ const single=async page=>{
   await page.locator('[name=output-mode][value=single]').check();
   await page.locator('#custom-requirements').click();await page.locator('#single-fit').selectOption('original');
   await reviewFraming(page);
-  if(await page.locator('[name=output-quality][value=compress]').isEnabled()){await page.locator('[name=output-quality][value=compress]').check();await page.locator('#pixel-settings').evaluate(el=>el.open=true);}
+  if(await page.locator('[name=output-quality][value=compress]').isEnabled()){await page.locator('[name=output-quality][value=compress]').check();}
 };
 const print=page=>page.locator('[name=output-mode][value=print]').check();
-const ready=async page=>{if(await page.locator('[name=output-mode][value=single]').isChecked()){await page.locator('[name=output-quality][value=compress]').check();await page.locator('#pixel-settings').evaluate(el=>el.open=true);}await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled({timeout:15000});};
+const ready=async page=>{if(await page.locator('[name=output-mode][value=single]').isChecked()){await page.locator('[name=output-quality][value=compress]').check();}await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled({timeout:15000});};
 async function noise(page) {
   return Buffer.from(await page.evaluate(()=>{
     const c=document.createElement('canvas');c.width=1200;c.height=900;
@@ -65,7 +65,7 @@ test('Portugal offers sourced head-size guides without adding them to exports',a
   await expect(page.locator('#head-source')).toHaveAttribute('href',/portugal\/uk\/english\/pdf\/tech-req-for-photos.pdf/);
   await expect(page.locator('.guide-line')).toHaveCount(4);
   expect(await page.locator('#sheet').evaluate(c=>c.toDataURL())).toBe(before);
-  await page.locator('#language').selectOption('zh');await expect(page.locator('#guide-control')).toContainText('头部位置参考线');
+  await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#guide-control')).toContainText('头部位置参考线');
   await single(page);await expect(page.locator('#guide-control')).toBeHidden();
 });
 
@@ -88,40 +88,45 @@ test('single mode preserves a full HEIC photo and exports offline without arrang
   await expect(page.locator('#pixel-width')).toHaveValue('120');await expect(page.locator('#pixel-height')).toHaveValue('80');
   await expect(page.locator('#custom-fields')).toBeHidden();await expect(page.locator('#crop-controls')).toBeHidden();await expect(page.locator('#print-guides')).toBeHidden();
   const result=await download(page);expect(result.size).toEqual([120,80]);expect(result.bytes.length).toBeLessThanOrEqual(300000);expect(result.name).toBe('photo-120x80.jpg');
-  await page.locator('#pixel-width').fill('90');await ready(page);await expect(page.locator('#pixel-height')).toHaveValue('60');
+  await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('90');await ready(page);await expect(page.locator('#pixel-height')).toHaveValue('60');
   expect((await download(page)).size).toEqual([90,60]);
 });
 
-test('single JPEG byte limit respects minimums, rejects impossible targets, and reports actual dimensions',async({page})=>{
-  test.setTimeout(90000);
+test('file-size and exact-pixel targets apply exclusively and show the encoded file size',async({page},info)=>{
   await openApp(page);await single(page);
   await page.locator('#photo').setInputFiles({name:'noise.png',mimeType:'image/png',buffer:await noise(page)});await ready(page);
-  await page.locator('#allow-resize').uncheck();await page.locator('#max-kb').fill('1');
-  await expect(page.locator('#single-error')).toContainText('cannot be met');await expect(page.locator('#save')).toBeDisabled();
-  await page.locator('#allow-resize').check();await page.locator('#pixel-settings details summary').click();
-  await page.locator('#min-width').fill('600');await page.locator('#min-height').fill('450');
-  await expect(page.locator('#single-error')).toContainText('cannot be met');
-  await page.locator('#min-width').fill('300');await page.locator('#min-height').fill('225');await page.locator('#max-kb').fill('100');await ready(page);
-  const result=await download(page);expect(result.bytes.length).toBeLessThanOrEqual(100000);expect(result.size[0]).toBeGreaterThanOrEqual(300);expect(result.size[1]).toBeGreaterThanOrEqual(225);
-  await expect(page.locator('#single-result')).toContainText(`${result.size[0]}×${result.size[1]}`);await expect(page.locator('#single-result')).toContainText(`${result.bytes.length} bytes`);
-  await page.locator('#max-kb').fill('');await page.locator('#allow-resize').uncheck();await ready(page);
-  const uncapped=await download(page);expect(uncapped.size).toEqual([1200,900]);expect(uncapped.bytes.length).toBeGreaterThan(100000);await expect(page.locator('#single-result')).toContainText('100/100');
+  await expect(page.locator('[name=compression-target][value=file]')).toBeChecked();
+  await page.locator('#max-kb').fill('100');await ready(page);
+  const limited=await download(page);expect(limited.bytes.length).toBeLessThanOrEqual(100000);
+  await expect(page.locator('#single-result')).not.toContainText(' bytes');
+  await expect(page.locator('#result-size')).toHaveText((limited.bytes.length/1000).toFixed(1)+' KB');
+  await page.locator('#max-kb').fill('0');await expect(page.locator('#save')).toBeDisabled();
+  await page.locator('[name=compression-target][value=pixels]').check();
+  await expect(page.locator('#max-kb')).toBeHidden();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('1200');await ready(page);
+  const exact=await download(page);expect(exact.size).toEqual([1200,900]);expect(exact.bytes.length).toBeGreaterThan(100000);
+  await page.locator('.sheet').screenshot({path:`.qa/compression-pixels-${info.project.name}.png`});
+  await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('0');await expect(page.locator('#save')).toBeDisabled();
+  await page.locator('[name=compression-target][value=file]').check();await page.locator('#max-kb').fill('100');await ready(page);
+  expect((await download(page)).bytes.length).toBeLessThanOrEqual(100000);await expect(page.locator('#pixel-width')).toBeHidden();
+  await page.setViewportSize({width:320,height:900});await page.locator('#language').check();
+  await page.locator('.sheet').screenshot({path:`.qa/compression-file-phone-${info.project.name}.png`});
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
 
 test('single crop supports exact pixel dimensions and mode changes preserve print edits',async({page})=>{
   await openApp(page);await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   await page.locator('#zoom').evaluate(el=>{el.value='2';el.dispatchEvent(new Event('input',{bubbles:true}));});await ready(page);
-  await single(page);await page.locator('#single-fit').selectOption('crop');await page.locator('#pixel-width').fill('600');await page.locator('#pixel-height').fill('600');
-  await page.locator('#max-kb').fill('');await page.locator('#allow-resize').uncheck();await ready(page);
+  await single(page);await page.locator('#single-fit').selectOption('crop');await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#pixel-axis').selectOption('width');await page.locator('#pixel-width').fill('600');
+  await ready(page);
   expect((await download(page)).size).toEqual([600,600]);await expect(page.locator('#crop-controls')).toBeVisible();
   await page.locator('#single-fit').selectOption('original');await ready(page);
   await expect(page.locator('#pixel-height')).toHaveValue('900');expect((await download(page)).size).toEqual([600,900]);
   await print(page);await ready(page);await expect(page.locator('#zoom')).toHaveValue('1');expect((await download(page)).size).toEqual([1800,1200]);
-  await single(page);await ready(page);await page.locator('#language').selectOption('zh');await expect(page.locator('#sheet-title')).toHaveText('4. 自定义输出');
+  await single(page);await ready(page);await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#sheet-title')).toHaveText('4. 自定义输出');
 });
 
 test('a superseded compression job cannot overwrite print output or leak errors',async({page})=>{
   await openApp(page);await single(page);await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
-  await page.locator('#pixel-width').fill('2000');await page.locator('#max-kb').fill('1');await print(page);await ready(page);
+  await page.locator('#max-kb').fill('1');await print(page);await ready(page);
   await expect(page.locator('#error')).toBeHidden();await expect(page.locator('#sheet')).toHaveAttribute('width','1800');expect((await download(page)).size).toEqual([1800,1200]);
 });

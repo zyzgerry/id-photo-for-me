@@ -6,9 +6,9 @@ import { fileURLToPath } from 'node:url';
 
 test('all sourced country/document options work in both languages without losing the selection',async({page})=>{
   test.setTimeout(120000);await openApp(page);
-  await expect(page.locator('#country option')).toHaveCount(new Set(PREPARATION_PRESETS.map(p=>p.country)).size+1);
+  await expect(page.locator('#country option')).toHaveCount(new Set(PREPARATION_PRESETS.map(p=>p.country)).size);
   for(const lang of ['en','zh']) {
-    await page.locator('#language').selectOption(lang);
+    await page.locator('#language').setChecked((lang)==='zh');
     for(const p of PRESETS) {
       await page.locator('#country').selectOption(p.country);await page.locator('#document').selectOption(p.id);
       await expect(page.locator('#size-readout')).toContainText(p.country==='us'?'2×2':`${p.widthMm}×${p.heightMm}`);
@@ -22,11 +22,11 @@ test('all sourced country/document options work in both languages without losing
       await expect(page.locator('#reference')).toHaveAttribute('href',p.source);
       await expect(page.locator('#verified')).toContainText(p.checked||'2026-10-30');
     }
-    const last=PRESETS.at(-1);await page.locator('#language').selectOption(lang==='en'?'zh':'en');
+    const last=PRESETS.at(-1);await page.locator('#language').setChecked((lang==='en'?'zh':'en')==='zh');
     await expect(page.locator('#country')).toHaveValue(last.country);await expect(page.locator('#document')).toHaveValue(last.id);
   }
-  await page.locator('#country').selectOption('custom');await page.locator('#width').fill('32');
-  await page.locator('#language').selectOption('zh');await expect(page.locator('#country')).toHaveValue('custom');
+  await page.locator('#custom-requirements').click();await page.locator('#width').fill('32');
+  await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#custom-requirements')).toHaveAttribute('aria-selected','true');
   await expect(page.locator('#width')).toHaveValue('32');await expect(page.locator('#custom-fields')).toBeVisible();
 });
 
@@ -45,20 +45,20 @@ test('short document labels keep detailed scope and linked sources collapsed unt
   await expect(page.locator('#preset-note')).toBeVisible();
   await expect(page.locator('#preset-scope')).toContainText('Hong Kong / Macao');
   await expect(page.locator('#reference')).toHaveAttribute('href',PRESETS.find(p=>p.country==='it').source);
-  await page.locator('#language').selectOption('zh');
+  await page.locator('#language').setChecked(('zh')==='zh');
   await expect(page.locator('#document option:checked')).toHaveText('申根签证');
   await expect(disclosure).toHaveText('要求与来源');
   await expect(page.locator('#preset-scope')).toContainText('香港／澳门');
   await disclosure.click();await expect(page.locator('#preset-note')).toBeHidden();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(320);
   await page.locator('#country').selectOption('us');await expect(page.locator('#preset-location')).toBeHidden();
-  await page.locator('#country').selectOption('custom');await expect(page.locator('#preset-location')).toBeHidden();
+  await page.locator('#custom-requirements').click();await expect(page.locator('#preset-location')).toBeHidden();
 });
 
 test('shared visa names distinguish Schengen, mixed guidance and national D routes',async({page})=>{
   await openApp(page);
   for(const lang of ['en','zh']) {
-    await page.locator('#language').selectOption(lang);
+    await page.locator('#language').setChecked((lang)==='zh');
     for(const [country,label] of [
       ['pt',['Schengen Visa','申根签证']],['ro',['Schengen Visa','申根签证']],
       ['it',['Schengen Visa','申根签证']],['gr',['Schengen Visa','申根签证']],
@@ -88,7 +88,7 @@ test('new formats export offline at their stated dimensions and retain phone lay
     await expect(page.locator('#sheet')).toHaveAttribute('width','1800');await expect(page.locator('#sheet')).toHaveAttribute('height','1200');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   }
-  await page.locator('#language').selectOption('zh');await expect(page.locator('#country option:checked')).toHaveText('秘鲁');
+  await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#country option:checked')).toHaveText('秘鲁');
   const pending=page.waitForEvent('download');await page.locator('#save').click();
   expect((await pending).suggestedFilename()).toBe('id-photo-4x6-300ppi.jpg');
 });

@@ -85,12 +85,12 @@ test('preset changes, metric dimensions, custom errors, and translated interface
   await expect(page.locator('#size-readout')).toHaveText('35×45 mm');
   expect(await page.locator('#crop').evaluate(el=>el.width/el.height)).toBeCloseTo(35/45,2);
   await expect(page.locator('#copies')).toHaveValue('8');
-  await page.locator('#country').selectOption('custom');await page.locator('#width').fill('110');await page.locator('#height').fill('110');
+  await page.locator('#custom-requirements').click();await page.locator('#width').fill('110');await page.locator('#height').fill('110');
   await expect(page.locator('#error')).toContainText('does not fit');await expect(page.locator('#save')).toBeDisabled();
   await page.locator('#width').fill('35');await page.locator('#height').fill('45');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#units').selectOption('inch');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();await expect(page.locator('#copies')).toHaveValue('8');
-  await page.locator('#language').selectOption('zh');await expect(page.locator('#save')).toHaveText('下载打印排版');await expect(page.locator('#copies')).toHaveValue('8');
-  await page.locator('#country').selectOption('us');await page.locator('#document').selectOption('us-visa');
+  await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#save')).toHaveText('下载打印排版');await expect(page.locator('#copies')).toHaveValue('8');
+  await page.locator('#document-requirements').click();await page.locator('#country').selectOption('us');await page.locator('#document').selectOption('us-visa');
   await expect(page.locator('#preset-note')).toContainText('DS-160');
 });
 

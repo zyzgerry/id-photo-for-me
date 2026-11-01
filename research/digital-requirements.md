@@ -1,3 +1,5 @@
+Historical research: country-specific digital presets and their output enforcement were removed on November 1, 2026. This document is background research, not current application behavior.
+
 # Digital photo routes — checked 2026-10-31
 
 Research targets were China, United States, United Kingdom, Canada and Schengen visa applications. Only specific routes supported by the sources below are presets. These are file preparation tools, not biometric or acceptance checks. All files remain local.
