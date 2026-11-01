@@ -4,9 +4,9 @@ The app is a practical, private ID-photo workbench: cool neutral background, whi
 
 ## Requirements-first flow
 
-The introduction explains the shared photo preparation workflow. Choose requirements, upload, and edit before choosing an output. A compact native radio selector immediately below the editor offers Single photo (default) or Printable sheet. The latter reveals the existing sheet arrangement controls. Both use the same current edits; no output decision is needed at the beginning.
+The introduction explains the shared photo preparation workflow. Choose requirements, upload, and edit before choosing an output. A compact native radio selector immediately below the editor offers Single photo or Printable sheet (default). The latter reveals the existing sheet arrangement controls. Both use the same current edits; no output decision is needed at the beginning.
 
-Keep the existing two-column desktop layout. Left: Requirements, then Upload photo. Right: Edit photo, then Arrange sheet / Customize output, then Export. Phones read the same logical sequence vertically. All sections remain visible; editing/output/export controls are inactive before upload, with readable empty-state guidance. No wizard or duplicated controls. Requirements stay before upload in DOM, visual and keyboard order at every breakpoint.
+Keep the existing two-column desktop layout. Left: Requirements, then Upload photo. Right: Edit photo, then 4. Customize output, then a separate 5. Export section. Phones read the same logical sequence vertically. All sections remain visible; editing/output/export controls are inactive before upload, with readable empty-state guidance. No wizard or duplicated controls. Requirements stay before upload in DOM, visual and keyboard order at every breakpoint.
 
 Requirements include country/document or a direct custom option, essential dimensions and critical scope caveats. Detailed bilingual guidance, source links and check dates stay in Requirements & sources. Upload has one primary picker, format disclosure and decoding feedback. The empty editor explains its purpose without a competing picker.
 
@@ -24,7 +24,7 @@ Export labels identify print sheet or ID photo. Print instructions retain whole-
 
 ## Accessibility and responsive behavior
 
-Keep 44px touch areas, visible focus, readable inactive guidance, no horizontal overflow at 320px, and English/Chinese parity. On phones the crop preview remains visible within the editor while tools scroll. Short landscape viewports use ordinary scrolling. Do not add a separate sticky preview/navigation system. Source changes, resize and language changes must not reset values or steal focus.
+Keep 44px touch areas, visible focus, readable inactive guidance, no horizontal overflow at 320px, and English/Chinese parity. On phones the crop preview remains visible within the editor while tools scroll. Short landscape viewports use ordinary scrolling. The single-photo output also has a compact section-bounded sticky preview and size, before its controls; short viewports use a smaller pinned preview. Source changes, resize and language changes must not reset values or steal focus.
 
 Portugal head guides retain their distinct VFS UK source; print dimensions retain the U.S. checklist source. Preserve short document names, child eligibility qualifiers, scoped location notes, Schengen/national distinctions and collapsed source disclosures.
 
@@ -40,7 +40,7 @@ Make the copy number itself editable beside the sheet preview, followed by the l
 
 Offer head-placement guides for every preset, including full-photo online routes. Only custom requirements hide the control. Keep verified centered head-height ranges where available; otherwise show adjustable manual crown/chin reference lines plus a center line, with a clear note that the preset has no verified range. Manual crown stays above chin. Keep guide controls outside the crop-only controls so full-photo mode can use them. These overlays never enter the JPEG or change framing.
 
-Top-of-page mockups demonstrate both outputs without controls. Output radio choices include miniature versions. Single-photo output places quality/compression controls beside a bounded 190px preview and metadata on desktop; phones use a compact 180px preview. Keep native controls and disclosure behavior.
+Top-of-page mockups demonstrate both outputs without controls. Output radio choices include miniature versions. Single-photo output places a compact preview and measured size before its quality/compression controls in DOM order. The preview sticks within the output section while settings scroll; photo and metadata share a row on phones and desktop. Preserve the last encoded result while updating, label it explicitly as previous, and disable export until valid. Keep native controls and disclosure behavior.
 
 The header uses a native checkbox switch styled as an English / 中文 pill, with both language labels always visible. The intro has a title and local-processing/reset note without a subtitle. The top single-photo example reads Make photo ID-ready and lists cropping, editing, compression; it has no JPEG badge. Output labels remain Single photo / Printable sheet.
 
@@ -52,3 +52,6 @@ Digital-only presets and their validation module are removed. Printed document c
 
 
 The close-up viewer uses a native full-screen dialog and the full-resolution encoded export blob. Clear Close, Fit, actual-pixel 100%, zoom buttons/readout and a neutral image stage support quality inspection. Preserve native focus trapping/Escape, explicitly restore opener focus in Safari, and provide keyboard panning alongside pinch/drag. Controls are at least 44px, wrap on small screens, honor safe-area insets and reduced motion, and release blob URLs when closed or invalidated.
+
+
+Output has one static 4. Customize output heading above the mode selector, with no mode-specific subtitle. Printable sheet is selected initially. Step 5 is a sibling region with its own heading and download/share controls. The preview canvas alone opens the close-up viewer, by pointer or keyboard; no separate Inspect button. Compact two-column radio choices and linked numeric fields keep 44px targets; repeated explanations live in Output guidance. Reserve preview space during initial encoding and keep focused controls below the sticky block.

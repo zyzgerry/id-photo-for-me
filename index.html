@@ -116,18 +116,24 @@
         </div></div>
       </section>
       <section class="sheet region" aria-labelledby="sheet-title">
-        <fieldset class="mode-picker"><legend data-i18n="outputMode">Choose your output</legend>
-          <label><input type="radio" name="output-mode" value="single" checked><span class="mini-mockup" aria-hidden="true"><span class="example-digital"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><span class="output-choice-copy"><strong data-i18n="singleMode">Single photo</strong><span class="hint" data-i18n="digitalExample">Download one JPEG, with optional file compression.</span></span></label>
-          <label><input type="radio" name="output-mode" value="print"><span class="mini-mockup" aria-hidden="true"><span class="example-sheet"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><span class="output-choice-copy"><strong data-i18n="printMode">Printable sheet</strong><span class="hint" data-i18n="printExample">Arrange copies on a 4×6 sheet for printing.</span></span></label>
+        <h2 id="sheet-title" data-i18n="singleStep3">4. Customize output</h2>
+        <fieldset class="mode-picker"><legend class="visually-hidden" data-i18n="outputMode">Output format</legend>
+          <label><input type="radio" name="output-mode" value="single"><span class="mini-mockup" aria-hidden="true"><span class="example-digital"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><span class="output-choice-copy"><strong data-i18n="singleMode">Single photo</strong><span class="hint" data-i18n="digitalExample">Download one JPEG, with optional file compression.</span></span></label>
+          <label><input type="radio" name="output-mode" value="print" checked><span class="mini-mockup" aria-hidden="true"><span class="example-sheet"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><span class="output-choice-copy"><strong data-i18n="printMode">Printable sheet</strong><span class="hint" data-i18n="printExample">Arrange copies on a 4×6 sheet for printing.</span></span></label>
         </fieldset>
-        <h2 id="sheet-title" data-i18n="step3">Print sheet</h2>
         <p id="output-empty" class="hint" data-i18n="outputInactive">Upload a photo to prepare the output.</p>
-        <fieldset id="output-controls" disabled>        <div id="single-settings" hidden>
+        <div class="output-body">
+          <div id="output-preview" class="output-preview">
+            <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
+
+            <div class="preview-details"><div id="single-result" role="status" hidden><span class="hint" data-i18n="resultFileSize">Resulting file size</span><strong id="result-size"></strong><span id="result-pixels" class="hint"></span></div><p class="hint" id="output-info"></p><p id="preview-status" class="hint" role="status" hidden></p></div>
+          </div>
+          <fieldset id="output-controls" disabled>        <div id="single-settings" hidden>
 
           <fieldset class="quality-picker"><legend data-i18n="outputChoice">Output preference</legend>
           <label><input type="radio" name="output-quality" value="quality" checked><span data-i18n="bestQuality">Preserve best quality</span></label>
           <label><input type="radio" name="output-quality" value="compress"><span data-i18n="compressOutput">Compress output size</span></label></fieldset>
-          <p id="quality-help" class="hint" data-i18n="qualityHelp">Keep the available crop detail at maximum JPEG quality. Choose compression for an upload file limit.</p>
+
           <div id="compression-settings" hidden>
             <fieldset class="compression-picker"><legend data-i18n="compressionTarget">What do you want to set?</legend>
               <label><input type="radio" name="compression-target" value="file" checked><span data-i18n="autoCompression">Auto compression</span></label>
@@ -135,39 +141,46 @@
             </fieldset>
             <div id="file-size-settings">
               <label for="max-kb" data-i18n="maxKB">Maximum file size (KB)</label><input id="max-kb" type="number" inputmode="decimal" min="1" max="30000" step="any" value="300">
-              <p class="hint" data-i18n="sizeHelp">Enter the upload site's file-size limit. We reduce JPEG quality and, if needed, pixel dimensions to fit.</p>
+
             </div>
             <div id="pixel-settings" hidden>
-              <p class="hint" data-i18n="pixelPurpose">Choose quality and pixels, then inspect the actual JPEG and file size. No file-size cap applies.</p>
+
               <label for="jpeg-quality" data-i18n="qualitySetting">JPEG quality setting (1–100)</label>
               <div class="quality-controls"><input id="jpeg-quality-slider" type="range" min="1" max="100" step="1" value="100" aria-labelledby="custom-quality-label"><label class="visually-hidden" id="custom-quality-label" for="jpeg-quality-slider" data-i18n="qualitySetting">JPEG quality setting (1–100)</label><input id="jpeg-quality" type="number" inputmode="numeric" min="1" max="100" step="1" value="100" aria-describedby="custom-quality-help"></div>
-              <p id="custom-quality-help" class="hint" data-i18n="qualityMeaning"></p>
+
               <p id="pixel-ratio" class="ratio-notice"></p>
               <div class="two-fields single-fields"><label><span id="pixel-width-label" data-i18n="pixelWidth">Width (pixels)</span><input id="pixel-width" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label><label><span id="pixel-height-label" data-i18n="pixelHeight">Height (pixels)</span><input id="pixel-height" type="number" inputmode="numeric" min="1" max="4096" step="1" value="1200"></label></div>
               <button id="reset-pixels" type="button" class="text-button" data-i18n="resetPixels">Reset pixel dimensions</button>
-              <p class="hint" data-i18n="pixelHelp">Width and height stay linked to your crop. Change the crop proportions in section 1. Maximum: 4096 pixels per side.</p>
+
             </div>
           </div>
-          <p class="hint" data-i18n="uploadRules">Check the destination’s size, pixel, and editing requirements. A smaller JPEG does not guarantee acceptance.</p>
+
+          <details class="output-help"><summary data-i18n="outputHelp">Output guidance</summary><p class="hint" data-i18n="singleOutput">Preview and file size reflect the actual encoded JPEG.</p><p id="quality-help" class="hint" data-i18n="qualityHelp">Keep the available crop detail at maximum JPEG quality. Choose compression for an upload file limit.</p>
+<p class="hint" data-i18n="sizeHelp">Enter the upload site's file-size limit. We reduce JPEG quality and, if needed, pixel dimensions to fit.</p>
+<p class="hint" data-i18n="pixelPurpose">Choose quality and pixels, then inspect the actual JPEG and file size. No file-size cap applies.</p>
+<p id="custom-quality-help" class="hint" data-i18n="qualityMeaning"></p>
+<p class="hint" data-i18n="pixelHelp">Width and height stay linked to your crop. Change the crop proportions in section 1. Maximum: 4096 pixels per side.</p>
+<p class="hint" data-i18n="uploadRules">Check the destination’s size, pixel, and editing requirements. A smaller JPEG does not guarantee acceptance.</p><p id="result-quality"></p></details>
           <p id="single-error" class="error" hidden></p>
         </div>
 </fieldset>
-        <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><button id="inspect-output" type="button" class="inspect-output" data-i18n="inspectJpeg" hidden>Inspect JPEG</button><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
-        <div class="output-details">
-        <div id="print-summary"><div class="copy-picker"><label class="visually-hidden" for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6" aria-describedby="capacity copy-error" disabled><span data-i18n="copies" aria-hidden="true">copies</span></div><p id="capacity" class="hint"></p><p id="copy-error" class="error" hidden></p></div>
+
+          <div id="print-controls" class="output-details"><div id="print-summary"><div class="copy-picker"><label class="visually-hidden" for="copies" data-i18n="copiesWanted">Copies to print</label><input id="copies" type="number" inputmode="numeric" min="1" step="1" value="6" aria-describedby="capacity copy-error" disabled><span data-i18n="copies" aria-hidden="true">copies</span></div><p id="capacity" class="hint"></p><p id="copy-error" class="error" hidden></p></div>
         <div id="print-guides">
         <label class="check-row cut-option"><input id="cut-guides" type="checkbox" checked disabled><span data-i18n="cutGuides">Include cutting guides</span></label>
         <details class="cut-help"><summary data-i18n="cutGuideHelp">Cutting guide details</summary><p class="hint" id="cut-note" data-i18n="cut">Fine dashed lines mark shared cut edges. Trim along them to avoid traces. Photo size and copy count stay the same.</p>
         </details><p id="rotated" class="hint" data-i18n="rotated" hidden>Copies rotated on the sheet to fit more; turn the print before cutting.</p>
         </div>
 
-        <p class="hint" id="output-info" data-i18n="output">1800×1200 pixels · 300 ppi</p>
-        <div id="single-result" role="status" hidden><span class="hint" data-i18n="resultFileSize">Resulting file size</span><strong id="result-size"></strong><span id="result-pixels" class="hint"></span><details class="encoding-details"><summary data-i18n="encodingDetails">JPEG compression details</summary><p id="result-quality"></p><p data-i18n="qualityMeaning">This is the browser's JPEG encoder setting, not a percentage of image quality. Higher settings usually keep more detail and make larger files.</p></details></div>
         </div>
-        <h3 class="export-title" data-i18n="exportTitle">5. Export</h3>
+        </div>
+      </section>
+      <section class="export region" aria-labelledby="export-title">
+        <h2 id="export-title" class="export-title" data-i18n="exportTitle">5. Export</h2>
         <div class="export-actions"><button id="save" class="button primary" data-i18n="save" disabled>Download JPEG</button><button id="share" class="button quiet" data-i18n="share" disabled>Share JPEG</button></div>
         <p id="export-status" class="hint" role="status" aria-live="polite"></p>
         <details class="print-note" id="print-note"><summary data-i18n="printTitle">Print at exactly 4×6 inches</summary><p data-i18n="print">Keep the entire sheet. Turn off automatic cropping, enlargement, and fit/fill options. Borderless printing may trim the edges. Measure your first test print.</p></details>
+
       </section>
       </div>
     </div>

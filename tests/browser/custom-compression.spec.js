@@ -5,7 +5,7 @@ import {openApp,reviewFraming} from './open-app.js';
 const fixture=fileURLToPath(new URL('../fixtures/orientation-6.jpg',import.meta.url));
 async function start(page){
   await openApp(page,'single');await page.locator('#custom-requirements').click();await page.locator('#single-fit').selectOption('original');
-  await page.locator('#photo').setInputFiles(fixture);await reviewFraming(page);
+  await page.locator('#photo').setInputFiles(fixture);await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   await page.locator('[name=output-quality][value=compress]').check();
   await page.locator('[name=compression-target][value=pixels]').check();
   await expect(page.locator('#save')).toBeEnabled({timeout:15000});
@@ -35,7 +35,7 @@ test('close-up reads the exact downloaded JPEG, supports keyboard zoom and resto
   await start(page);await page.locator('#pixel-width').fill('1200');await page.locator('#jpeg-quality').fill('35');await expect(page.locator('#save')).toBeEnabled();
   const data=await download(page);
   await page.evaluate(()=>{const create=URL.createObjectURL.bind(URL);URL.createObjectURL=blob=>{window.inspectedBlob=blob;return create(blob);};});
-  await page.locator('#inspect-output').click();await expect(page.locator('#jpeg-viewer')).toBeVisible();
+  await page.locator('#sheet').click();await expect(page.locator('#jpeg-viewer')).toBeVisible();
   await expect(page.locator('#viewer-viewport')).not.toHaveAttribute('aria-busy','true');
   const inspected=await page.evaluate(async()=>Array.from(new Uint8Array(await window.inspectedBlob.arrayBuffer())));
   expect(Buffer.from(inspected).equals(data)).toBe(true);
@@ -45,11 +45,11 @@ test('close-up reads the exact downloaded JPEG, supports keyboard zoom and resto
   await page.keyboard.press('ArrowRight');await expect.poll(()=>page.locator('#viewer-viewport').evaluate(el=>el.scrollLeft)).toBeGreaterThan(0);
   await page.keyboard.press('Escape');await expect(page.locator('#jpeg-viewer')).not.toBeVisible();
   await expect(page.locator('#viewer-image')).not.toHaveAttribute('src');
-  await expect(page.locator('#inspect-output')).toBeFocused();
+  await expect(page.locator('#sheet')).toBeFocused();
   await page.locator('#sheet').focus();await page.keyboard.press('Enter');await expect(page.locator('#jpeg-viewer')).toBeVisible();await expect(page.locator('#viewer-viewport')).not.toHaveAttribute('aria-busy','true');
   await page.locator('#viewer-close').click();
   await page.locator('[name=compression-target][value=file]').check();await expect(page.locator('#save')).toBeEnabled();
-  await page.locator('#inspect-output').click();await expect(page.locator('#viewer-viewport')).not.toHaveAttribute('aria-busy','true');
+  await page.locator('#sheet').click();await expect(page.locator('#viewer-viewport')).not.toHaveAttribute('aria-busy','true');
   await page.screenshot({path:'.qa/viewer-desktop-'+info.project.name+'.png'});
 });
 
@@ -57,7 +57,7 @@ test('phone close-up supports pinch and drag with compact bilingual controls',as
   await page.setViewportSize({width:375,height:812});await page.emulateMedia({reducedMotion:'reduce'});await start(page);
   await page.locator('#pixel-height').fill('1200');await expect(page.locator('#pixel-width-label')).toContainText('calculated');
   await page.locator('#language').check();await expect(page.locator('#pixel-width-label')).toContainText('自动计算');
-  await expect(page.locator('#save')).toBeEnabled();await page.locator('#inspect-output').click();
+  await expect(page.locator('#save')).toBeEnabled();await page.locator('#sheet').click();
   await expect(page.locator('#viewer-viewport')).not.toHaveAttribute('aria-busy','true');
   const viewport=page.locator('#viewer-viewport');
   const box=await viewport.boundingBox();const x=box.x+box.width/2,y=box.y+box.height/2;

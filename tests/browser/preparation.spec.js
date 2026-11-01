@@ -40,15 +40,16 @@ async function detailPhoto(page){
 test('ID preparation is first and defaults to source-detail JPEG quality; compression is optional',async({page},testInfo)=>{
   await page.goto('./');await expect(page.locator('body')).not.toHaveAttribute('inert');
   await expect(page.locator('[name=output-mode]').first()).toHaveValue('single');
-  await expect(page.locator('[name=output-mode][value=single]')).toBeChecked();
+  await expect(page.locator('[name=output-mode][value=print]')).toBeChecked();
+  await page.locator('[name=output-mode][value=single]').check();
   await expect(page.locator('.mode-picker')).toContainText('Single photo');
   await expect(page.locator('#sheet-title')).toHaveText('4. Customize output');
   await page.locator('#photo').setInputFiles({name:'detail.png',mimeType:'image/png',buffer:await detailPhoto(page)});await expect(page.locator('#save')).toBeEnabled();
   await expect(page.locator('[name=output-quality][value=quality]')).toBeChecked();
   await expect(page.locator('#compression-settings')).toBeHidden();
-  const preview=await page.locator('.sheet-stage').boundingBox();expect(preview.height).toBeLessThanOrEqual(270); // Includes the 44px Inspect JPEG action.
+  const preview=await page.locator('.sheet-stage').boundingBox();expect(preview.height).toBeLessThanOrEqual(270);
   const exportHeading=await page.locator('.export-title').boundingBox(), actions=await page.locator('.export-actions').boundingBox();expect(actions.y).toBeGreaterThanOrEqual(exportHeading.y+exportHeading.height);
-  const best=await downloadInfo(page);expect([best.width,best.height]).toEqual([1200,1200]);await expect(page.locator('#single-result')).toContainText(new Intl.NumberFormat('en',{minimumFractionDigits:1,maximumFractionDigits:1}).format(best.bytes/1000)+' KB');await expect(page.locator('#single-result')).toContainText('100/100');
+  const best=await downloadInfo(page);expect([best.width,best.height]).toEqual([1200,1200]);await expect(page.locator('#single-result')).toContainText(new Intl.NumberFormat('en',{minimumFractionDigits:1,maximumFractionDigits:1}).format(best.bytes/1000)+' KB');await expect(page.locator('#result-quality')).toContainText('100/100');
   await page.locator('#sheet-title').scrollIntoViewIfNeeded();await page.locator('.sheet').screenshot({path:`.qa/customize-quality-${testInfo.project.name}.png`});
   await page.locator('[name=output-quality][value=compress]').check();await expect(page.locator('#save')).toBeEnabled();
   await expect(page.locator('#max-kb')).toBeVisible();await expect(page.locator('#pixel-width')).toBeHidden();

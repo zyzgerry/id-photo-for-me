@@ -1,5 +1,6 @@
 export const messages = {
   en: {
+    outputHelp:"Output guidance",previewUpdating:"Updating… Previous result shown.",previewPrevious:"Previous result shown. Fix the settings to update.",
     autoCompression:"Auto compression",customCompression:"Full custom compression",
     qualitySetting:"JPEG quality setting (1–100)",qualitySettingError:"Enter a whole JPEG quality setting from 1–100.",
     inspectJpeg:"Inspect JPEG",closeViewer:"Close",fitView:"Fit",actualView:"100%",zoomIn:"Zoom in",zoomOut:"Zoom out",
@@ -112,6 +113,7 @@ export const messages = {
     local:'Local processing', source:'Decoder notices', noScript:'JavaScript is needed to process photos locally. Enable it and reload.',
   },
   zh: {
+    outputHelp:"输出说明",previewUpdating:"正在更新… 当前显示上次结果。",previewPrevious:"当前显示上次结果，请修正设置后更新。",
     autoCompression:"自动压缩",customCompression:"完全自定义压缩",
     qualitySetting:"JPEG 编码质量（1–100）",qualitySettingError:"请输入 1–100 的整数 JPEG 编码质量。",
     inspectJpeg:"放大检查 JPEG",closeViewer:"关闭",fitView:"适应窗口",actualView:"100%",zoomIn:"放大",zoomOut:"缩小",
