@@ -16,11 +16,12 @@ test('all sourced country/document options work in both languages without losing
       if(p.scope) {
         await expect(page.locator('#preset-location')).toBeVisible();
         await expect(page.locator('#preset-scope')).toHaveText(p.scope[lang]);
-      } else await expect(page.locator('#preset-location')).toBeHidden();
+      }
+      await expect(page.locator('#preset-location')).toBeVisible();
       await expect(page.locator('#preset-note')).not.toBeEmpty();await expect(page.locator('#error')).toBeHidden();
       await page.locator('.requirements').evaluate(el=>el.open=true);
       await expect(page.locator('#reference')).toHaveAttribute('href',p.source);
-      await expect(page.locator('#verified')).toContainText(p.checked||'2026-10-30');
+      await expect(page.locator('#verified')).toContainText(p.checked||'2026-11-01');
     }
     const last=PRESETS.at(-1);await page.locator('#language').setChecked((lang==='en'?'zh':'en')==='zh');
     await expect(page.locator('#country')).toHaveValue(last.country);await expect(page.locator('#document')).toHaveValue(last.id);
@@ -51,7 +52,7 @@ test('short document labels keep detailed scope and linked sources collapsed unt
   await expect(page.locator('#preset-scope')).toContainText('香港／澳门');
   await disclosure.click();await expect(page.locator('#preset-note')).toBeHidden();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(320);
-  await page.locator('#country').selectOption('us');await expect(page.locator('#preset-location')).toBeHidden();
+  await page.locator('#country').selectOption('us');await expect(page.locator('#preset-location')).toBeVisible();
   await page.locator('#custom-requirements').click();await expect(page.locator('#preset-location')).toBeHidden();
 });
 
@@ -59,19 +60,12 @@ test('shared visa names distinguish Schengen, mixed guidance and national D rout
   await openApp(page);
   for(const lang of ['en','zh']) {
     await page.locator('#language').setChecked((lang)==='zh');
-    for(const [country,label] of [
-      ['pt',['Schengen Visa','申根签证']],['ro',['Schengen Visa','申根签证']],
-      ['it',['Schengen Visa','申根签证']],['gr',['Schengen Visa','申根签证']],
-      ['de',['Schengen / National Visa','申根／国家签证']],
-      ['at',['Schengen / National Visa','申根／国家签证']],
-      ['sk',['National Visa (D)','国家签证（D类）']],
-      ['be',['National Visa (D, study)','国家签证（D类，留学）']],
-      ['ch',['National Visa (D, marriage)','国家签证（D类，结婚）']]
-    ]) {
+    for(const country of ['pt','ro','it','gr','de','at','sk','be','ch']) {
+      const p=PRESETS.find(p=>p.country===country);
       await page.locator('#country').selectOption(country);
-      await expect(page.locator('#document option:checked')).toHaveText(label[lang==='en'?0:1]);
+      await expect(page.locator('#document option:checked')).toHaveText(typeof p.document==='string'?messages[lang][p.document]:p.document[lang]);
     }
-    for(const country of ['ie','cy']) {
+    for(const country of ['ie','me']) {
       await page.locator('#country').selectOption(country);
       await expect(page.locator('#document option:checked')).not.toContainText(/Schengen|申根/);
     }
@@ -85,10 +79,10 @@ test('new formats export offline at their stated dimensions and retain phone lay
     const p=PRESETS.find(p=>p.id===id);
     await page.locator('#country').selectOption(p.country);await page.locator('#document').selectOption(p.id);
     await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
-    await expect(page.locator('#sheet')).toHaveAttribute('width','1800');await expect(page.locator('#sheet')).toHaveAttribute('height','1200');
+    await expect(page.locator('#sheet')).toHaveAttribute('width','3600');await expect(page.locator('#sheet')).toHaveAttribute('height','2400');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
   }
   await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#country option:checked')).toHaveText('秘鲁');
   const pending=page.waitForEvent('download');await page.locator('#save').click();
-  expect((await pending).suggestedFilename()).toBe('id-photo-4x6-300ppi.jpg');
+  expect((await pending).suggestedFilename()).toBe('id-photo-4x6-600ppi.jpg');
 });

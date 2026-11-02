@@ -7,7 +7,7 @@ test('requirements tabs hide locked fields, retain selections and support keyboa
   await expect(page.locator('#document-requirements')).toHaveAttribute('aria-selected','true');
   await expect(page.locator('#digital-framing')).toBeHidden();
   await expect(page.locator('#country option[value=custom]')).toHaveCount(0);
-  await page.locator('#country').selectOption('schengen');
+  await page.locator('#country').selectOption('pt');
   const document=await page.locator('#document').inputValue();
   await page.locator('.settings').screenshot({path:`.qa/requirements-document-${info.project.name}.png`});
   await page.locator('#document-requirements').focus();await page.keyboard.press('ArrowRight');
@@ -23,7 +23,7 @@ test('requirements tabs hide locked fields, retain selections and support keyboa
   await page.locator('.settings').screenshot({path:`.qa/requirements-custom-phone-${info.project.name}.png`});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   await page.locator('#custom-requirements').focus();await page.keyboard.press('Home');
-  await expect(page.locator('#country')).toHaveValue('schengen');
+  await expect(page.locator('#country')).toHaveValue('pt');
   await expect(page.locator('#document')).toHaveValue(document);
   await expect(page.locator('#digital-framing')).toBeHidden();
 });

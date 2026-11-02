@@ -100,7 +100,7 @@ test('transparent PNG flattens onto white and refresh leaves no photo storage',a
   }),'base64');
   await page.locator('#photo').setInputFiles({name:'transparent.png',mimeType:'image/png',buffer});await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   expect((await pixel(page)).crop).toEqual([255,255,255,255]);
-  const tint=await page.locator('#sheet').evaluate(canvas=>[...canvas.getContext('2d').getImageData(400,100,1,1).data]);
+  const tint=await page.locator('#sheet').evaluate(canvas=>[...canvas.getContext('2d').getImageData(800,200,1,1).data]);
   expect(tint[0]).toBe(255);expect(tint[1]).toBeGreaterThanOrEqual(126);expect(tint[1]).toBeLessThanOrEqual(128);
   expect(await page.evaluate(async()=>({databases:(await indexedDB.databases()).length,caches:(await caches.keys()).length}))).toEqual({databases:0,caches:0});
   await page.reload();await expect(page.locator('#save')).toBeDisabled();await expect(page.locator('#crop-wrap')).toBeHidden();

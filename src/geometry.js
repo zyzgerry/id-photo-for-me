@@ -1,5 +1,5 @@
-export const PPI = 300;
-export const SHEET = { width: 1800, height: 1200, widthMm: 152.4, heightMm: 101.6 };
+export const PPI = 600;
+export const SHEET = { width: 6 * PPI, height: 4 * PPI, widthMm: 152.4, heightMm: 101.6 };
 export const mmToPx = mm => mm * PPI / 25.4;
 
 export function layoutSheet(widthMm, heightMm, requested) {

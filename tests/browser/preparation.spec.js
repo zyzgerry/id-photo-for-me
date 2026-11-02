@@ -7,7 +7,7 @@ test('US to Schengen updates the preparation crop instead of keeping the square'
   await openApp(page);await page.locator('[name=output-mode][value=single]').check();
   await page.locator('#country').selectOption('us');await page.locator('#photo').setInputFiles(fixture);
   await expect(page.locator('#crop')).toBeVisible();
-  await page.locator('#country').selectOption('schengen');
+  await page.locator('#country').selectOption('pt');
   await expect.poll(()=>page.locator('#crop').evaluate(c=>c.width/c.height)).toBeCloseTo(35/45,2);
 });
 
@@ -61,7 +61,7 @@ test('ID preparation is first and defaults to source-detail JPEG quality; compre
   await page.locator('[name=output-quality][value=quality]').check();await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBe(1200);
   await page.locator('[name=output-quality][value=compress]').check();await expect(page.locator('#save')).toBeDisabled();await expect(page.locator('#pixel-width')).toBeVisible();
   await page.locator('#pixel-width').fill('600');await expect(page.locator('#save')).toBeEnabled();
-  await page.locator('[name=output-mode][value=print]').check();await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBe(1800);
+  await page.locator('[name=output-mode][value=print]').check();await expect(page.locator('#save')).toBeEnabled();expect((await downloadInfo(page)).width).toBe(3600);
   await page.locator('[name=output-mode][value=single]').check();await expect(page.locator('[name=output-quality][value=compress]')).toBeChecked();await expect(page.locator('#max-kb')).toHaveValue('100');
   await page.locator('#clear').click();await expect(page.locator('#save')).toBeDisabled();await expect(page.locator('#crop-wrap')).toBeHidden();
 });

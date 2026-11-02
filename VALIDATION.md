@@ -13,7 +13,7 @@
 
 Run `pnpm test`, `pnpm build`, and `pnpm test:browser` from the repository. The browser checks cover:
 
-- Exact 1800×1200 sheet and six 600×600-pixel copies for 2×2-inch photos; 300-ppi JFIF metadata in the saved JPEG.
+- Exact 3600×2400 sheet and six 1200×1200-pixel copies for 2×2-inch photos; 600-ppi JFIF metadata in the saved JPEG.
 - Metric raster tolerance, both uniform-grid orientations, impossible sizes, and shared boundaries without borders/gaps.
 - Asymmetric crop preview/export agreement; ratio changes; JPEG EXIF orientation; synthetic HEIC decoding after going offline.
 - Neutral adjustments, repeated slider changes, original comparison, and reset without cumulative edits.
@@ -166,3 +166,9 @@ Full repository Ponytail audit recorded in canonical CUSTOM_COMPRESSION_AUDIT.md
 Step 4 is a static Customize output heading above the format selector; Printable sheet is selected by default. Removed the mode subtitle and dedicated Inspect button. Single-photo feedback precedes configuration in DOM order, remains pinned with compact landscape sizing, and preserves/labels the last encoded result during computation or invalid inputs. Previous JPEGs stay inspectable; download waits for a valid new result. Step 5 Export is a separate sibling region. Repeated guidance is disclosed and settings retain 44px targets. Added WebKit focus correction based on actual sticky bounds.
 
 All 16 Node checks pass. All 120 Chromium/WebKit scenarios have passing results: the broad run found one WebKit short-viewport focus issue, which was fixed; all 10 final layout/viewer checks then passed in both engines. Screenshots reviewed at desktop, 375px/320px Chinese and landscape sizes. Tests cover heading order/default output, independent Export, preview DOM order, retained feedback during paused encoding/invalid input, direct-photo zoom and focus restoration, sticky sizing and unobscured pixel-field focus. HTML IDs, control references, bilingual labels, build, syntax and diff checks pass. Independent Impeccable layout/mechanical review found no new blocking issue; five scanner warnings relate to incumbent styling/illustrations and the runtime-loaded hidden viewer image. Physical iPhone/VoiceOver checks remain pending; CI runs the entire Chromium/WebKit/Firefox suite before publication.
+
+## 600-PPI sheets and ordinary photo requirements — November 1, 2026
+
+All 18 Node checks and the build pass. All 126 Chromium/WebKit cases have passing results across the full run and focused reruns: the full run passed 123, followed by 12 successful focused reruns covering the corrected guide assertion and resize wait in both engines (three repeats each). The resize diagnostic confirmed normal JPEG completion about 40 ms beyond the former five-second test deadline; the check now uses the existing 15-second export allowance. No application workaround or diagnostic logging remains. Final independent review approved, with no confirmed blocking findings. Not published. Actual iPhone, Firefox and physical-print/authority acceptance were not rechecked.
+
+Current catalog: 88 choices across 83 countries/regions, including one independently sourced numerical Schengen choice for each of the 29 members. Actual JPEG dimensions/density/filename, six exact 2-inch copies, metric placement, guide raster/preview, native single-photo pixels/metadata, source-detail thresholds, visible bilingual caveats and restrictions, every preset, offline HEIC, compression, replacement, viewer, keyboard and responsive layout were exercised. Only synthetic fixtures were used. The earlier measured personal 300-PPI exports above are historical and are not a physical validation of this release.

@@ -16,7 +16,7 @@ Changing requirements retains the photo, valid framing and adjustments, updates 
 
 ## Output
 
-Print arrangement is automatic, fixed 4×6 inches at 300 ppi (1800×1200 pixels). Copy count and cutting guides belong after editing. Never shrink individual physical photo dimensions to fit. Preserve zero-gap uniform-grid placement, exact counts, complete one-pixel dashed edges including partial rows, and maximum JPEG quality with no byte cap. Screen-pixel overlays stay aligned with the canvas and never enter the output.
+Print arrangement is automatic, fixed 4×6 inches at 600 ppi (3600×2400 pixels). Copy count and cutting guides belong after editing. Never shrink individual physical photo dimensions to fit. Preserve zero-gap uniform-grid placement, exact counts, complete two-pixel dashed edges including partial rows, and maximum JPEG quality with no byte cap. Screen-pixel overlays stay aligned with the canvas and never enter the output.
 
 Customize output offers Preserve best quality (default) and Compress output size. Compression has two mutually exclusive native radio choices: Set maximum file size (default) uses automatic dimensions and may reduce them to fit the KB cap; Set pixel dimensions uses exact linked dimensions at maximum JPEG quality, with no KB cap. Never validate hidden controls from the other target. Remove user-editable minimums, the resize checkbox and country-specific digital output bounds. Pixel reset restores current crop-derived dimensions. File-size mode starts from current crop detail, never silently enlarges. Show the actual resulting KB prominently beside the encoded preview, with pixels below; omit raw bytes. Keep JPEG encoder settings and their plain-language explanation in a collapsed disclosure. Selected document sources and acceptance caveats still apply.
 
@@ -30,7 +30,7 @@ Portugal head guides retain their distinct VFS UK source; print dimensions retai
 
 ## File-size-only compression
 
-Until the user explicitly edits output pixels, compression starts from the same available crop dimensions as best quality, without country-specific digital upload bounds. Do not silently upscale to physical-preset 300-ppi dimensions. If that maximum-quality JPEG already fits the cap, retain its pixels, quality and exact bytes. Recompute default dimensions after framing changes; preserve explicit pixel overrides until requirements or the source photo change. Keep generic input validation and the existing explicit-upscale warning.
+Until the user explicitly edits output pixels, compression starts from the same available crop dimensions as best quality, without country-specific digital upload bounds. Do not silently upscale to physical-preset 600-ppi dimensions. If that maximum-quality JPEG already fits the cap, retain its pixels, quality and exact bytes. Recompute default dimensions after framing changes; preserve explicit pixel overrides until requirements or the source photo change. Keep generic input validation and the existing explicit-upscale warning.
 
 ## Compact editor and sheet controls
 

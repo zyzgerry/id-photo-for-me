@@ -1,0 +1,373 @@
+{
+  "date": "2026-11-01",
+  "source": "https://www.idphoto4you.com/",
+  "method": "Read country select and photo options after selecting each country; no images uploaded.",
+  "units": "mm unless inches stated",
+  "groups": [
+    {
+      "name": "Common Sizes",
+      "photos": "35×45; 2×2 inches; 30×40"
+    },
+    {
+      "name": "European Union",
+      "photos": "Passport 35×45"
+    }
+  ],
+  "countries": [
+    {
+      "country": "al",
+      "name": "Albania",
+      "photos": "Passport 40×50"
+    },
+    {
+      "country": "ar",
+      "name": "Argentina",
+      "photos": "Passport 1.5×1.5 inches"
+    },
+    {
+      "country": "au",
+      "name": "Australia",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "at",
+      "name": "Austria",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "bs",
+      "name": "Bahamas",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "bd",
+      "name": "Bangladesh",
+      "photos": "Passport 40×50"
+    },
+    {
+      "country": "by",
+      "name": "Belarus",
+      "photos": "Passport 40×50"
+    },
+    {
+      "country": "be",
+      "name": "Belgium",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "bz",
+      "name": "Belize",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "bo",
+      "name": "Bolivia",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "br",
+      "name": "Brazil",
+      "photos": "Passport 50×70; Visa 2×2 inches; ID 30×40"
+    },
+    {
+      "country": "bg",
+      "name": "Bulgaria",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "ca",
+      "name": "Canada",
+      "photos": "Passport 50×70; Visa 35×45; Citizenship 35×45; PR card 35×45"
+    },
+    {
+      "country": "cn",
+      "name": "China",
+      "photos": "Passport 33×48; Visa 2×2 inches"
+    },
+    {
+      "country": "co",
+      "name": "Colombia",
+      "photos": "Passport 1.5×2 inches; Visa 2×2 inches"
+    },
+    {
+      "country": "cr",
+      "name": "Costa Rica",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "hr",
+      "name": "Croatia",
+      "photos": "Passport 35×45; Driver licence 30×35"
+    },
+    {
+      "country": "cy",
+      "name": "Cyprus",
+      "photos": "Passport 40×50"
+    },
+    {
+      "country": "cz",
+      "name": "Czechia",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "dk",
+      "name": "Denmark",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "ee",
+      "name": "Estonia",
+      "photos": "Passport 40×50 (including under 11); Visa 36×47"
+    },
+    {
+      "country": "fi",
+      "name": "Finland",
+      "photos": "Passport/Visa 36×47 (including under 11)"
+    },
+    {
+      "country": "fr",
+      "name": "France",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "de",
+      "name": "Germany",
+      "photos": "Passport 35×45 (including under 10)"
+    },
+    {
+      "country": "gr",
+      "name": "Greece",
+      "photos": "Passport/Visa 40×60"
+    },
+    {
+      "country": "hk",
+      "name": "Hong Kong SAR China",
+      "photos": "Passport/Visa 40×50"
+    },
+    {
+      "country": "hu",
+      "name": "Hungary",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "in",
+      "name": "India",
+      "photos": "Passport 35×35, 2×2 inches, 35×45; Visa 2×2 inches; OCI 35×35; PAN 25×35"
+    },
+    {
+      "country": "id",
+      "name": "Indonesia",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "ir",
+      "name": "Iran",
+      "photos": "Passport 30×40"
+    },
+    {
+      "country": "ie",
+      "name": "Ireland",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "il",
+      "name": "Israel",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "it",
+      "name": "Italy",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "jm",
+      "name": "Jamaica",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "jp",
+      "name": "Japan",
+      "photos": "Passport 35×45; Visa 45×45"
+    },
+    {
+      "country": "ke",
+      "name": "Kenya",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "kr",
+      "name": "South Korea",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "lb",
+      "name": "Lebanon",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "my",
+      "name": "Malaysia",
+      "photos": "Passport 35×50 or 2×2 inches"
+    },
+    {
+      "country": "mx",
+      "name": "Mexico",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "ma",
+      "name": "Morocco",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "nl",
+      "name": "Netherlands",
+      "photos": "Passport 35×45 (including under 11)"
+    },
+    {
+      "country": "nz",
+      "name": "New Zealand",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "ng",
+      "name": "Nigeria",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "no",
+      "name": "Norway",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "pk",
+      "name": "Pakistan",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "pa",
+      "name": "Panama",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "pe",
+      "name": "Peru",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "ph",
+      "name": "Philippines",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "pl",
+      "name": "Poland",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "pt",
+      "name": "Portugal",
+      "photos": "Passport 35×45; Citizenship 1.5×1.5 inches"
+    },
+    {
+      "country": "ro",
+      "name": "Romania",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "ru",
+      "name": "Russia",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "sg",
+      "name": "Singapore",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "za",
+      "name": "South Africa",
+      "photos": "Passport 35×45 or 2×2 inches"
+    },
+    {
+      "country": "es",
+      "name": "Spain",
+      "photos": "Passport 30×40"
+    },
+    {
+      "country": "se",
+      "name": "Sweden",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "ch",
+      "name": "Switzerland",
+      "photos": "Passport 35×45 (including under 11)"
+    },
+    {
+      "country": "sy",
+      "name": "Syria",
+      "photos": "Passport 40×40"
+    },
+    {
+      "country": "tw",
+      "name": "Taiwan",
+      "photos": "Passport 2×2 inches or 35×45"
+    },
+    {
+      "country": "tz",
+      "name": "Tanzania",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "th",
+      "name": "Thailand",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "tt",
+      "name": "Trinidad & Tobago",
+      "photos": "Passport 43×53; Machine-readable passport 31×41"
+    },
+    {
+      "country": "tr",
+      "name": "Türkiye",
+      "photos": "Passport 50×60"
+    },
+    {
+      "country": "ua",
+      "name": "Ukraine",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "gb",
+      "name": "United Kingdom",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "us",
+      "name": "United States",
+      "photos": "Passport & Visa 2×2 inches"
+    },
+    {
+      "country": "uz",
+      "name": "Uzbekistan",
+      "photos": "Passport 35×45"
+    },
+    {
+      "country": "ve",
+      "name": "Venezuela",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "vn",
+      "name": "Vietnam",
+      "photos": "Passport 2×2 inches"
+    },
+    {
+      "country": "zw",
+      "name": "Zimbabwe",
+      "photos": "Passport 2×2 inches"
+    }
+  ]
+}

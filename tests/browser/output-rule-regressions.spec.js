@@ -28,7 +28,7 @@ test('printed document selection adds no digital byte, compression or pixel limi
   await expect(page.locator('#save')).toBeEnabled();expect((await download(page)).size[0]).toBe(100);
 });
 test('one pixel dimension is calculated and changing ratio retains the chosen editable edge',async({page},info)=>{
-  await openApp(page,'single');await page.locator('#country').selectOption('schengen');await photo(page,4);
+  await openApp(page,'single');await page.locator('#country').selectOption('pt');await photo(page,4);
   await page.locator('[name=output-quality][value=compress]').check();await page.locator('[name=compression-target][value=pixels]').check();
   await expect(page.locator('#pixel-height')).not.toHaveAttribute('readonly','');await page.locator('#pixel-width').fill('600');
   await expect(page.locator('#pixel-height')).toHaveValue('771');await expect(page.locator('#pixel-ratio')).toContainText('35 : 45');

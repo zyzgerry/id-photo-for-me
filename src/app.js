@@ -1,7 +1,7 @@
 import { createJpegViewer } from './jpeg-viewer.js';
 import { PRESETS, PREPARATION_PRESETS, VERIFIED } from './presets.js';
 import { messages } from './i18n.js';
-import { SHEET, layoutSheet, cropRect } from './geometry.js';
+import { PPI, SHEET, layoutSheet, cropRect } from './geometry.js';
 import { renderCrop, renderSheet, exportJpeg } from './render.js';
 import { decodePhoto, prepareDecoder } from './image.js';
 import { validateSingle, exportSingle, drawJpegPreview } from './single.js';
@@ -88,7 +88,9 @@ function updatePresetDetails() {
   for(const id of ['single-fit','ratio-width','ratio-height']) $(id).disabled=!!preset;
   $('country-help').textContent=t(mode==='print'?'countryHelp':'digitalCountryHelp');
   $('document-fields').hidden = customRequirements;
-  $('preset-location').hidden = !requirement?.scope;
+  $('preset-location').hidden = !requirement;
+  $('preset-warning').hidden = !requirement?.warning;
+  $('preset-warning').textContent = requirement?.warning?.[lang] || '';
   $('preset-scope').hidden = !requirement?.scope;
   $('preset-scope').textContent = requirement?.scope?.[lang] || '';
   const details=requirement;
@@ -263,7 +265,7 @@ function updateReadouts() {
     if(mode==='print') {
       const ppi = Math.floor(Math.min(rect.width / (layout.widthMm / 25.4), rect.height / (layout.heightMm / 25.4)));
       $('resolution').textContent = `${t('resolution')}: ${ppi} ppi`;
-      $('upscale').hidden = ppi >= 300;
+      $('upscale').hidden = ppi >= PPI;
     } else {
       $('resolution').textContent=`${t('workingPixels')}: ${photo.canvas.width}×${photo.canvas.height} px`;
       $('upscale').hidden=singleOptions.width<=rect.width&&singleOptions.height<=rect.height;
@@ -331,11 +333,11 @@ function scheduleRender() {
       let jpeg,filename;
       if(mode==='print') {
         sheet = renderSheet(photo.canvas, effectiveSettings(), layout, $('cut-guides').checked);
-        jpeg = await exportJpeg(sheet);
+        jpeg = await exportJpeg(sheet,1,PPI);
         if (current !== revision) return;
         $('sheet').width=sheet.width;$('sheet').height=sheet.height;
         $('sheet').getContext('2d').drawImage(sheet,0,0);
-        filename='id-photo-4x6-300ppi.jpg';
+        filename=`id-photo-4x6-${PPI}ppi.jpg`;
       } else {
         const result=await exportSingle(photo.canvas,{...effectiveSettings()},{...singleOptions},()=>current===revision);
         if(current!==revision) return;

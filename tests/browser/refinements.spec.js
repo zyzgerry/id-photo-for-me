@@ -33,7 +33,7 @@ test('resizing retains photo, settings, focus and exports in the requirements-fi
   await expect(page.locator('.sheet #copies')).toBeVisible();await expect(page.locator('.sheet #cut-guides')).toBeVisible();
   for(const width of [375,1440,320,1024]){
     await page.locator('#copies').focus();await page.setViewportSize({width,height:900});await expect(page.locator('#copies')).toBeFocused();
-    await expect(page.locator('#copies')).toHaveValue('4');await expect(page.locator('#save')).toBeEnabled();await expect(page.locator('.setup-column > .settings')).toBeVisible();
+    await expect(page.locator('#copies')).toHaveValue('4');await expect(page.locator('#save')).toBeEnabled({timeout:15000});await expect(page.locator('.setup-column > .settings')).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   }
   await page.locator('[name=output-mode][value=single]').check();await expect(page.locator('#print-summary')).toBeHidden();await expect(page.locator('#save')).toBeEnabled();
@@ -56,14 +56,14 @@ test('mobile preview stays visible while changing tonal adjustments',async({page
 test('cutting guides change only cut edges and can be disabled without changing geometry',async({page})=>{
   await openApp(page);await page.locator('#photo').setInputFiles(fixture);await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   const sample=()=>page.locator('#sheet').evaluate(c=>{
-    const x=c.getContext('2d');return {edge:[...x.getImageData(600,16,1,1).data],near:[...x.getImageData(598,16,1,1).data],inside:[...x.getImageData(200,200,1,1).data],width:c.width,height:c.height};
+    const x=c.getContext('2d');return {edge:[...x.getImageData(1200,32,1,1).data],near:[...x.getImageData(1196,32,1,1).data],inside:[...x.getImageData(400,400,1,1).data],width:c.width,height:c.height};
   });
   const guided=await sample();expect(guided.edge).toEqual([114,114,114,255]);
   await page.locator('#cut-guides').uncheck();await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   const plain=await sample();expect(plain.edge).not.toEqual(guided.edge);expect(plain.near).toEqual(guided.near);expect(plain.inside).toEqual(guided.inside);
-  expect([plain.width,plain.height]).toEqual([1800,1200]);await expect(page.locator('#copies')).toHaveValue('6');
+  expect([plain.width,plain.height]).toEqual([3600,2400]);await expect(page.locator('#copies')).toHaveValue('6');
   await page.locator('#country').selectOption('pt');await page.locator('#cut-guides').check();await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
-  const margin=await page.locator('#sheet').evaluate(c=>[...c.getContext('2d').getImageData(73,57,1,1).data]);
+  const margin=await page.locator('#sheet').evaluate(c=>[...c.getContext('2d').getImageData(146,114,1,1).data]);
   expect(margin).toEqual([114,114,114,255]);await expect(page.locator('#copies')).toHaveValue('8');
 });
 

@@ -1,4 +1,4 @@
-import { SHEET, cropRect, mmToPx, withJpegDensity } from './geometry.js';
+import { PPI, SHEET, cropRect, mmToPx, withJpegDensity } from './geometry.js';
 
 export function renderCrop(image, settings, width, height, original = false) {
   const canvas = document.createElement('canvas');
@@ -42,14 +42,18 @@ export function renderSheet(image, settings, layout, cutGuides = false) {
 }
 
 export function drawCutGuides(ctx, layout) {
+  const scale=PPI/300;
+  // Preserve the existing physical line weight and dash spacing at 600 PPI.
+  ctx.save();ctx.scale(scale,scale);
+  layout={...layout,copies:layout.copies.map(c=>({...c,x:c.x/scale,y:c.y/scale,width:c.width/scale,height:c.height/scale}))};
   const left = Math.min(...layout.copies.map(c=>c.x));
   const top = Math.min(...layout.copies.map(c=>c.y));
   const right = Math.max(...layout.copies.map(c=>c.x+c.width));
   const bottom = Math.max(...layout.copies.map(c=>c.y+c.height));
   const xs = [...new Set(layout.copies.flatMap(c=>[c.x,c.x+c.width]))];
   const ys = [...new Set(layout.copies.flatMap(c=>[c.y,c.y+c.height]))];
-  ctx.save(); ctx.fillStyle = '#727272';
-  // One output pixel (0.085 mm): no gutters, scaling, or thick retained borders.
+  ctx.fillStyle = '#727272';
+  // 0.085-mm lines: no gutters or thick retained borders.
   // Each dash is placed inside the grid; outer trim ticks stay in unused paper.
   const edges = new Map();
   for (const c of layout.copies) {
@@ -57,7 +61,7 @@ export function drawCutGuides(ctx, layout) {
       ['h',c.y,c.x,c.x+c.width],['h',c.y+c.height,c.x,c.x+c.width]]) edges.set(edge.join(','),edge);
   }
   for (const [axis,boundary,start,end] of edges.values()) {
-    const limit = axis==='v' ? ctx.canvas.width : ctx.canvas.height;
+    const limit = (axis==='v' ? ctx.canvas.width : ctx.canvas.height)/scale;
     const position = Math.min(boundary,limit-1);
     for (let p=Math.floor(start/16)*16;p<end;p+=16) {
       const from=Math.max(p,start),to=Math.min(p+8,end);
@@ -68,18 +72,18 @@ export function drawCutGuides(ctx, layout) {
     }
   }
   for (const x of xs) {
-    if (top>=14) ctx.fillRect(Math.min(x,ctx.canvas.width-1),top-12,1,8);
-    if (bottom<=ctx.canvas.height-14) ctx.fillRect(Math.min(x,ctx.canvas.width-1),bottom+4,1,8);
+    if (top>=14) ctx.fillRect(Math.min(x,ctx.canvas.width/scale-1),top-12,1,8);
+    if (bottom<=ctx.canvas.height/scale-14) ctx.fillRect(Math.min(x,ctx.canvas.width/scale-1),bottom+4,1,8);
   }
   for (const y of ys) {
-    if (left>=14) ctx.fillRect(left-12,Math.min(y,ctx.canvas.height-1),8,1);
-    if (right<=ctx.canvas.width-14) ctx.fillRect(right+4,Math.min(y,ctx.canvas.height-1),8,1);
+    if (left>=14) ctx.fillRect(left-12,Math.min(y,ctx.canvas.height/scale-1),8,1);
+    if (right<=ctx.canvas.width/scale-14) ctx.fillRect(right+4,Math.min(y,ctx.canvas.height/scale-1),8,1);
   }
   ctx.restore();
 }
 
-export async function exportJpeg(canvas, quality = 1) {
+export async function exportJpeg(canvas, quality = 1, density = 300) {
   const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
   if (!blob) throw new Error('exportError');
-  return new Blob([withJpegDensity(new Uint8Array(await blob.arrayBuffer()))], { type: 'image/jpeg' });
+  return new Blob([withJpegDensity(new Uint8Array(await blob.arrayBuffer()),density)], { type: 'image/jpeg' });
 }

@@ -1,3 +1,5 @@
+> Historical record: current behavior and inclusion decisions are in [Current photo requirements](current-photo-requirements.md).
+
 # Official printed-photo catalog and benchmark
 
 Checked October 31, 2026. **99 document/application presets across 95 countries and regions**; this is not a claim that both passports and visas are covered for each country. Dimensions are width × height, in mm. Each selectable route includes source, verification date, bilingual scope/notes, and editing restriction. Sources can change; the receiving authority's current checklist controls acceptance.

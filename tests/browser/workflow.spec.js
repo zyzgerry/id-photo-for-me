@@ -42,13 +42,13 @@ test('offline crop, adjustments, JPEG geometry, density, and clear keep all phot
   expect(comparison.crop).toEqual(comparison.sheet);expect(comparison.sheet).toEqual([0,255,0,255]);
   const pending=page.waitForEvent('download');await page.locator('#save').click();const download=await pending;
   const bytes=await readFile(await download.path());
-  expect([...bytes.subarray(13,18)]).toEqual([1,1,44,1,44]);
+  expect([...bytes.subarray(13,18)]).toEqual([1,2,88,2,88]);
   const decoded=await page.evaluate(async data=>{
     const b=Uint8Array.from(atob(data),c=>c.charCodeAt(0));const img=await createImageBitmap(new Blob([b],{type:'image/jpeg'}));
     const c=document.createElement('canvas');c.width=img.width;c.height=img.height;const x=c.getContext('2d');x.drawImage(img,0,0);
     return {width:img.width,height:img.height,pixel:[...x.getImageData(100,100,1,1).data]};
   },bytes.toString('base64'));
-  expect(decoded.width).toBe(1800);expect(decoded.height).toBe(1200);expect(decoded.pixel[1]).toBeGreaterThan(245);
+  expect(decoded.width).toBe(3600);expect(decoded.height).toBe(2400);expect(decoded.pixel[1]).toBeGreaterThan(245);
   expect(requests.slice(initialRequests).filter(url=>/^https?:/.test(url))).toEqual([]);
   expect(await page.evaluate(()=>({local:localStorage.length,session:sessionStorage.length,cookies:document.cookie}))).toEqual({local:0,session:0,cookies:''});
   await page.locator('#clear').click();await expect(page.locator('#crop-wrap')).toBeHidden();await expect(page.locator('#save')).toBeDisabled();

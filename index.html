@@ -52,7 +52,8 @@
         <div id="digital-framing" hidden>          <label for="single-fit" data-i18n="singleFit">Framing</label>
           <select id="single-fit"><option value="original" data-i18n="keepFull">Keep the full photo</option><option value="crop" selected data-i18n="cropOutput">Crop to output ratio</option></select><div id="ratio-fields" class="two-fields"><label><span data-i18n="ratioWidth">Crop ratio: width</span><input id="ratio-width" type="number" min="1" max="4096" value="1" step="any"></label><label><span data-i18n="ratioHeight">Crop ratio: height</span><input id="ratio-height" type="number" min="1" max="4096" value="1" step="any"></label></div></div>
         </div>
-        <p class="hint" id="preset-location" data-i18n="locationCaveat" hidden>Requirements may vary by application location.</p>
+        <p class="hint" id="preset-location" data-i18n="locationCaveat">Confirm the photo dimensions and other requirements with the embassy or passport authority before printing.</p>
+        <p class="warning" id="preset-warning" hidden></p>
         <p class="size-readout" id="size-readout"></p>
         <details class="requirements"><summary data-i18n="documentGuidance">Requirements &amp; sources</summary>
         <p class="hint" id="preset-scope" hidden></p>
@@ -111,7 +112,7 @@
             <label class="check-row"><input id="original" type="checkbox"><span data-i18n="original">Compare original</span></label>
           </div>
         </fieldset>
-        <p id="resolution" class="hint"></p><p id="upscale" class="warning" data-i18n="upscale" hidden>Below 300 ppi: this crop will be enlarged. Zoom out or use a higher-resolution photo; enlargement cannot restore detail.</p>
+        <p id="resolution" class="hint"></p><p id="upscale" class="warning" data-i18n="upscale" hidden>Below 600 ppi: this crop will be enlarged. Zoom out or use a higher-resolution photo; enlargement cannot restore detail.</p>
         <p id="bounded" class="hint" data-i18n="bounded" hidden>Large photos are reduced to a maximum working edge of 4096 pixels to limit memory use.</p>
         </div></div>
       </section>
@@ -124,7 +125,7 @@
         <p id="output-empty" class="hint" data-i18n="outputInactive">Upload a photo to prepare the output.</p>
         <div class="output-body">
           <div id="output-preview" class="output-preview">
-            <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="1800" height="1200" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
+            <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="3600" height="2400" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
 
             <div class="preview-details"><div id="single-result" role="status" hidden><span class="hint" data-i18n="resultFileSize">Resulting file size</span><strong id="result-size"></strong><span id="result-pixels" class="hint"></span></div><p class="hint" id="output-info"></p><p id="preview-status" class="hint" role="status" hidden></p></div>
           </div>

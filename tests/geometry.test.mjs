@@ -6,6 +6,21 @@ import { validateSingle, exportSingle } from '../src/single.js';
 import { PRESETS, PREPARATION_PRESETS, VERIFIED } from '../src/presets.js';
 import { messages } from '../src/i18n.js';
 
+test('all 29 Schengen members have a visa choice while local photo exceptions survive',()=>{
+  const members='at be bg hr cz dk ee fi fr de gr hu is it lv li lt lu mt nl no pl pt ro sk si es se ch'.split(' ');
+  for(const country of members) {
+    const choices=PRESETS.filter(p=>p.country===country);
+    assert.ok(choices.some(p=>/Schengen/i.test(typeof p.document==='string'?messages.en[p.document]:p.document.en)),country);
+  }
+  assert.ok(!PRESETS.some(p=>p.country==='schengen'));
+  for(const country of ['gb','ie','cy']) {
+    assert.ok(!PRESETS.some(p=>p.country===country && p.id.endsWith('-schengen-common')));
+  }
+  assert.deepEqual([PRESETS.find(p=>p.id==='fi-schengen-common').widthMm,PRESETS.find(p=>p.id==='fi-schengen-common').heightMm],[36,47]);
+  assert.deepEqual([PRESETS.find(p=>p.id==='gr-visa-uk').widthMm,PRESETS.find(p=>p.id==='gr-visa-uk').heightMm],[35,40]);
+  assert.match(PRESETS.find(p=>p.id==='nl-schengen-common').note.en,/400 dpi/);
+});
+
 test('every document preset has unique identity, bilingual guidance, dated sources and valid print geometry',()=>{
   const ids=new Set();
   for(const p of PRESETS) {
@@ -22,7 +37,7 @@ test('every document preset has unique identity, bilingual guidance, dated sourc
     for(const c of layout.copies) {
       assert.ok(Math.abs(c.width-mmToPx(c.rotated?p.heightMm:p.widthMm))<1,`${p.id} width`);
       assert.ok(Math.abs(c.height-mmToPx(c.rotated?p.widthMm:p.heightMm))<1,`${p.id} height`);
-      assert.ok(c.x>=0&&c.y>=0&&c.x+c.width<=1800&&c.y+c.height<=1200,`${p.id} bounds`);
+      assert.ok(c.x>=0&&c.y>=0&&c.x+c.width<=3600&&c.y+c.height<=2400,`${p.id} bounds`);
     }
   }
   for(const [id,size] of [['us-passport',[50.8,50.8]],['cn-visa',[33,48]],['fi-passport',[36,47]],['dm-passport',[35,45]],['pe-visa',[50,50]]]) {
@@ -30,12 +45,19 @@ test('every document preset has unique identity, bilingual guidance, dated sourc
   }
 });
 
-test('six exact 2-inch copies tile a 1800x1200 sheet with shared boundaries', () => {
+test('ordinary travel catalog excludes specialty routes and inferred Schengen dimensions',()=>{
+  for(const id of ['hr-visa-d','ch-visa-marriage-madagascar','by-visa-private-uae','sk-visa','si-visa','am-visa','be-visa','id-official-visa-mexico','pg-passport-adult','ar-visa','za-passport-toronto','om-visa-temporary-work']){
+    assert.ok(!PRESETS.some(p=>p.id===id),id);
+  }
+  assert.ok(!PRESETS.some(p=>p.source.includes('5bb16566-c8c2-4afb-b038-530f488cb72a')));
+});
+
+test('six exact 2-inch copies tile a 3600x2400 sheet with shared boundaries', () => {
   const result = layoutSheet(50.8,50.8);
   assert.equal(result.count,6);
   assert.deepEqual(result.copies.map(c=>[c.x,c.y,c.width,c.height]),[
-    [0,0,600,600],[600,0,600,600],[1200,0,600,600],
-    [0,600,600,600],[600,600,600,600],[1200,600,600,600]]);
+    [0,0,1200,1200],[1200,0,1200,1200],[2400,0,1200,1200],
+    [0,1200,1200,1200],[1200,1200,1200,1200],[2400,1200,1200,1200]]);
 });
 test('metric dimensions and rotated layouts stay within one pixel without shrinking', () => {
   for (const [w,h] of [[35,45],[45,35],[55,30],[10,10],[101.6,152.4],[152.4,101.6]]) {
@@ -45,7 +67,7 @@ test('metric dimensions and rotated layouts stay within one pixel without shrink
     for (const c of layout.copies) {
       assert.ok(Math.abs(c.width-mmToPx(c.rotated?h:w))<1);
       assert.ok(Math.abs(c.height-mmToPx(c.rotated?w:h))<1);
-      assert.ok(c.x>=0&&c.y>=0&&c.x+c.width<=1800&&c.y+c.height<=1200);
+      assert.ok(c.x>=0&&c.y>=0&&c.x+c.width<=3600&&c.y+c.height<=2400);
     }
   }
 });
@@ -66,20 +88,20 @@ test('requested copy counts retain size, stay within capacity, and never overlap
       for(const [i,c] of result.copies.entries()) {
         assert.ok(Math.abs(c.width-mmToPx(c.rotated?h:w))<1);
         assert.ok(Math.abs(c.height-mmToPx(c.rotated?w:h))<1);
-        assert.ok(c.x>=0&&c.y>=0&&c.x+c.width<=1800&&c.y+c.height<=1200);
+        assert.ok(c.x>=0&&c.y>=0&&c.x+c.width<=3600&&c.y+c.height<=2400);
         for(const other of result.copies.slice(i+1)) assert.ok(c.x+c.width<=other.x||other.x+other.width<=c.x||c.y+c.height<=other.y||other.y+other.height<=c.y);
       }
     }
     for(const invalid of [0,-1,1.5,maximum+1,NaN]) assert.throws(()=>layoutSheet(w,h,invalid),/copyLimit/);
   }
   const four=layoutSheet(50.8,50.8,4);assert.equal(four.columns,2);assert.equal(four.rows,2);
-  assert.ok(layoutSheet(50.8,50.8,2).copies.every(c=>c.x>0&&c.y>0&&c.x+c.width<1800&&c.y+c.height<1200));
+  assert.ok(layoutSheet(50.8,50.8,2).copies.every(c=>c.x>0&&c.y>0&&c.x+c.width<3600&&c.y+c.height<2400));
 });
-test('JPEG density is 300ppi with no competing JFIF header', () => {
+test('JPEG density is 600ppi with no competing JFIF header', () => {
   const original=new Uint8Array([255,216,255,224,0,16,74,70,73,70,0,1,1,0,0,1,0,1,0,0,255,217]);
   const bytes=withJpegDensity(original);
   assert.equal(bytes.length,original.length);
-  assert.deepEqual([...bytes.slice(13,18)],[1,1,44,1,44]);
+  assert.deepEqual([...bytes.slice(13,18)],[1,2,88,2,88]);
   assert.deepEqual([...bytes.slice(-2)],[255,217]);
 });
 test('file headers enforce size limits before native decoding', () => {

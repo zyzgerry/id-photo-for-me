@@ -36,7 +36,7 @@ test('outer cut guides cover all four metric photo boundaries',async({page})=>{
   await openApp(page);await page.locator('#country').selectOption('pt');
   await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   const edges=await page.locator('#sheet').evaluate(c=>{
-    const ctx=c.getContext('2d');return [[73,80],[1727,80],[96,69],[96,1131]].map(([x,y])=>[...ctx.getImageData(x,y,1,1).data]);
+    const ctx=c.getContext('2d');return [[146,160],[3454,160],[192,137],[192,2263]].map(([x,y])=>[...ctx.getImageData(x,y,1,1).data]);
   });
   expect(edges).toEqual(Array(4).fill([114,114,114,255]));
 });
@@ -56,14 +56,14 @@ test('outer cutting edges stay visible in a reduced white-photo preview',async({
   await page.locator('#cut-guides').uncheck();await ready(page);await expect(page.locator('#cut-preview')).toBeHidden();
 });
 
-test('Portugal offers sourced head-size guides without adding them to exports',async({page})=>{
+test('Portugal uses manual head guides without borrowing another mission’s range',async({page})=>{
   await openApp(page);await page.locator('#country').selectOption('pt');
   await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   await expect(page.locator('#guide-control')).toBeVisible();
   const before=await page.locator('#sheet').evaluate(c=>c.toDataURL());
   await page.locator('#guides').check();await expect(page.locator('#guide-overlay')).toBeVisible();
-  await expect(page.locator('#head-source')).toHaveAttribute('href',/portugal\/uk\/english\/pdf\/tech-req-for-photos.pdf/);
-  await expect(page.locator('.guide-line')).toHaveCount(4);
+  await expect(page.locator('#head-reference')).toBeHidden();
+  await expect(page.locator('.guide-line')).toHaveCount(2);
   expect(await page.locator('#sheet').evaluate(c=>c.toDataURL())).toBe(before);
   await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#guide-control')).toContainText('头部位置参考线');
   await single(page);await expect(page.locator('#guide-control')).toBeHidden();
@@ -78,8 +78,8 @@ test('copy selector enforces capacity and rearranges exactly the requested photo
   await page.locator('#copies').fill('6');await ready(page);await expect(page.locator('#copies')).toHaveValue('6');
   await page.locator('#country').selectOption('pt');await ready(page);await expect(page.locator('#copies')).toHaveValue('6');
   await page.locator('#copies').fill('5');await ready(page);await expect(page.locator('#copies')).toHaveValue('5');
-  expect(await page.locator('#sheet').evaluate(c=>[...c.getContext('2d').getImageData(1300,850,1,1).data])).toEqual([255,255,255,255]);
-  const result=await download(page);expect(result.size).toEqual([1800,1200]);expect([...result.bytes.subarray(13,18)]).toEqual([1,1,44,1,44]);
+  expect(await page.locator('#sheet').evaluate(c=>[...c.getContext('2d').getImageData(2600,1700,1,1).data])).toEqual([255,255,255,255]);
+  const result=await download(page);expect(result.size).toEqual([3600,2400]);expect([...result.bytes.subarray(13,18)]).toEqual([1,2,88,2,88]);
 });
 
 test('single mode preserves a full HEIC photo and exports offline without arrangement',async({page,context})=>{
@@ -121,12 +121,12 @@ test('single crop supports exact pixel dimensions and mode changes preserve prin
   expect((await download(page)).size).toEqual([600,600]);await expect(page.locator('#crop-controls')).toBeVisible();
   await page.locator('#single-fit').selectOption('original');await ready(page);
   await expect(page.locator('#pixel-height')).toHaveValue('900');expect((await download(page)).size).toEqual([600,900]);
-  await print(page);await ready(page);await expect(page.locator('#zoom')).toHaveValue('1');expect((await download(page)).size).toEqual([1800,1200]);
+  await print(page);await ready(page);await expect(page.locator('#zoom')).toHaveValue('1');expect((await download(page)).size).toEqual([3600,2400]);
   await single(page);await ready(page);await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#sheet-title')).toHaveText('4. 自定义输出');
 });
 
 test('a superseded compression job cannot overwrite print output or leak errors',async({page})=>{
   await openApp(page);await single(page);await page.locator('#photo').setInputFiles(fixture('orientation-6.jpg'));await ready(page);
   await page.locator('#max-kb').fill('1');await print(page);await ready(page);
-  await expect(page.locator('#error')).toBeHidden();await expect(page.locator('#sheet')).toHaveAttribute('width','1800');expect((await download(page)).size).toEqual([1800,1200]);
+  await expect(page.locator('#error')).toBeHidden();await expect(page.locator('#sheet')).toHaveAttribute('width','3600');expect((await download(page)).size).toEqual([3600,2400]);
 });
