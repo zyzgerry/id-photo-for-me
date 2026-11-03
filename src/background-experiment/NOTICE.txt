@@ -1,0 +1,32 @@
+Background-removal experiment, 2026-11-02
+
+MediaPipe Tasks Vision 0.10.21, Copyright Google LLC, Apache License 2.0.
+Official package: https://registry.npmjs.org/@mediapipe/tasks-vision/0.10.21
+Source: https://github.com/google-ai-edge/mediapipe/tree/v0.10.21
+The bundled runtime is unmodified. See LICENSE.txt for the license text.
+
+Google MediaPipe SelfieSegmenter square, float16, version 1; Apache 2.0.
+https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter/float16/1/selfie_segmenter.tflite
+License evidence: https://storage.googleapis.com/mediapipe-assets/Model%20Card%20MediaPipe%20Selfie%20Segmentation.pdf
+
+Google MediaPipe SelfieMulticlass 256x256, float32, version 1; Apache 2.0.
+https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/1/selfie_multiclass_256x256.tflite
+License evidence: https://storage.googleapis.com/mediapipe-assets/Model%20Card%20Multiclass%20Segmentation.pdf
+Models are unmodified. Both model cards warn that masks are not pixel-perfect.
+
+All runtime/model assets are self-hosted. The page permits same-origin connections only.
+No photo, mask, filename or report is uploaded. Reports are downloaded only on request.
+No application analytics are included. Model files may be cached by the browser.
+This trial uses CPU in a classic worker; it does not require cross-origin isolation.
+MediaPipe confidence values are used as soft alpha, not a dedicated matting model.
+The main app's existing image loader provides orientation/HEIC handling and size limits.
+No crop, print layout, JPEG compression or acceptance checking is part of this trial.
+
+Asset SHA-256 and uncompressed sizes:
+vendor/multiclass.tflite  16371837 bytes  c6748b1253a99067ef71f7e26ca71096cd449baefa8f101900ea23016507e0e0
+vendor/selfie.tflite  249537 bytes  191ac9529ae506ee0beefa6b2c945a172dab9d07d1e802a290a4e4038226658b
+vendor/vision_bundle.mjs  137735 bytes  40f4123dfcd75cfa58add046919cc6f52fde66f009ff582997c09ba54c6ba27c
+vendor/wasm/vision_wasm_internal.js  204284 bytes  4a97e2520ba506c680ecd6ba6acfb146888afa0e2746d57f205352bc6ebb82eb
+vendor/wasm/vision_wasm_internal.wasm  9574032 bytes  f00ec4731faa23b3e714d00e88d4d10e2df5c0a427d3a2b4ae6e3526fdd14ef7
+vendor/wasm/vision_wasm_nosimd_internal.js  204137 bytes  927def7b465c51b86e4b3060f93646aca4e27121f4b8fc0483786e407ea9cf1f
+vendor/wasm/vision_wasm_nosimd_internal.wasm  9448638 bytes  3821ea9b1f7fb8c549ef2a064ef5c85750bf375c545a49fd6eea0df44a95f1f4

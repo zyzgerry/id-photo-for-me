@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>Background removal experiment · ID Photo for Me</title>
+  <link rel="stylesheet" href="./experiment.css">
+  <script type="module" src="./experiment.js"></script>
+</head>
+<body>
+<main>
+  <a href="../../">Back to ID Photo for Me</a>
+  <h1>Try a white background</h1>
+  <p>This is an experiment. Compare two models on your photo before we add background removal to the editor.</p>
+  <p><strong>Your photo stays on this device.</strong> Only the tools are downloaded. Closing or reloading this page clears the photo and results. No automatic passport-acceptance check.</p>
+  <section aria-labelledby="choose-title">
+    <h2 id="choose-title">Choose your portrait</h2>
+    <label for="photo">Photo from Photos or Files</label>
+    <input id="photo" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif">
+    <p class="note">JPEG, PNG or HEIC, up to 30 MB and 50 megapixels. Uses the main app’s photo loader; working images are limited to a 4096-pixel longest edge.</p>
+    <p id="photo-info"></p>
+  </section>
+  <section aria-labelledby="test-title">
+    <h2 id="test-title">Run the comparison</h2>
+    <label for="model">Model</label>
+    <select id="model">
+      <option value="selfie">A · Small portrait model</option>
+      <option value="multiclass">B · Larger portrait model</option>
+    </select>
+    <p id="download-note" class="note">A: about 11 MB of first-use tools before compression. B: about 27 MB; the runtime is shared. Downloads start only when you tap Run. Your browser may cache them.</p>
+    <div class="actions"><button id="run" disabled>Run selected model</button><button id="cancel" disabled>Cancel</button><button id="clear">Clear photo &amp; results</button></div>
+    <p id="status" role="status" aria-live="polite">Choose a photo to begin.</p>
+    <progress id="progress" hidden aria-label="Model download"></progress>
+    <p class="note">Try A, then B, then run either again to compare repeat speed. Keep Safari in the foreground. Cancel stays available during processing.</p>
+  </section>
+  <section aria-labelledby="review-title">
+    <h2 id="review-title">Check hair, ears and shoulders</h2>
+    <p>Look for missing hair, chopped edges, leftover background or a colored halo. A larger model is not automatically better. Tap a full-size link to zoom in Safari.</p>
+    <div id="comparisons">
+      <figure id="original-figure" hidden><figcaption>Original</figcaption><img id="original" alt="Your original portrait"><a id="original-open" target="_blank" rel="noopener">Open full-size original</a></figure>
+    </div>
+  </section>
+  <section aria-labelledby="report-title">
+    <h2 id="report-title">Share the measurements</h2>
+    <p>Tell me which model looks better and whether any hair, ears or clothing disappeared. Download this small report and attach it in our chat, or paste its text. It contains timings and browser information, without your photo or filename.</p>
+    <label for="device">Phone model and iOS version (optional)</label>
+    <input id="device" type="text" maxlength="120" placeholder="For example: iPhone 17 Pro, iOS …">
+    <label for="notes">What did you notice? (optional)</label>
+    <textarea id="notes" rows="3" maxlength="2000" placeholder="A: hair looks … B: shoulders look …"></textarea>
+    <button id="report">Download test report</button>
+    <pre id="measurements">No runs yet.</pre>
+  </section>
+  <footer><p>Experimental build 2026-11-02 · MediaPipe 0.10.21 · CPU in a worker · 256×256 model inputs. Soft confidence masks are enlarged onto the working image; these are not detailed hair mattes.</p><p><a href="./NOTICE.txt">Model/runtime sources and Apache 2.0 license</a></p></footer>
+</main>
+</body>
+</html>
