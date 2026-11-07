@@ -4,7 +4,8 @@ export function renderCrop(image, settings, width, height, original = false) {
   const canvas = document.createElement('canvas');
   canvas.width = width; canvas.height = height;
   const ctx = canvas.getContext('2d', { colorSpace: 'srgb' });
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = '#ffffff';
+  if (!settings.whiteBackground) ctx.fillRect(0, 0, width, height);
   ctx.imageSmoothingQuality = 'high';
   const crop = cropRect(image.width, image.height, settings.ratio, settings.zoom, settings.x, settings.y);
   ctx.drawImage(image, crop.x, crop.y, crop.width, crop.height, 0, 0, width, height);
@@ -17,6 +18,10 @@ export function renderCrop(image, settings, width, height, original = false) {
       for (let c = 0; c < 3; c++) pixels.data[i+c] = (pixels.data[i+c] - 128) * contrast + 128 + brightness;
     }
     ctx.putImageData(pixels, 0, 0);
+  }
+  if (settings.whiteBackground) {
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillRect(0, 0, width, height);
   }
   return canvas;
 }

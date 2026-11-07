@@ -9,6 +9,7 @@ import { validateSingle, exportSingle, drawJpegPreview } from './single.js';
 const $ = id => document.getElementById(id);
 let lang = navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
 let photo = null, preset = PRESETS[0], layout = null;
+let backgroundCanvas, backgroundJob, backgroundProgress, backgroundStatus = '';
 let file = null, downloadUrl = null, revision = 0, renderTimer, loading = false;
 let statusKey = '', errorKey = '', exportKey = '';
 const settings = { ratio:1,zoom:1,x:50,y:50,brightness:0,contrast:0 };
@@ -17,11 +18,15 @@ const activeRequirement=()=>preset;
 const pixelTarget=()=>document.querySelector('[name=compression-target]:checked').value==='pixels';
 const compressing=()=>document.querySelector('[name=output-quality]:checked').value==='compress';
 const effectiveSettings=()=>activeRequirement()?.restrictEdits&&!$('allow-edits').checked?{...settings,brightness:0,contrast:0}:settings;
+const backgroundAllowed=()=>!activeRequirement()?.restrictEdits||$('background-permission').checked;
+const backgroundActive=()=>!!backgroundCanvas&&backgroundAllowed();
+const editedPhoto=()=>backgroundActive()?backgroundCanvas:photo.canvas;
+const renderSettings=()=>({...effectiveSettings(),whiteBackground:backgroundActive()});
 function markFramingReview(){if(photo) settings.review=true;}
 function updateExportAvailability(){
   $('framing-review').hidden=!photo||!settings.review;
-  $('save').disabled=!file||!!settings.review;
-  $('share').disabled=!file||!!settings.review||$('share').hidden;
+  $('save').disabled=!file||!!settings.review||!!backgroundJob;
+  $('share').disabled=!file||!!settings.review||!!backgroundJob||$('share').hidden;
 }
 let pixelEdge='width', pixelsEdited=false, customRequirements=false, customFraming=null;
 let mode='print', singleOptions=null, singleResult=null, requestedCopies=null, printCapacity=6;
@@ -104,6 +109,7 @@ function updatePresetDetails() {
   $('guide-control').hidden=!preset;
   $('allow-edits-row').hidden=!requirement?.restrictEdits;
   $('adjust-controls').disabled=!photo||(!!requirement?.restrictEdits&&!$('allow-edits').checked);
+  updateBackgroundControls();
   $('output-controls').disabled=!photo;
   $('copies').disabled=$('cut-guides').disabled=!photo;
   $('output-empty').hidden=!!photo;
@@ -332,14 +338,14 @@ function scheduleRender() {
     try {
       let jpeg,filename;
       if(mode==='print') {
-        sheet = renderSheet(photo.canvas, effectiveSettings(), layout, $('cut-guides').checked);
+        sheet = renderSheet(editedPhoto(), renderSettings(), layout, $('cut-guides').checked);
         jpeg = await exportJpeg(sheet,1,PPI);
         if (current !== revision) return;
         $('sheet').width=sheet.width;$('sheet').height=sheet.height;
         $('sheet').getContext('2d').drawImage(sheet,0,0);
         filename=`id-photo-4x6-${PPI}ppi.jpg`;
       } else {
-        const result=await exportSingle(photo.canvas,{...effectiveSettings()},{...singleOptions},()=>current===revision);
+        const result=await exportSingle(editedPhoto(),renderSettings(),{...singleOptions},()=>current===revision);
         if(current!==revision) return;
         await drawJpegPreview(result.blob,$('sheet'),()=>current===revision);
         if(current!==revision) return;
@@ -364,7 +370,8 @@ function drawCrop() {
   if (!photo || !(mode==='print'?layout:singleOptions)) return;
   const width = Math.max(1,Math.round(600*Math.min(1,settings.ratio)));
   const height = Math.max(1,Math.round(600*Math.min(1,1/settings.ratio)));
-  const preview = renderCrop(photo.canvas, effectiveSettings(), width, height, $('original').checked);
+  const original = $('original').checked;
+  const preview = renderCrop(original?photo.canvas:editedPhoto(), original?settings:renderSettings(), width, height, original);
   $('crop').width = width; $('crop').height = height;
   $('crop').getContext('2d').drawImage(preview,0,0);
   preview.width = preview.height = 1;
@@ -372,7 +379,88 @@ function drawCrop() {
   $('crop-wrap').style.setProperty('--crop-ratio', settings.ratio);
 }
 
+function updateBackgroundControls() {
+  const busy = !!backgroundJob;
+  const status = backgroundCanvas && !backgroundAllowed() ? 'backgroundPaused' : backgroundStatus;
+  $('background-permission-row').hidden = !photo || !activeRequirement()?.restrictEdits;
+  $('background-permission').disabled = busy;
+  $('remove-background').hidden = !!backgroundCanvas;
+  $('remove-background').disabled = !photo || loading || busy || !backgroundAllowed();
+  $('cancel-background').hidden = !busy;
+  $('restore-background').hidden = !backgroundCanvas;
+  $('background-download-note').hidden = !!backgroundCanvas;
+  $('background-progress').hidden = !busy || backgroundProgress == null;
+  if (backgroundProgress != null) $('background-progress').value = backgroundProgress;
+  $('background-progress').ariaLabel = t('backgroundPreparing');
+  const message = status ? t(status) : '';
+  if ($('background-status').textContent !== message) $('background-status').textContent = message;
+  $('background-status').toggleAttribute('data-error', status === 'backgroundFailed');
+}
+
+function cancelBackground() {
+  backgroundJob?.abort();
+  backgroundJob = null;
+  backgroundProgress = null;
+}
+
+function resetBackground() {
+  cancelBackground();
+  if (backgroundCanvas) backgroundCanvas.width = backgroundCanvas.height = 1;
+  backgroundCanvas = null;
+  backgroundStatus = '';
+  $('background-permission').checked = false;
+}
+
+$('remove-background').onclick = async () => {
+  if ($('remove-background').disabled) return;
+  const job = backgroundJob = new AbortController();
+  const source = photo.canvas;
+  backgroundStatus = 'backgroundPreparing';
+  updateBackgroundControls(); updateExportAvailability();
+  try {
+    const {removeBackground} = await import('./remove-background.js');
+    const result = await removeBackground(source, job.signal, ({stage, progress}) => {
+      if (backgroundJob !== job) return;
+      if (stage) {
+        backgroundStatus = ['download','verify','initialize'].includes(stage) ? 'backgroundPreparing' : 'backgroundWorking';
+        if (stage !== 'download') backgroundProgress = null;
+      }
+      if (progress) backgroundProgress = progress.current / progress.total;
+      updateBackgroundControls();
+    });
+    if (backgroundJob !== job) { result.width = result.height = 1; return; }
+    backgroundCanvas = result;
+    backgroundStatus = 'backgroundDone';
+    scheduleRender();
+  } catch {
+    if (backgroundJob === job) backgroundStatus = 'backgroundFailed';
+  } finally {
+    if (backgroundJob === job) {
+      const returnFocus = document.activeElement === $('cancel-background') || document.activeElement === $('remove-background');
+      backgroundJob = null;
+      backgroundProgress = null;
+      updateBackgroundControls(); updateExportAvailability();
+      if (returnFocus) $(backgroundCanvas?'restore-background':backgroundAllowed()?'remove-background':'background-tab').focus();
+    }
+  }
+};
+$('cancel-background').onclick = () => {
+  cancelBackground();
+  backgroundStatus = 'backgroundCancelled';
+  updateBackgroundControls(); updateExportAvailability();
+  $(backgroundAllowed()?'remove-background':'background-tab').focus();
+};
+$('restore-background').onclick = () => {
+  backgroundCanvas.width = backgroundCanvas.height = 1;
+  backgroundCanvas = null;
+  backgroundStatus = 'backgroundRestored';
+  updateBackgroundControls(); scheduleRender();
+  $($('remove-background').disabled?'background-tab':'remove-background').focus();
+};
+$('background-permission').onchange = () => { updateBackgroundControls(); scheduleRender(); };
+
 function clearPhoto() {
+  resetBackground();
   pixelsEdited=false;pixelEdge='width';$('jpeg-quality').value=$('jpeg-quality-slider').value=100;
   selectTool('framing');
   revision++; clearTimeout(renderTimer); discardExport();
@@ -392,6 +480,8 @@ function clearPhoto() {
 $('photo').addEventListener('change', async event => {
   const selected = event.target.files[0]; if (!selected || loading) return;
   loading = true; $('photo').disabled = $('clear').disabled = true; $('photo').setAttribute('aria-busy','true');
+  if (backgroundJob) { cancelBackground(); backgroundStatus = 'backgroundCancelled'; updateExportAvailability(); }
+  updateBackgroundControls();
   setStatus('loading');
   try {
     const result = await decodePhoto(selected);
@@ -410,11 +500,13 @@ $('photo').addEventListener('change', async event => {
     if(mode==='single') configureSingle('photo');else chooseSize(false);
     if (matchMedia('(max-width: 760px)').matches) $('crop-title').scrollIntoView({block:'start',behavior:'auto'});
   } catch (e) { setStatus(photo?'ready':''); setError(messages.en[e.message] ? e.message : 'decodeError'); }
-  finally { loading = false; $('photo').disabled = false; $('clear').disabled = !photo; $('photo').value = ''; $('photo').removeAttribute('aria-busy'); }
+  finally { loading = false; $('photo').disabled = false; $('clear').disabled = !photo; $('photo').value = ''; $('photo').removeAttribute('aria-busy'); updateBackgroundControls(); }
 });
 $('clear').onclick = clearPhoto;
 function updateRequirementSelection(){
+  const previous = preset;
   preset=customRequirements?null:catalog.find(p=>p.id===$('document').value)||null;
+  if (preset !== previous) $('background-permission').checked = false;
   if(preset){
     $('single-fit').value=preset.fit||'crop';
     $('ratio-width').value=preset.widthMm;
@@ -507,11 +599,11 @@ $('reset-pixels').onclick=()=>{
 for(const radio of document.querySelectorAll('[name=compression-target]')) radio.onchange=()=>configureSingle();
 for(const radio of document.querySelectorAll('[name=output-quality]')) radio.onchange=()=>configureSingle();
 function selectTool(name, focus = false) {
-  if (name === 'framing' && $('original').checked) {
+  if (name !== 'adjustments' && $('original').checked) {
     $('original').checked = false;
     if (photo) drawCrop();
   }
-  for (const tool of ['framing','adjustments']) {
+  for (const tool of photoTools) {
     const selected = tool === name;
     $(`${tool}-tab`).setAttribute('aria-selected',String(selected));
     $(`${tool}-tab`).tabIndex = selected ? 0 : -1;
@@ -519,24 +611,27 @@ function selectTool(name, focus = false) {
   }
   if (focus) $(`${name}-tab`).focus();
 }
-for (const name of ['framing','adjustments']) {
+const photoTools = ['background','framing','adjustments'];
+for (const [index,name] of photoTools.entries()) {
   $(`${name}-tab`).onclick = () => selectTool(name);
   $(`${name}-tab`).onkeydown = e => {
     if (['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) {
-      e.preventDefault(); selectTool(e.key === 'Home' ? 'framing' : e.key === 'End' ? 'adjustments' : name === 'framing' ? 'adjustments' : 'framing',true);
+      e.preventDefault();
+      const next = e.key === 'Home' ? 0 : e.key === 'End' ? photoTools.length - 1 : (index + (e.key === 'ArrowRight' ? 1 : -1) + photoTools.length) % photoTools.length;
+      selectTool(photoTools[next], true);
     }
   };
 }
 $('language').onchange = () => { lang = $('language').checked ? 'zh' : 'en'; updateLanguage(); };
 $('save').onclick = () => {
-  if (!file||settings.review) return;
+  if (!file||settings.review||backgroundJob) return;
   if (downloadUrl) URL.revokeObjectURL(downloadUrl);
   downloadUrl = URL.createObjectURL(file);
   const link = document.createElement('a'); link.href = downloadUrl; link.download = file.name;
   document.body.append(link); link.click(); link.remove(); setExport('saved');
 };
 $('share').onclick = async () => {
-  if (!file||settings.review) return;
+  if (!file||settings.review||backgroundJob) return;
   try { await navigator.share({ files:[file], title:t('title') }); setExport('shared'); }
   catch (e) { if (e.name !== 'AbortError') setError('shareError'); }
 };

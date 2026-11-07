@@ -14,6 +14,8 @@ Crop proportions come from requirements before editing. In custom preparation mo
 
 Changing requirements retains the photo, valid framing and adjustments, updates proportions, and flags framing review. Export stays blocked until the user confirms Framing reviewed. Both outputs share the current requirements, crop, tonal adjustments, adjustment permission and framing-review state. Switching output modes must not restore an older edit session. Keep print arrangement and preparation output controls separately adjustable; clearing/replacing the source photo explicitly resets its edits.
 
+Remove background sits beside Framing and Adjustments in the same editor. Framing remains the opening view. Background removal loads on demand, offers cancel and restore, and shows the same edited photo in both outputs. Presets flagged for editing restrictions require separate confirmation before applying a white background. Tonal controls affect the subject while the replacement background stays white.
+
 ## Output
 
 Print arrangement is automatic, fixed 4×6 inches at 600 ppi (3600×2400 pixels). Copy count and cutting guides belong after editing. Never shrink individual physical photo dimensions to fit. Preserve zero-gap uniform-grid placement, exact counts, complete two-pixel dashed edges including partial rows, and maximum JPEG quality with no byte cap. Screen-pixel overlays stay aligned with the canvas and never enter the output.

@@ -29,4 +29,4 @@ Prepare the model explicitly, select a JPEG/PNG/HEIC portrait, process, inspect 
 
 ## Evidence and open decisions
 
-Local four-photo and desktop-browser validations support the chosen model quality. Actual iPhone resource limits, first-use wait, cache behavior and usability remain open until device testing. Production integration is not approved by the experiment.
+The BiRefNet trial remains isolated. The owner approved the separate, iPhone-tested MODNet recipe at 1024 × 1536 with full-photo 20–80% cleanup as an optional editor feature. Processing stays on device and loads on demand. Some clothing can still show mask artifacts, so the editor offers preview and restore before export.

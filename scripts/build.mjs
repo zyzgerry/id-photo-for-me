@@ -9,7 +9,7 @@ await mkdir(resolve(dist, 'vendor'), { recursive: true });
 for (const file of ['index.html', 'favicon.svg', 'styles.css', 'tokens.css', 'base.css', 'src', 'THIRD_PARTY.md']) {
   await cp(resolve(root, file), resolve(dist, file), { recursive: true });
 }
-// Experimental runtime files are isolated; ordinary editor imports never reference them.
+// The editor requests the background runtime only when removal starts.
 const portraitVendor = resolve(dist, 'src/portrait-experiment/vendor');
 await mkdir(portraitVendor, {recursive:true});
 for (const file of ['ort.webgpu.min.mjs','ort.wasm.min.mjs','ort-wasm-simd-threaded.asyncify.mjs','ort-wasm-simd-threaded.asyncify.wasm','ort-wasm-simd-threaded.mjs','ort-wasm-simd-threaded.wasm']) {
@@ -45,7 +45,7 @@ html = html.replace('<html lang="en">', `<html lang="en" data-release="${version
   .replace(/<body([^>]*)>/, '<body$1 inert>')
   .replace('href="./styles.css"', `href="./assets/${version}/styles.css"`)
   .replace('<script type="module" src="./src/app.js"></script>', `<script type="module">${bootstrap}</script>`)
-  .replace("script-src 'self';", `script-src 'self' 'sha256-${scriptHash}';`)
+  .replace("script-src 'self' 'wasm-unsafe-eval';", `script-src 'self' 'wasm-unsafe-eval' 'sha256-${scriptHash}';`)
   .replace("connect-src 'none';", "connect-src 'self';");
 await writeFile(resolve(dist,'index.html'), html);
 for (const experiment of ['portrait-experiment', 'modnet-experiment']) {

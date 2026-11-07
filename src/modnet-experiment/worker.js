@@ -53,7 +53,7 @@ async function prepare({id, base, provider, fresh}) {
   send(id, {ready: true, preparation: {...preparation, resources}});
 }
 
-async function run({id, pixels, width, height, reusedModel}) {
+async function run({id, pixels, width, height, reusedModel, cutout}) {
   if (!session) throw new Error('Prepare the model first.');
   const {inputWidth, inputHeight} = RECIPE;
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || Math.max(width, height) > 4096 || pixels.length !== width * height * 4) throw new Error('Invalid working image.');
@@ -71,6 +71,11 @@ async function run({id, pixels, width, height, reusedModel}) {
     const refine = now();
     tightenFullMask(mask);
     const edgeRefineMs = now() - refine;
+    if (cutout) {
+      for (let i = 0; i < mask.length; i++) pixels[i * 4 + 3] = mask[i];
+      send(id, {cutout:pixels}, [pixels.buffer]);
+      return;
+    }
     compositeWhite(pixels, mask);
     const composited = now();
     const timing = {mode, recipe: RECIPE.key, inputWidth, inputHeight, width, height, edgeCutoff: RECIPE.edgeCutoff, edgeRefineMs, reusedModel, prepareImageMs: prepared - started, inferenceMs: inferred - infer, maskAndCompositeMs: composited - inferred};

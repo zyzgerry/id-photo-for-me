@@ -75,10 +75,15 @@ select:hover, input[type=number]:hover { border-color: var(--color-ink); }
 #crop:active { cursor: grabbing; }
 #guide-overlay { position: absolute; inset: 0; pointer-events: none; }
 .guide-line { position: absolute; width: 100%; border-top: 2px dashed var(--color-guide); filter: drop-shadow(0 1px 0 var(--color-guide-shadow)); }
-.tool-tabs { display: flex; margin-block: 16px 8px; border-bottom: 1px solid var(--color-rule); }
-.tool-tabs button { flex: 1; min-width: 0; min-height: 46px; padding: 8px 12px; border: 0; border-bottom: 2px solid var(--color-input); background: var(--color-input); color: var(--color-muted); font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.tool-tabs { display: grid; grid-template-columns: minmax(0,1.2fr) minmax(0,.8fr) minmax(0,1.1fr); gap: var(--space-xs); margin-block: 16px 8px; border-bottom: 1px solid var(--color-rule); }
+.tool-tabs button { min-width: 0; min-height: 46px; padding: var(--space-xs) var(--space-2xs); border: 0; border-bottom: 2px solid var(--color-input); background: var(--color-input); color: var(--color-muted); font-size: clamp(.75rem, 3.2vw, var(--text-sm)); line-height: 1.2; font-weight: 600; cursor: pointer; overflow-wrap: anywhere; text-wrap: balance; }
 .tool-tabs button[aria-selected=true] { border-bottom-color: var(--color-accent); color: var(--color-accent); }
 .tool-tabs button:hover { background: var(--color-paper); }
+.background-actions { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-block: var(--space-sm) var(--space-xs); }
+.background-actions .button { max-width: 100%; white-space: normal; }
+#background-progress { display: block; width: 100%; accent-color: var(--color-accent); }
+#background-status:empty { display: none; }
+#background-status[data-error] { color: var(--color-error); }
 fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
 fieldset:disabled { color: var(--color-muted); cursor: not-allowed; }
 fieldset:disabled input, fieldset:disabled button, input:disabled { cursor: not-allowed; }

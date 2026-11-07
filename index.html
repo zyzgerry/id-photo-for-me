@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Prepare an ID photo for print or online applications, entirely on your device.">
   <meta name="referrer" content="no-referrer">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; font-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'none'; font-src 'self'; base-uri 'none'; form-action 'none'">
   <title>ID Photo for Me</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
   <link rel="stylesheet" href="./styles.css">
@@ -85,10 +85,23 @@
         </div>
         <div class="editor-tools"><div id="framing-review" class="review-notice" role="status" hidden><p data-i18n="reviewNeeded">Requirements changed. Review your framing before exporting.</p><button id="review-framing" class="text-button" data-i18n="reviewFraming">Review framing</button><button id="confirm-framing" class="button quiet" data-i18n="framingReviewed">Framing reviewed</button></div>
         <div class="tool-tabs" role="tablist" aria-label="Photo tools" id="tool-tabs">
+          <button id="background-tab" role="tab" aria-selected="false" aria-controls="background-panel" tabindex="-1" data-i18n="backgroundTool">Remove background</button>
           <button id="framing-tab" role="tab" aria-selected="true" aria-controls="framing-panel" data-i18n="framingTool">Framing</button>
           <button id="adjustments-tab" role="tab" aria-selected="false" aria-controls="adjustments-panel" tabindex="-1" data-i18n="adjustmentsTool">Adjustments</button>
         </div>
         <fieldset id="edit-controls" disabled>
+          <div id="background-panel" role="tabpanel" aria-labelledby="background-tab" hidden>
+            <p class="hint" data-i18n="backgroundHelp">Replace the background with white, then continue framing and adjusting your photo.</p>
+            <label id="background-permission-row" class="check-row" hidden><input id="background-permission" type="checkbox"><span data-i18n="backgroundPermission">I’ve checked that my document allows background changes.</span></label>
+            <p id="background-download-note" class="hint" data-i18n="backgroundDownloadNote">Runs on your device. First use loads about 26 MB of model data plus processing tools.</p>
+            <div class="background-actions">
+              <button id="remove-background" type="button" class="button primary" data-i18n="backgroundTool">Remove background</button>
+              <button id="cancel-background" type="button" class="button quiet" data-i18n="backgroundCancel" hidden>Cancel</button>
+              <button id="restore-background" type="button" class="button quiet" data-i18n="backgroundRestore" hidden>Restore original background</button>
+            </div>
+            <progress id="background-progress" max="1" hidden></progress>
+            <p id="background-status" class="hint" role="status"></p>
+          </div>
           <div id="framing-panel" role="tabpanel" aria-labelledby="framing-tab">
           <p class="hint" id="framing-help" data-i18n="drag">Drag the photo to frame it, or use the position sliders. Pinch to zoom.</p>
           <div id="crop-controls">
