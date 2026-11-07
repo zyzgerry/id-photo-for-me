@@ -1,5 +1,5 @@
-import {MODEL, RECIPES, MAX_EDGE_MARKS} from './model.js';
-import {prepareInput, buildMask, tightenMarkedEdges, compositeWhite} from './processing.js';
+import {MODEL, RECIPE} from './model.js';
+import {prepareInput, buildMask, tightenFullMask, compositeWhite} from './processing.js';
 let session, ort, mode, preparation;
 const now = () => performance.now();
 const send = (id, data, transfer = []) => self.postMessage({id, ...data}, transfer);
@@ -36,7 +36,7 @@ async function prepare({id, base, provider, fresh}) {
   }
   const downloadMs = now() - downloadStart;
   stage(id, 'verify', 'Checking the downloaded model…');
-  if (offset !== MODEL.bytes || hasher.digest('hex') !== MODEL.sha256) throw new Error('The model integrity check failed. Select Fresh download and prepare again.');
+  if (offset !== MODEL.bytes || hasher.digest('hex') !== MODEL.sha256) throw new Error('The model integrity check failed. Enable Fresh download in Model and timing details, then retry.');
   hasher = null;
   stage(id, 'initialize', 'Preparing CPU processing…');
   ort = await import('../portrait-experiment/vendor/ort.wasm.min.mjs');
@@ -53,32 +53,27 @@ async function prepare({id, base, provider, fresh}) {
   send(id, {ready: true, preparation: {...preparation, resources}});
 }
 
-async function run({id, pixels, width, height, recipeKey, marks}) {
+async function run({id, pixels, width, height, reusedModel}) {
   if (!session) throw new Error('Prepare the model first.');
-  if (!Object.hasOwn(RECIPES, recipeKey)) throw new Error('Choose a processing option.');
-  const recipe = RECIPES[recipeKey], {inputWidth, inputHeight} = recipe;
+  const {inputWidth, inputHeight} = RECIPE;
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || Math.max(width, height) > 4096 || pixels.length !== width * height * 4) throw new Error('Invalid working image.');
-  if (recipe.edgeCutoff && (!Array.isArray(marks) || marks.length < 1 || marks.length > MAX_EDGE_MARKS ||
-    marks.some(mark => !mark || !Number.isFinite(mark.x) || !Number.isFinite(mark.y) || mark.x < 0 || mark.x >= width || mark.y < 0 || mark.y >= height))) {
-    throw new Error('Mark the ear or neck edge on the original photo.');
-  }
   const started = now(); let tensor, output;
   try {
     stage(id, 'preprocess', 'Preparing the photo…');
-    const input = prepareInput(pixels, width, height, recipe), prepared = now();
+    const input = prepareInput(pixels, width, height), prepared = now();
     tensor = new ort.Tensor('float32', input, [1, 3, inputHeight, inputWidth]);
     stage(id, 'inference', 'Removing the background…');
     const infer = now(); output = await session.run({[session.inputNames[0]]: tensor});
     const values = await output[session.outputNames[0]].getData(), inferred = now();
     if (values.length !== inputWidth * inputHeight) throw new Error('Unexpected model output dimensions.');
     stage(id, 'mask', 'Finishing the edges and keeping the original colors…');
-    const mask = buildMask(values, width, height, recipe);
+    const mask = buildMask(values, width, height);
     const refine = now();
-    if (recipe.edgeCutoff) tightenMarkedEdges(mask, width, height, marks, recipe.edgeCutoff);
+    tightenFullMask(mask);
     const edgeRefineMs = now() - refine;
     compositeWhite(pixels, mask);
     const composited = now();
-    const timing = {mode, recipe: recipeKey, inputWidth, inputHeight, width, height, edgeMarks: recipe.edgeCutoff ? marks.length : 0, edgeRefineMs, reusedModel: true, prepareImageMs: prepared - started, inferenceMs: inferred - infer, maskAndCompositeMs: composited - inferred};
+    const timing = {mode, recipe: RECIPE.key, inputWidth, inputHeight, width, height, edgeCutoff: RECIPE.edgeCutoff, edgeRefineMs, reusedModel, prepareImageMs: prepared - started, inferenceMs: inferred - infer, maskAndCompositeMs: composited - inferred};
     stage(id, 'encode', 'Preparing the full-size PNG…');
     if (typeof OffscreenCanvas !== 'undefined') {
       const canvas = new OffscreenCanvas(width, height), ctx = canvas.getContext('2d', {colorSpace: 'srgb'});

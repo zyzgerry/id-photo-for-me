@@ -1,6 +1,6 @@
 import {compositeWhite} from '../portrait-experiment/processing.js';
 export {compositeWhite};
-import {RECIPES, edgeRadius} from './model.js';
+import {RECIPE} from './model.js';
 const roundEven = value => value % 1 === .5 ? 2 * Math.round(value / 2) : Math.round(value);
 
 function geometry(width, height, inputWidth, inputHeight) {
@@ -22,8 +22,8 @@ function areaWeights(size, target) {
   });
 }
 
-export function prepareInput(pixels, width, height, recipe = RECIPES.standard) {
-  const {inputWidth, inputHeight, extendBottom} = recipe;
+export function prepareInput(pixels, width, height, recipe = RECIPE) {
+  const {inputWidth, inputHeight} = recipe;
   const {rw, rh, left, top} = geometry(width, height, inputWidth, inputHeight);
   if (pixels.length !== width * height * 4) throw new Error('Invalid source pixels.');
   const xs = areaWeights(width, rw), ys = areaWeights(height, rh);
@@ -43,22 +43,12 @@ export function prepareInput(pixels, width, height, recipe = RECIPES.standard) {
       tensor[c * plane + (top + y) * inputWidth + left + x] = sum;
     }
   }
-  if (extendBottom) {
-    const lastRow = top + rh - 1;
-    for (let c = 0; c < 3; c++) {
-      const start = c * plane + lastRow * inputWidth;
-      for (let y = lastRow + 1; y < inputHeight; y++) {
-        tensor.copyWithin(c * plane + y * inputWidth, start, start + inputWidth);
-      }
-    }
-  }
   return tensor;
 }
 
-export function buildMask(values, width, height, recipe = RECIPES.standard) {
-  const {inputWidth, inputHeight, alphaCutoff} = recipe;
+export function buildMask(values, width, height, recipe = RECIPE) {
+  const {inputWidth, inputHeight} = recipe;
   const {rw, rh, left, top} = geometry(width, height, inputWidth, inputHeight);
-  const alphaRange = 1 - 2 * alphaCutoff;
   if (values.length !== inputWidth * inputHeight) throw new Error('Unexpected alpha dimensions.');
   for (const value of values) if (!Number.isFinite(value) || value < -.001 || value > 1.001) throw new Error('The model produced an invalid alpha mask.');
   const mask = new Uint8Array(width * height);
@@ -70,41 +60,16 @@ export function buildMask(values, width, height, recipe = RECIPES.standard) {
       const x0 = Math.floor(sx), x1 = Math.min(rw - 1, x0 + 1), dx = sx - x0;
       const a = values[(top + y0) * inputWidth + left + x0] * (1 - dx) + values[(top + y0) * inputWidth + left + x1] * dx;
       const b = values[(top + y1) * inputWidth + left + x0] * (1 - dx) + values[(top + y1) * inputWidth + left + x1] * dx;
-      const alpha = (a * (1 - dy) + b * dy - alphaCutoff) / alphaRange;
+      const alpha = a * (1 - dy) + b * dy;
       mask[y * width + x] = roundEven(Math.max(0, Math.min(1, alpha)) * 255);
     }
   }
   return mask;
 }
 
-// Blend the strongest mark at overlaps so a second tap does not compound the curve.
-export function tightenMarkedEdges(mask, width, height, marks, cutoff) {
-  const radius = edgeRadius(width, height), weights = new Float32Array(width);
-  const startY = Math.max(0, Math.floor(Math.min(...marks.map(mark => mark.y)) - radius));
-  const endY = Math.min(height - 1, Math.ceil(Math.max(...marks.map(mark => mark.y)) + radius));
-  for (let y = startY; y <= endY; y++) {
-    weights.fill(0);
-    let first = width, last = -1;
-    for (const mark of marks) {
-      const dy = y - mark.y;
-      if (Math.abs(dy) >= radius) continue;
-      const halfWidth = Math.sqrt(radius * radius - dy * dy);
-      const left = Math.max(0, Math.ceil(mark.x - halfWidth));
-      const right = Math.min(width - 1, Math.floor(mark.x + halfWidth));
-      first = Math.min(first, left); last = Math.max(last, right);
-      for (let x = left; x <= right; x++) {
-        const value = mask[y * width + x];
-        if (value === 0 || value === 255) continue;
-        const distance = Math.hypot(x - mark.x, dy);
-        const weight = Math.max(0, Math.min(1, (radius - distance) / (radius * .25)));
-        weights[x] = Math.max(weights[x], weight);
-      }
-    }
-    for (let x = first; x <= last; x++) {
-      if (weights[x] === 0) continue;
-      const index = y * width + x, alpha = mask[index] / 255;
-      const tightened = Math.max(0, Math.min(1, (alpha - cutoff) / (1 - 2 * cutoff)));
-      mask[index] = roundEven((alpha + weights[x] * (tightened - alpha)) * 255);
-    }
-  }
+export function tightenFullMask(mask) {
+  const cutoff = RECIPE.edgeCutoff, range = 1 - 2 * cutoff;
+  const lookup = Uint8Array.from({length: 256}, (_, alpha) =>
+    roundEven(Math.max(0, Math.min(1, (alpha / 255 - cutoff) / range)) * 255));
+  for (let i = 0; i < mask.length; i++) mask[i] = lookup[mask[i]];
 }

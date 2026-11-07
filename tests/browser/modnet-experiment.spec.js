@@ -13,31 +13,12 @@ test('portrait test page is isolated, responsive and preserves the loaded origin
   const requests = [], errors = []; page.on('request', r => requests.push(r.url())); page.on('pageerror', e => errors.push(e.message));
   await page.setViewportSize({width:390, height:844}); await page.goto('src/modnet-experiment/');
   await expect(page.locator('h1')).toContainText('MODNet');
-  await expect(page.locator('#mode option')).toHaveCount(1);
-  await expect(page.locator('#mode')).toHaveValue('wasm');
-  await expect(page.locator('#recipe')).toHaveValue('standard');
-  await page.locator('#recipe').selectOption('detail');
-  await expect(page.locator('#recipe')).toHaveValue('detail');
   await expect(page.locator('#run')).toBeDisabled(); await expect(page.locator('#cancel')).toBeDisabled();
   expect(requests.some(url => /\/models\/|modnet-experiment\/vendor\//.test(url))).toBe(false);
   await page.locator('#photo').setInputFiles({name:'synthetic.png', mimeType:'image/png', buffer:await portrait(page)});
   await expect(page.locator('#original')).toBeVisible(); await expect(page.locator('#status')).toContainText('Photo ready');
-  await page.locator('#recipe').selectOption('edge-20-80');
-  await expect(page.locator('#edge-overlay')).toBeVisible();
-  await expect(page.locator('#detail-note')).toBeHidden();
-  await expect(page.locator('#mark-count')).toContainText('Tap the photo');
-  await page.locator('#edge-overlay').click();
-  await expect(page.locator('#run')).toBeInViewport({ratio:1});
-  expect(await page.locator('#run').evaluate(run => run.getBoundingClientRect().bottom <= document.getElementById('edge-overlay').getBoundingClientRect().top)).toBe(true);
-  await expect(page.locator('#edge-overlay circle')).toHaveCount(1);
-  await page.locator('#recipe').selectOption('edge-30-70');
-  await expect(page.locator('#run')).toBeInViewport({ratio:1});
-  await expect(page.locator('#edge-overlay circle')).toHaveCount(1);
-  await page.locator('#clear-marks').click();
-  await expect(page.locator('#edge-overlay circle')).toHaveCount(0);
-  await page.locator('#recipe').selectOption('detail');
-  await expect(page.locator('#edge-overlay')).toBeHidden();
-  await expect(page.locator('#run')).toBeDisabled();
+  await expect(page.locator('#run')).toBeEnabled();
+  expect(requests.some(url => url.includes('/models/'))).toBe(false);
   await page.locator('#photo').setInputFiles({name:'broken.jpg', mimeType:'image/jpeg', buffer:Buffer.from('invalid')});
   await expect(page.locator('#status')).toContainText('Choose a JPEG'); await expect(page.locator('#original')).toBeVisible();
   const downloaded = page.waitForEvent('download'); await page.locator('#report').click();
@@ -50,13 +31,14 @@ test('portrait test page is isolated, responsive and preserves the loaded origin
   expect(await page.evaluate(() => localStorage.getItem('modnet-checkpoint-v1'))).toBeNull();
 });
 test('portrait model download is explicit and cancellation cannot install a stale model', async ({page}) => {
-  await page.goto('src/modnet-experiment/'); await page.locator('#mode').selectOption('wasm');
+  await page.goto('src/modnet-experiment/');
+  await page.locator('#photo').setInputFiles({name:'synthetic.png', mimeType:'image/png', buffer:await portrait(page)});
   let release; const gate = new Promise(resolve => release = resolve);
   await page.route('**/models/**/part-0.bin', async route => { await gate; await route.abort().catch(() => {}); });
-  const requested = page.waitForRequest('**/models/**/part-0.bin'); await page.locator('#prepare').click(); await requested;
+  const requested = page.waitForRequest('**/models/**/part-0.bin'); await page.locator('#run').click(); await requested;
   await expect(page.locator('#cancel')).toBeEnabled(); await page.locator('#cancel').click(); release();
-  await expect(page.locator('#status')).toContainText('Cancelled'); await expect(page.locator('#prepare')).toBeEnabled();
-  await expect(page.locator('#run')).toBeDisabled(); await expect(page.locator('#release')).toBeDisabled();
+  await expect(page.locator('#status')).toContainText('Cancelled'); await expect(page.locator('#run')).toBeEnabled();
+  await expect(page.locator('#release')).toBeDisabled();
 });
 test('portrait interrupted-stage report survives a reload without photo history', async ({page}) => {
   await page.goto('src/modnet-experiment/');
@@ -71,4 +53,29 @@ test('ordinary editor visits never load portrait runtime or model assets', async
   await page.goto('./');await expect(page.locator('body')).not.toHaveAttribute('inert');
   await page.waitForLoadState('networkidle');
   expect(requests.some(url=>/modnet-experiment|\/models\//.test(url))).toBe(false);
+});
+
+test('one tap prepares and runs, then the second tap reuses the model', async ({page}) => {
+  await page.route('**/modnet-experiment/worker.js', route => route.fulfill({contentType:'text/javascript',body: [
+    'let ready = false;',
+    'self.onmessage = ({data}) => {',
+    '  if (data.type === "prepare") {',
+    '    if (ready) throw Error("Unexpected second preparation");',
+    '    ready = true;',
+    '    self.postMessage({id:data.id, ready, preparation:{totalMs:1, downloadMs:0, initializeMs:1}});',
+    '  } else {',
+    '    if (!ready) throw Error("Run before preparation");',
+    '    self.postMessage({id:data.id, result:{pixels:data.pixels, width:data.width, height:data.height},',
+    '      timing:{recipe:"1024x1536-20-80", inputWidth:1024, inputHeight:1536, edgeCutoff:.20, inferenceMs:1, encodeMs:0}});',
+    '  }',
+    '};',
+  ].join('\n')}));
+  await page.setViewportSize({width:390, height:844});
+  await page.goto('src/modnet-experiment/');
+  await page.locator('#photo').setInputFiles({name:'synthetic.png', mimeType:'image/png', buffer:await portrait(page)});
+  for (const run of [1,2]) {
+    await page.locator('#run').click();
+    await expect(page.locator('#status')).toContainText('Finished in');
+    await expect(page.locator('#save')).toHaveAttribute('download', 'modnet-1024x1536-20-80-photo1-run' + run + '.png');
+  }
 });

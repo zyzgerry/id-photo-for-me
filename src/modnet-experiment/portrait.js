@@ -1,60 +1,30 @@
 import {decodePhoto} from '../image.js';
-import {MODEL, RECIPES, MAX_EDGE_MARKS, edgeRadius} from './model.js';
+import {MODEL, RECIPE} from './model.js';
 const $ = id => document.getElementById(id), checkpointKey = 'modnet-checkpoint-v1';
 const build = document.documentElement.dataset.release || 'modnet-development';
 let worker, ready = false, busy = false, active = 0, source, originalUrl, resultUrl, photoSession = 0, phase = 'idle', started = 0, ticker, deadline;
-let preparation, priorCheckpoint;
+let priorCheckpoint;
+const mode = 'wasm';
 const runs = [], errors = [], preparations = [], stages = [];
-const marks = [];
 try { priorCheckpoint = JSON.parse(localStorage.getItem(checkpointKey) || 'null'); } catch {}
-function drawMarks() {
-  const overlay = $('edge-overlay');
-  overlay.replaceChildren();
-  if (!source) return;
-  overlay.setAttribute('viewBox', '0 0 ' + source.width + ' ' + source.height);
-  for (const mark of marks) {
-    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', mark.x); circle.setAttribute('cy', mark.y);
-    circle.setAttribute('r', edgeRadius(source.width, source.height));
-    overlay.append(circle);
-  }
-}
 function controls() {
-  const recipeKey = $('recipe').value, cutoff = RECIPES[recipeKey].edgeCutoff;
-  $('detail-note').hidden = recipeKey !== 'detail';
-  $('edge-target').hidden = !cutoff;
-  $('edge-preview').hidden = !cutoff;
-  $('mark-count').hidden = !cutoff;
-  $('run-panel').classList.toggle('targeted', Boolean(cutoff));
-  $('edge-overlay').toggleAttribute('hidden', !cutoff);
-  const previewParent = cutoff ? $('edge-preview') : $('comparisons');
-  const figure = $('original-figure');
-  if (figure.parentElement !== previewParent) previewParent.prepend(figure);
-  if (cutoff) {
-    $('edge-meaning').textContent = 'Below ' + Math.round(cutoff * 100) + '% becomes background. Above ' + Math.round((1 - cutoff) * 100) + '% becomes solid.';
-    if (!source) $('mark-count').textContent = 'Choose a photo to start marking.';
-    else if (!marks.length) $('mark-count').textContent = 'Tap the photo to mark at least one area.';
-    else if (!ready) $('mark-count').textContent = 'Marks saved. Prepare the model above to run.';
-    else $('mark-count').textContent = marks.length + ' of ' + MAX_EDGE_MARKS + ' marks · ready to run';
-  }
-  $('clear-marks').disabled = busy || !marks.length;
-  $('prepare').disabled = busy; $('run').disabled = busy || !ready || !source || (cutoff && !marks.length);
-  $('release').disabled = busy || !worker; $('cancel').disabled = !busy; $('mode').disabled = busy; $('fresh').disabled = busy;
-  $('photo').disabled = busy; $('recipe').disabled = busy; $('prepare').textContent = ready ? 'Prepare model again' : 'Prepare model · about 26 MB';
+  $('run').disabled = busy || !source;
+  $('release').disabled = busy || !worker; $('cancel').disabled = !busy; $('fresh').disabled = busy;
+  $('photo').disabled = busy;
 }
 function checkpoint(state) {
-  const record = {build, modelHash: MODEL.sha256, at: new Date().toISOString(), state, phase, mode: $('mode').value, recipe: $('recipe').value, photoSession, completedRuns: runs.length};
+  const record = {build, modelHash: MODEL.sha256, at: new Date().toISOString(), state, phase, mode, recipe: RECIPE.key, photoSession, completedRuns: runs.length};
   try { localStorage.setItem(checkpointKey, JSON.stringify(record)); } catch {}
 }
 function status(text, code = phase) { phase = code; $('status').textContent = text; stages.push({at: new Date().toISOString(), phase}); if (stages.length > 100) stages.shift(); checkpoint(busy ? 'busy' : 'idle'); }
 function finish() { busy = false; clearTimeout(deadline); clearInterval(ticker); $('progress').hidden = true; controls(); checkpoint('idle'); }
-function terminate() { worker?.terminate(); worker = null; ready = false; $('model-status').textContent = 'Model memory released. Prepare the model before another run.'; }
+function terminate() { worker?.terminate(); worker = null; ready = false; $('model-status').textContent = 'The next run will prepare the model.'; }
 function cancel(message = 'Cancelled. Your original photo and previous result are preserved.') { active++; terminate(); finish(); status(message, 'cancelled'); }
 function fail(raw) {
-  errors.push({at: new Date().toISOString(), phase, mode: $('mode').value, recipe: $('recipe').value, message: raw});
+  errors.push({at: new Date().toISOString(), phase, mode, recipe: RECIPE.key, message: raw});
   let message = raw;
   if (/bad_alloc|out of memory|memory access|unaligned|null function/i.test(raw)) message = 'Processing stopped while allocating or using working memory. Release other heavy tabs and retry. ';
-  if (/dynamically imported module|processing tools/i.test(raw)) message = 'The processing tools could not load. Reload this page and prepare again.';
+  if (/dynamically imported module|processing tools/i.test(raw)) message = 'The processing tools could not load. Reload this page and retry.';
   cancel(`Could not finish: ${message}`); phase = 'error'; checkpoint('error');
 }
 function begin(code, timeout) {
@@ -66,7 +36,7 @@ function begin(code, timeout) {
 }
 function measurements() {
   const lines = preparations.map((p, i) => `Preparation ${i + 1}: ${(p.totalMs / 1000).toFixed(1)} s total · download ${(p.downloadMs / 1000).toFixed(1)} s · initialization ${(p.initializeMs / 1000).toFixed(1)} s`);
-  for (const r of runs) lines.push(`Photo ${r.photoSession}, run ${r.run}: ${RECIPES[r.recipe].label} · ${(r.totalMs / 1000).toFixed(1)} s total · model ${(r.inferenceMs / 1000).toFixed(1)} s`);
+  for (const r of runs) lines.push(`Photo ${r.photoSession}, run ${r.run}: ${RECIPE.label} · ${(r.totalMs / 1000).toFixed(1)} s total · model ${(r.inferenceMs / 1000).toFixed(1)} s`);
   $('measurements').textContent = lines.join('\n\n') || 'No completed runs yet.';
 }
 async function acceptResult(data, id) {
@@ -81,7 +51,7 @@ async function acceptResult(data, id) {
   if (resultUrl) URL.revokeObjectURL(resultUrl); resultUrl = URL.createObjectURL(blob);
   $('result').src = resultUrl; $('result-open').href = resultUrl; $('save').href = resultUrl;
   const recipeKey = data.timing.recipe;
-  $('result-label').textContent = RECIPES[recipeKey].label + ' · white background';
+  $('result-label').textContent = RECIPE.label + ' · white background';
   $('save').download = `modnet-${recipeKey}-photo${photoSession}-run${runs.length + 1}.png`; $('result-figure').hidden = false;
   runs.push({...data.timing, photoSession, run: runs.length + 1, encodeMs: data.timing.encodeMs + fallbackEncodeMs, totalMs: performance.now() - started, pngBytes: blob.size});
   measurements(); finish(); status(`Finished in ${(runs.at(-1).totalMs / 1000).toFixed(1)} seconds. Inspect and save the result, then run it again.`, 'complete');
@@ -95,41 +65,36 @@ function attachWorker() {
     if (data.progress) { $('progress').hidden = false; $('progress').max = data.progress.total; $('progress').value = data.progress.current; $('model-status').textContent = `Downloaded ${(data.progress.current / 1000000).toFixed(1)} / ${(data.progress.total / 1000000).toFixed(1)} MB`; }
     if (data.error) { fail(data.error); return; }
     if (data.ready) {
-      ready = true; preparation = data.preparation; preparations.push(preparation); measurements(); finish();
-      $('model-status').textContent = `Model verified and prepared in ${(preparation.totalMs / 1000).toFixed(1)} seconds. It stays in memory until released or this page closes.`;
-      status(source ? 'Model and photo ready. Choose Remove background.' : 'Model ready. Choose a portrait.', 'ready');
+      ready = true; preparations.push(data.preparation); measurements(); finish();
+      $('model-status').textContent = `Model verified and prepared in ${(data.preparation.totalMs / 1000).toFixed(1)} seconds. It stays in memory until released or this page closes.`;
+      startRun(false);
     }
     if (data.result) { try { await acceptResult(data, data.id); } catch (error) { if (data.id === active) fail(error.message); } }
   };
   return instance;
 }
-$('prepare').onclick = () => {
-  if (busy) return; terminate(); const id = begin('download', 600000);
-  status('Preparing the model download…', 'download');
-  const base = new URL(`../../models/${MODEL.directory}/`, document.baseURI).href;
-  try { attachWorker().postMessage({type: 'prepare', id, base, provider: $('mode').value, fresh: $('fresh').checked}); } catch (error) { fail(error.message); }
-};
-$('recipe').onchange = () => {
-  controls();
-  if (source && RECIPES[$('recipe').value].edgeCutoff) $('run-panel').scrollIntoView({block: 'nearest'});
-};
-$('clear-marks').onclick = () => { marks.length = 0; drawMarks(); controls(); };
-$('edge-overlay').onclick = event => {
-  if (busy || !source || marks.length >= MAX_EDGE_MARKS) return;
-  const matrix = $('edge-overlay').getScreenCTM();
-  if (!matrix) return;
-  const {x, y} = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
-  if (x < 0 || y < 0 || x >= source.width || y >= source.height) return;
-  marks.push({x, y}); drawMarks(); controls();
-};
-$('run').onclick = () => {
-  if ($('run').disabled || !worker) return;
+function startRun(reusedModel) {
   const id = begin('preprocess', 300000); status('Preparing the photo…', 'preprocess');
-  try { const pixels = source.getContext('2d').getImageData(0, 0, source.width, source.height).data; worker.postMessage({type: 'run', id, pixels, width: source.width, height: source.height, recipeKey: $('recipe').value, marks}, [pixels.buffer]); } catch (error) { fail(error.message); }
+  try {
+    const pixels = source.getContext('2d').getImageData(0, 0, source.width, source.height).data;
+    worker.postMessage({type: 'run', id, pixels, width: source.width, height: source.height, reusedModel}, [pixels.buffer]);
+  } catch (error) { fail(error.message); }
+}
+$('run').onclick = () => {
+  if ($('run').disabled) return;
+  const fresh = $('fresh').checked;
+  if (ready && !fresh) { startRun(true); return; }
+  if (worker) terminate();
+  const id = begin('download', 600000);
+  status('Preparing the model…', 'download');
+  const base = new URL('../../models/' + MODEL.directory + '/', document.baseURI).href;
+  try {
+    attachWorker().postMessage({type: 'prepare', id, base, provider: mode, fresh});
+    $('fresh').checked = false;
+  } catch (error) { fail(error.message); }
 };
 $('cancel').onclick = () => cancel();
 $('release').onclick = () => { active++; terminate(); finish(); status('Model memory released. Your photo and result are preserved.', 'released'); };
-$('mode').onchange = () => { active++; terminate(); finish(); status('Mode changed. Prepare the model again to use this mode.', 'idle'); };
 $('photo').onchange = async () => {
   const file = $('photo').files[0]; if (!file) return;
   if (busy) cancel(); const id = begin('decode', 60000); status('Opening the photo…', 'decode');
@@ -139,12 +104,12 @@ $('photo').onchange = async () => {
     const blob = await new Promise(resolve => decoded.canvas.toBlob(resolve, 'image/png'));
     if (id !== active) { decoded.canvas.width = decoded.canvas.height = 1; return; }
     if (!blob) throw new Error('Could not prepare the original preview.');
-    if (source) source.width = source.height = 1; source = decoded.canvas; photoSession++; marks.length = 0; drawMarks();
+    if (source) source.width = source.height = 1; source = decoded.canvas; photoSession++;
     if (originalUrl) URL.revokeObjectURL(originalUrl); if (resultUrl) URL.revokeObjectURL(resultUrl); resultUrl = null;
     originalUrl = URL.createObjectURL(blob); $('original').src = originalUrl; $('original-open').href = originalUrl; $('original-figure').hidden = false;
     $('result').removeAttribute('src'); $('result-figure').hidden = true;
     $('photo-info').textContent = `Original: ${decoded.originalWidth} × ${decoded.originalHeight}. Working image: ${source.width} × ${source.height}.`;
-    finish(); status(ready ? 'Photo ready. Choose Remove background.' : 'Photo ready. Prepare the model to continue.', 'ready');
+    finish(); status('Photo ready. Choose Remove background.', 'ready');
   } catch (error) {
     if (id !== active) return;
     const messages = {fileLimit: 'Choose a photo up to 30 MB.', pixelLimit: 'Choose a photo up to 50 megapixels and 12,000 pixels per side.', unsupported: 'Choose a JPEG, PNG or HEIC photo.', decodeError: 'Could not open this photo. Try a JPEG exported from Photos.', decoderError: 'HEIC decoding failed. Retry or choose a JPEG.'};
@@ -152,19 +117,18 @@ $('photo').onchange = async () => {
   }
 };
 $('report').onclick = () => {
-  const report = {build, date: new Date().toISOString(), device: $('device').value, os: $('os').value, deviceLabelSource: 'user-entered, not hardware detection', notes: $('notes').value, userAgent: navigator.userAgent, secureContext: isSecureContext, graphicsApi: !!navigator.gpu, crossOriginIsolated, model: MODEL, recipes: RECIPES, preparations, runs, errors, stages, priorCheckpoint, lastStage: phase, measurementNotes: 'All photos stay on device. Download timing includes streaming hash work. Transfer bytes may be zero for cached or unavailable browser measurements; zero alone does not prove a cache hit. Model preparation is separate from image processing. No total device-memory measurement is available. Full image, letterboxed MODNet. Each run records the option and input dimensions.'};
+  const report = {build, date: new Date().toISOString(), device: $('device').value, os: $('os').value, deviceLabelSource: 'user-entered, not hardware detection', notes: $('notes').value, userAgent: navigator.userAgent, secureContext: isSecureContext, graphicsApi: !!navigator.gpu, crossOriginIsolated, model: MODEL, recipes: {[RECIPE.key]: RECIPE}, preparations, runs, errors, stages, priorCheckpoint, lastStage: phase, measurementNotes: 'All photos stay on device. Download timing includes streaming hash work. Transfer bytes may be zero for cached or unavailable browser measurements; zero alone does not prove a cache hit. Preparation and image processing timings are recorded separately. No total device-memory measurement is available. Full image, letterboxed MODNet. Each run records the option and input dimensions.'};
   const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], {type: 'application/json'})), link = document.createElement('a');
   link.href = url; link.download = 'modnet-report.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
 $('reset').onclick = () => {
-  active++; terminate(); finish(); if (source) source.width = source.height = 1; source = null; marks.length = 0; drawMarks();
+  active++; terminate(); finish(); if (source) source.width = source.height = 1; source = null;
   for (const url of [originalUrl, resultUrl]) if (url) URL.revokeObjectURL(url); originalUrl = resultUrl = null;
   for (const id of ['original', 'result']) $(id).removeAttribute('src'); $('original-figure').hidden = $('result-figure').hidden = true;
-  $('recipe').value = 'standard'; $('photo').value = ''; $('photo-info').textContent = ''; $('elapsed').textContent = ''; $('notes').value = '';
-  runs.length = errors.length = preparations.length = stages.length = 0; preparation = priorCheckpoint = null; photoSession = 0;
-  measurements(); status('Test reset. Prepare the model and choose a photo.', 'idle'); try { localStorage.removeItem(checkpointKey); } catch {} controls();
+  $('photo').value = ''; $('fresh').checked = false; $('photo-info').textContent = ''; $('elapsed').textContent = ''; $('notes').value = '';
+  runs.length = errors.length = preparations.length = stages.length = 0; priorCheckpoint = null; photoSession = 0;
+  measurements(); status('Test reset. Choose a photo.', 'idle'); try { localStorage.removeItem(checkpointKey); } catch {} controls();
 };
-$('capabilities').textContent = 'This trial uses on-device CPU processing, checked against the reviewed MODNet output.';
 const phaseNames={download:'the model download',verify:'the model check',initialize:'model preparation',preprocess:'photo preparation',inference:'background removal',mask:'finishing the edges',encode:'PNG export',decode:'opening the photo'};
 if (priorCheckpoint?.state === 'busy') $('status').textContent = `The previous attempt ended during ${phaseNames[priorCheckpoint.phase]||priorCheckpoint.phase}. Its photo-free stage marker will be included in the report.`;
 controls();
