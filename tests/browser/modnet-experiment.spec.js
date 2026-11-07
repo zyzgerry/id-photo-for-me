@@ -24,9 +24,14 @@ test('portrait test page is isolated, responsive and preserves the loaded origin
   await expect(page.locator('#original')).toBeVisible(); await expect(page.locator('#status')).toContainText('Photo ready');
   await page.locator('#recipe').selectOption('edge-20-80');
   await expect(page.locator('#edge-overlay')).toBeVisible();
+  await expect(page.locator('#detail-note')).toBeHidden();
+  await expect(page.locator('#mark-count')).toContainText('Tap the photo');
   await page.locator('#edge-overlay').click();
+  await expect(page.locator('#run')).toBeInViewport({ratio:1});
+  expect(await page.locator('#run').evaluate(run => run.getBoundingClientRect().bottom <= document.getElementById('edge-overlay').getBoundingClientRect().top)).toBe(true);
   await expect(page.locator('#edge-overlay circle')).toHaveCount(1);
   await page.locator('#recipe').selectOption('edge-30-70');
+  await expect(page.locator('#run')).toBeInViewport({ratio:1});
   await expect(page.locator('#edge-overlay circle')).toHaveCount(1);
   await page.locator('#clear-marks').click();
   await expect(page.locator('#edge-overlay circle')).toHaveCount(0);

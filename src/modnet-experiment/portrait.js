@@ -20,15 +20,22 @@ function drawMarks() {
   }
 }
 function controls() {
-  const cutoff = RECIPES[$('recipe').value].edgeCutoff;
+  const recipeKey = $('recipe').value, cutoff = RECIPES[recipeKey].edgeCutoff;
+  $('detail-note').hidden = recipeKey !== 'detail';
   $('edge-target').hidden = !cutoff;
+  $('edge-preview').hidden = !cutoff;
+  $('mark-count').hidden = !cutoff;
+  $('run-panel').classList.toggle('targeted', Boolean(cutoff));
   $('edge-overlay').toggleAttribute('hidden', !cutoff);
   const previewParent = cutoff ? $('edge-preview') : $('comparisons');
   const figure = $('original-figure');
   if (figure.parentElement !== previewParent) previewParent.prepend(figure);
   if (cutoff) {
     $('edge-meaning').textContent = 'Below ' + Math.round(cutoff * 100) + '% becomes background. Above ' + Math.round((1 - cutoff) * 100) + '% becomes solid.';
-    $('mark-count').textContent = marks.length ? marks.length + ' of ' + MAX_EDGE_MARKS + ' marks' : 'Mark at least one area to run this option.';
+    if (!source) $('mark-count').textContent = 'Choose a photo to start marking.';
+    else if (!marks.length) $('mark-count').textContent = 'Tap the photo to mark at least one area.';
+    else if (!ready) $('mark-count').textContent = 'Marks saved. Prepare the model above to run.';
+    else $('mark-count').textContent = marks.length + ' of ' + MAX_EDGE_MARKS + ' marks · ready to run';
   }
   $('clear-marks').disabled = busy || !marks.length;
   $('prepare').disabled = busy; $('run').disabled = busy || !ready || !source || (cutoff && !marks.length);
@@ -102,7 +109,10 @@ $('prepare').onclick = () => {
   const base = new URL(`../../models/${MODEL.directory}/`, document.baseURI).href;
   try { attachWorker().postMessage({type: 'prepare', id, base, provider: $('mode').value, fresh: $('fresh').checked}); } catch (error) { fail(error.message); }
 };
-$('recipe').onchange = controls;
+$('recipe').onchange = () => {
+  controls();
+  if (source && RECIPES[$('recipe').value].edgeCutoff) $('run-panel').scrollIntoView({block: 'nearest'});
+};
 $('clear-marks').onclick = () => { marks.length = 0; drawMarks(); controls(); };
 $('edge-overlay').onclick = event => {
   if (busy || !source || marks.length >= MAX_EDGE_MARKS) return;

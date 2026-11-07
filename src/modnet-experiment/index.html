@@ -31,15 +31,17 @@
     <p id="photo-info"></p>
     <label for="recipe">Edge detail</label>
     <select id="recipe"><option value="standard">Standard · 512 × 768</option><option value="detail">Detail · 1024 × 1536</option><option value="edge-20-80">20–80% · targeted edges</option><option value="edge-30-70">30–70% · targeted edges</option></select>
-    <p class="note">Detail adds gentle edge cleanup and reduces fading where clothing meets the bottom edge. It takes longer and uses more working memory.</p>
-    <div id="edge-target" hidden>
-      <p class="note">Tap the exposed ear or neck edge on the original. Add another mark for a longer edge and keep the circles away from fine hair. Both strengths reuse your marks.</p>
-      <p class="note" id="edge-meaning"></p>
-      <div id="edge-preview"></div>
-      <button id="clear-marks" type="button" disabled>Clear marks</button>
-      <p id="mark-count" class="note" aria-live="polite"></p>
+    <p id="detail-note" class="note" hidden>Detail adds gentle edge cleanup and reduces fading where clothing meets the bottom edge. It takes longer and uses more working memory.</p>
+    <div id="run-panel">
+      <div class="actions"><button id="run" disabled>Remove background</button><button id="cancel" disabled>Cancel</button></div>
+      <p id="mark-count" class="note" aria-live="polite" hidden></p>
     </div>
-    <div class="actions"><button id="run" disabled>Remove background</button><button id="cancel" disabled>Cancel</button></div>
+    <div id="edge-target" hidden>
+      <p class="note">Tap an exposed ear or neck edge on the photo below. Keep the marks away from fine hair.</p>
+      <p class="note" id="edge-meaning"></p>
+      <button id="clear-marks" type="button" disabled>Clear marks</button>
+    </div>
+    <div id="edge-preview" hidden></div>
     <p id="status" role="status" aria-live="polite">Prepare the model and choose a photo to begin.</p>
     <progress id="progress" hidden aria-label="Model download"></progress>
     <p id="elapsed" class="note"></p>
