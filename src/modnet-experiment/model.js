@@ -9,3 +9,8 @@ export const MODEL = Object.freeze({
   inputWidth: 512,
   inputHeight: 768,
 });
+
+export const RECIPES = Object.freeze({
+  standard: Object.freeze({label: 'Standard', inputWidth: 512, inputHeight: 768, alphaCutoff: 0, extendBottom: false}),
+  detail: Object.freeze({label: 'Detail', inputWidth: 1024, inputHeight: 1536, alphaCutoff: .02, extendBottom: true}),
+});

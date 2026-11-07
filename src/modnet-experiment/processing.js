@@ -1,13 +1,13 @@
 import {compositeWhite} from '../portrait-experiment/processing.js';
 export {compositeWhite};
-const WIDTH = 512, HEIGHT = 768;
+import {RECIPES} from './model.js';
 const roundEven = value => value % 1 === .5 ? 2 * Math.round(value / 2) : Math.round(value);
 
-function geometry(width, height) {
+function geometry(width, height, inputWidth, inputHeight) {
   if (![width, height].every(v => Number.isInteger(v) && v > 0 && v <= 4096)) throw new Error('Invalid working dimensions.');
-  const scale = Math.min(WIDTH / width, HEIGHT / height);
+  const scale = Math.min(inputWidth / width, inputHeight / height);
   const rw = roundEven(width * scale), rh = roundEven(height * scale);
-  return {rw, rh, left: Math.floor((WIDTH - rw) / 2), top: Math.floor((HEIGHT - rh) / 2)};
+  return {rw, rh, left: Math.floor((inputWidth - rw) / 2), top: Math.floor((inputHeight - rh) / 2)};
 }
 
 // Area overlap weights preserve fine source contributions while reducing resolution.
@@ -22,8 +22,9 @@ function areaWeights(size, target) {
   });
 }
 
-export function prepareInput(pixels, width, height) {
-  const {rw, rh, left, top} = geometry(width, height);
+export function prepareInput(pixels, width, height, recipe = RECIPES.standard) {
+  const {inputWidth, inputHeight, extendBottom} = recipe;
+  const {rw, rh, left, top} = geometry(width, height, inputWidth, inputHeight);
   if (pixels.length !== width * height * 4) throw new Error('Invalid source pixels.');
   const xs = areaWeights(width, rw), ys = areaWeights(height, rh);
   const horizontal = new Float32Array(height * rw * 3);
@@ -34,20 +35,31 @@ export function prepareInput(pixels, width, height) {
       horizontal[(y * rw + x) * 3 + c] = sum;
     }
   }
-  const plane = WIDTH * HEIGHT, tensor = new Float32Array(plane * 3);
+  const plane = inputWidth * inputHeight, tensor = new Float32Array(plane * 3);
   for (let y = 0; y < rh; y++) for (let x = 0; x < rw; x++) {
     for (let c = 0; c < 3; c++) {
       let sum = 0;
       for (const [sy, weight] of ys[y]) sum += horizontal[(sy * rw + x) * 3 + c] * weight;
-      tensor[c * plane + (top + y) * WIDTH + left + x] = sum;
+      tensor[c * plane + (top + y) * inputWidth + left + x] = sum;
+    }
+  }
+  if (extendBottom) {
+    const lastRow = top + rh - 1;
+    for (let c = 0; c < 3; c++) {
+      const start = c * plane + lastRow * inputWidth;
+      for (let y = lastRow + 1; y < inputHeight; y++) {
+        tensor.copyWithin(c * plane + y * inputWidth, start, start + inputWidth);
+      }
     }
   }
   return tensor;
 }
 
-export function buildMask(values, width, height) {
-  const {rw, rh, left, top} = geometry(width, height);
-  if (values.length !== WIDTH * HEIGHT) throw new Error('Unexpected alpha dimensions.');
+export function buildMask(values, width, height, recipe = RECIPES.standard) {
+  const {inputWidth, inputHeight, alphaCutoff} = recipe;
+  const {rw, rh, left, top} = geometry(width, height, inputWidth, inputHeight);
+  const alphaRange = 1 - 2 * alphaCutoff;
+  if (values.length !== inputWidth * inputHeight) throw new Error('Unexpected alpha dimensions.');
   for (const value of values) if (!Number.isFinite(value) || value < -.001 || value > 1.001) throw new Error('The model produced an invalid alpha mask.');
   const mask = new Uint8Array(width * height);
   for (let y = 0; y < height; y++) {
@@ -56,9 +68,10 @@ export function buildMask(values, width, height) {
     for (let x = 0; x < width; x++) {
       const sx = Math.max(0, Math.min(rw - 1, (x + .5) * rw / width - .5));
       const x0 = Math.floor(sx), x1 = Math.min(rw - 1, x0 + 1), dx = sx - x0;
-      const a = values[(top + y0) * WIDTH + left + x0] * (1 - dx) + values[(top + y0) * WIDTH + left + x1] * dx;
-      const b = values[(top + y1) * WIDTH + left + x0] * (1 - dx) + values[(top + y1) * WIDTH + left + x1] * dx;
-      mask[y * width + x] = roundEven(Math.max(0, Math.min(1, a * (1 - dy) + b * dy)) * 255);
+      const a = values[(top + y0) * inputWidth + left + x0] * (1 - dx) + values[(top + y0) * inputWidth + left + x1] * dx;
+      const b = values[(top + y1) * inputWidth + left + x0] * (1 - dx) + values[(top + y1) * inputWidth + left + x1] * dx;
+      const alpha = (a * (1 - dy) + b * dy - alphaCutoff) / alphaRange;
+      mask[y * width + x] = roundEven(Math.max(0, Math.min(1, alpha)) * 255);
     }
   }
   return mask;

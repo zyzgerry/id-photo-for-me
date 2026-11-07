@@ -1,4 +1,4 @@
-import {MODEL} from './model.js';
+import {MODEL, RECIPES} from './model.js';
 import {prepareInput, buildMask, compositeWhite} from './processing.js';
 let session, ort, mode, preparation;
 const now = () => performance.now();
@@ -53,22 +53,24 @@ async function prepare({id, base, provider, fresh}) {
   send(id, {ready: true, preparation: {...preparation, resources}});
 }
 
-async function run({id, pixels, width, height}) {
+async function run({id, pixels, width, height, recipeKey}) {
   if (!session) throw new Error('Prepare the model first.');
+  if (!Object.hasOwn(RECIPES, recipeKey)) throw new Error('Choose Standard or Detail.');
+  const recipe = RECIPES[recipeKey], {inputWidth, inputHeight} = recipe;
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || Math.max(width, height) > 4096 || pixels.length !== width * height * 4) throw new Error('Invalid working image.');
   const started = now(); let tensor, output;
   try {
     stage(id, 'preprocess', 'Preparing the photo…');
-    const input = prepareInput(pixels, width, height), prepared = now();
-    tensor = new ort.Tensor('float32', input, [1, 3, 768, 512]);
+    const input = prepareInput(pixels, width, height, recipe), prepared = now();
+    tensor = new ort.Tensor('float32', input, [1, 3, inputHeight, inputWidth]);
     stage(id, 'inference', 'Removing the background…');
     const infer = now(); output = await session.run({[session.inputNames[0]]: tensor});
     const values = await output[session.outputNames[0]].getData(), inferred = now();
-    if (values.length !== 512 * 768) throw new Error('Unexpected model output dimensions.');
+    if (values.length !== inputWidth * inputHeight) throw new Error('Unexpected model output dimensions.');
     stage(id, 'mask', 'Finishing the edges and keeping the original colors…');
-    const mask = buildMask(values, width, height); compositeWhite(pixels, mask);
+    const mask = buildMask(values, width, height, recipe); compositeWhite(pixels, mask);
     const composited = now();
-    const timing = {mode, width, height, reusedModel: true, prepareImageMs: prepared - started, inferenceMs: inferred - infer, maskAndCompositeMs: composited - inferred};
+    const timing = {mode, recipe: recipeKey, inputWidth, inputHeight, width, height, reusedModel: true, prepareImageMs: prepared - started, inferenceMs: inferred - infer, maskAndCompositeMs: composited - inferred};
     stage(id, 'encode', 'Preparing the full-size PNG…');
     if (typeof OffscreenCanvas !== 'undefined') {
       const canvas = new OffscreenCanvas(width, height), ctx = canvas.getContext('2d', {colorSpace: 'srgb'});

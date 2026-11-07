@@ -1,8 +1,8 @@
 # MODNet Safari experiment
 
-Open src/modnet-experiment/ on the published site. Choose Prepare model, choose a JPEG/PNG/HEIC portrait, then Remove background. Save PNG and diagnostic report. Repeat the same photo twice before testing another image.
+Open src/modnet-experiment/ on the published site. Choose Prepare model, choose a JPEG/PNG/HEIC portrait, then Remove background. Save PNG and diagnostic report. Save the Standard result, select Detail, and run the same photo again with the prepared model. Save the Detail result and one diagnostic report.
 
-The exact reviewed photographic FP32 ONNX file is checked by SHA-256. Full image is fit to 512x768 with neutral padding, RGB normalized to [-1,1], predicted soft alpha restored with bilinear interpolation and composited with original source RGB onto white. JavaScript area and bilinear sampling can differ slightly from OpenCV. CPU exports were compared with native outputs on identical decoded images.
+The exact reviewed photographic FP32 ONNX file is checked by SHA-256. Standard fits the full image to 512x768 with neutral padding. Detail uses 1024x1536, extends the last image row into lower padding, and clips the alpha range below 0.02 and above 0.98 with linear rescaling between. Both normalize RGB to [-1,1], restore soft alpha with bilinear interpolation, and composite the original RGB onto white. The run report records the option and input dimensions. Switching options reuses the worker and model. JavaScript area and bilinear sampling can differ slightly from OpenCV. CPU exports were compared with native outputs on identical decoded images.
 
 The trial uses single-thread WASM CPU processing. A desktop graphics candidate completed but failed output parity, so CPU is the only offered provider. CPU inference, image handling and export timings are separate in reports. Download size is about 26 MB plus lazy-loaded runtime tools. Peak device memory is unmeasured.
 

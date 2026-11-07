@@ -1,5 +1,5 @@
 import {decodePhoto} from '../image.js';
-import {MODEL} from './model.js';
+import {MODEL, RECIPES} from './model.js';
 const $ = id => document.getElementById(id), checkpointKey = 'modnet-checkpoint-v1';
 const build = document.documentElement.dataset.release || 'modnet-development';
 let worker, ready = false, busy = false, active = 0, source, originalUrl, resultUrl, photoSession = 0, phase = 'idle', started = 0, ticker, deadline;
@@ -9,10 +9,10 @@ try { priorCheckpoint = JSON.parse(localStorage.getItem(checkpointKey) || 'null'
 function controls() {
   $('prepare').disabled = busy; $('run').disabled = busy || !ready || !source;
   $('release').disabled = busy || !worker; $('cancel').disabled = !busy; $('mode').disabled = busy; $('fresh').disabled = busy;
-  $('photo').disabled = busy; $('prepare').textContent = ready ? 'Prepare model again' : 'Prepare model · about 26 MB';
+  $('photo').disabled = busy; $('recipe').disabled = busy; $('prepare').textContent = ready ? 'Prepare model again' : 'Prepare model · about 26 MB';
 }
 function checkpoint(state) {
-  const record = {build, modelHash: MODEL.sha256, at: new Date().toISOString(), state, phase, mode: $('mode').value, photoSession, completedRuns: runs.length};
+  const record = {build, modelHash: MODEL.sha256, at: new Date().toISOString(), state, phase, mode: $('mode').value, recipe: $('recipe').value, photoSession, completedRuns: runs.length};
   try { localStorage.setItem(checkpointKey, JSON.stringify(record)); } catch {}
 }
 function status(text, code = phase) { phase = code; $('status').textContent = text; stages.push({at: new Date().toISOString(), phase}); if (stages.length > 100) stages.shift(); checkpoint(busy ? 'busy' : 'idle'); }
@@ -20,7 +20,7 @@ function finish() { busy = false; clearTimeout(deadline); clearInterval(ticker);
 function terminate() { worker?.terminate(); worker = null; ready = false; $('model-status').textContent = 'Model memory released. Prepare the model before another run.'; }
 function cancel(message = 'Cancelled. Your original photo and previous result are preserved.') { active++; terminate(); finish(); status(message, 'cancelled'); }
 function fail(raw) {
-  errors.push({at: new Date().toISOString(), phase, mode: $('mode').value, message: raw});
+  errors.push({at: new Date().toISOString(), phase, mode: $('mode').value, recipe: $('recipe').value, message: raw});
   let message = raw;
   if (/bad_alloc|out of memory|memory access|unaligned|null function/i.test(raw)) message = 'Processing stopped while allocating or using working memory. Release other heavy tabs and retry. ';
   if (/dynamically imported module|processing tools/i.test(raw)) message = 'The processing tools could not load. Reload this page and prepare again.';
@@ -35,7 +35,7 @@ function begin(code, timeout) {
 }
 function measurements() {
   const lines = preparations.map((p, i) => `Preparation ${i + 1}: ${(p.totalMs / 1000).toFixed(1)} s total · download ${(p.downloadMs / 1000).toFixed(1)} s · initialization ${(p.initializeMs / 1000).toFixed(1)} s`);
-  for (const r of runs) lines.push(`Photo ${r.photoSession}, run ${r.run}: ${r.mode === 'webgpu' ? 'graphics-assisted' : 'CPU'} · ${(r.totalMs / 1000).toFixed(1)} s total · model ${(r.inferenceMs / 1000).toFixed(1)} s`);
+  for (const r of runs) lines.push(`Photo ${r.photoSession}, run ${r.run}: ${RECIPES[r.recipe].label} · ${(r.totalMs / 1000).toFixed(1)} s total · model ${(r.inferenceMs / 1000).toFixed(1)} s`);
   $('measurements').textContent = lines.join('\n\n') || 'No completed runs yet.';
 }
 async function acceptResult(data, id) {
@@ -49,7 +49,9 @@ async function acceptResult(data, id) {
   if (!blob?.size) throw new Error('The PNG could not be encoded. Retry or release model memory.');
   if (resultUrl) URL.revokeObjectURL(resultUrl); resultUrl = URL.createObjectURL(blob);
   $('result').src = resultUrl; $('result-open').href = resultUrl; $('save').href = resultUrl;
-  $('save').download = `modnet-photo${photoSession}-run${runs.length + 1}.png`; $('result-figure').hidden = false;
+  const recipeKey = data.timing.recipe;
+  $('result-label').textContent = RECIPES[recipeKey].label + ' · white background';
+  $('save').download = `modnet-${recipeKey}-photo${photoSession}-run${runs.length + 1}.png`; $('result-figure').hidden = false;
   runs.push({...data.timing, photoSession, run: runs.length + 1, encodeMs: data.timing.encodeMs + fallbackEncodeMs, totalMs: performance.now() - started, pngBytes: blob.size});
   measurements(); finish(); status(`Finished in ${(runs.at(-1).totalMs / 1000).toFixed(1)} seconds. Inspect and save the result, then run it again.`, 'complete');
 }
@@ -79,7 +81,7 @@ $('prepare').onclick = () => {
 $('run').onclick = () => {
   if (busy || !source || !ready || !worker) return;
   const id = begin('preprocess', 300000); status('Preparing the photo…', 'preprocess');
-  try { const pixels = source.getContext('2d').getImageData(0, 0, source.width, source.height).data; worker.postMessage({type: 'run', id, pixels, width: source.width, height: source.height}, [pixels.buffer]); } catch (error) { fail(error.message); }
+  try { const pixels = source.getContext('2d').getImageData(0, 0, source.width, source.height).data; worker.postMessage({type: 'run', id, pixels, width: source.width, height: source.height, recipeKey: $('recipe').value}, [pixels.buffer]); } catch (error) { fail(error.message); }
 };
 $('cancel').onclick = () => cancel();
 $('release').onclick = () => { active++; terminate(); finish(); status('Model memory released. Your photo and result are preserved.', 'released'); };
@@ -106,7 +108,7 @@ $('photo').onchange = async () => {
   }
 };
 $('report').onclick = () => {
-  const report = {build, date: new Date().toISOString(), device: $('device').value, os: $('os').value, deviceLabelSource: 'user-entered, not hardware detection', notes: $('notes').value, userAgent: navigator.userAgent, secureContext: isSecureContext, graphicsApi: !!navigator.gpu, crossOriginIsolated, model: MODEL, preparations, runs, errors, stages, priorCheckpoint, lastStage: phase, measurementNotes: 'All photos stay on device. Download timing includes streaming hash work. Transfer bytes may be zero for cached or unavailable browser measurements; zero alone does not prove a cache hit. Model preparation is separate from image processing. No total device-memory measurement is available. Full image, 512x768 letterboxed MODNet. Local processing.'};
+  const report = {build, date: new Date().toISOString(), device: $('device').value, os: $('os').value, deviceLabelSource: 'user-entered, not hardware detection', notes: $('notes').value, userAgent: navigator.userAgent, secureContext: isSecureContext, graphicsApi: !!navigator.gpu, crossOriginIsolated, model: MODEL, recipes: RECIPES, preparations, runs, errors, stages, priorCheckpoint, lastStage: phase, measurementNotes: 'All photos stay on device. Download timing includes streaming hash work. Transfer bytes may be zero for cached or unavailable browser measurements; zero alone does not prove a cache hit. Model preparation is separate from image processing. No total device-memory measurement is available. Full image, letterboxed MODNet. Each run records the option and input dimensions.'};
   const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], {type: 'application/json'})), link = document.createElement('a');
   link.href = url; link.download = 'modnet-report.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
@@ -114,7 +116,7 @@ $('reset').onclick = () => {
   active++; terminate(); finish(); if (source) source.width = source.height = 1; source = null;
   for (const url of [originalUrl, resultUrl]) if (url) URL.revokeObjectURL(url); originalUrl = resultUrl = null;
   for (const id of ['original', 'result']) $(id).removeAttribute('src'); $('original-figure').hidden = $('result-figure').hidden = true;
-  $('photo').value = ''; $('photo-info').textContent = ''; $('elapsed').textContent = ''; $('notes').value = '';
+  $('recipe').value = 'standard'; $('photo').value = ''; $('photo-info').textContent = ''; $('elapsed').textContent = ''; $('notes').value = '';
   runs.length = errors.length = preparations.length = stages.length = 0; preparation = priorCheckpoint = null; photoSession = 0;
   measurements(); status('Test reset. Prepare the model and choose a photo.', 'idle'); try { localStorage.removeItem(checkpointKey); } catch {} controls();
 };

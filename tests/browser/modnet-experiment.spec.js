@@ -15,6 +15,9 @@ test('portrait test page is isolated, responsive and preserves the loaded origin
   await expect(page.locator('h1')).toContainText('MODNet');
   await expect(page.locator('#mode option')).toHaveCount(1);
   await expect(page.locator('#mode')).toHaveValue('wasm');
+  await expect(page.locator('#recipe')).toHaveValue('standard');
+  await page.locator('#recipe').selectOption('detail');
+  await expect(page.locator('#recipe')).toHaveValue('detail');
   await expect(page.locator('#run')).toBeDisabled(); await expect(page.locator('#cancel')).toBeDisabled();
   expect(requests.some(url => /\/models\/|modnet-experiment\/vendor\//.test(url))).toBe(false);
   await page.locator('#photo').setInputFiles({name:'synthetic.png', mimeType:'image/png', buffer:await portrait(page)});
