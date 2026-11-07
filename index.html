@@ -81,7 +81,12 @@
         <div class="section-heading"><h2 id="crop-title" data-i18n="step2">Your photo</h2><div class="editor-actions"><button id="reset-crop" class="text-button" data-i18n="resetCrop" disabled>Reset framing</button><button id="clear" class="text-button" disabled data-i18n="clear">Clear photo</button></div></div>
         <div class="editor-workspace"><div id="crop-stage" class="crop-stage">
           <div id="crop-empty" class="empty"><h3 data-i18n="emptyTitle">Start with a photo</h3><p data-i18n="empty">Choose a photo from Photos or Files. Your crop and print sheet will appear here.</p></div>
-          <div id="crop-wrap" hidden><canvas id="crop" width="600" height="600" tabindex="0" role="img" aria-label="Photo crop preview"></canvas><div id="guide-overlay" aria-hidden="true" hidden></div></div>
+          <div id="crop-wrap" hidden>
+            <canvas id="crop" width="600" height="600" tabindex="0" role="img" aria-label="Photo crop preview"></canvas><div id="guide-overlay" aria-hidden="true" hidden></div>
+            <button id="inspect-edit" class="button quiet" type="button" aria-label="Magnify photo" aria-haspopup="dialog" aria-controls="jpeg-viewer" title="Magnify photo">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5M8 10.5h5m-2.5-2.5v5"/></svg>
+            </button>
+          </div>
         </div>
         <div class="editor-tools"><div id="framing-review" class="review-notice" role="status" hidden><p data-i18n="reviewNeeded">Requirements changed. Review your framing before exporting.</p><button id="review-framing" class="text-button" data-i18n="reviewFraming">Review framing</button><button id="confirm-framing" class="button quiet" data-i18n="framingReviewed">Framing reviewed</button></div>
         <div class="tool-tabs" role="tablist" aria-label="Photo tools" id="tool-tabs">
@@ -91,19 +96,18 @@
         </div>
         <fieldset id="edit-controls" disabled>
           <div id="background-panel" role="tabpanel" aria-labelledby="background-tab" hidden>
-            <p class="hint" data-i18n="backgroundHelp">Replace the background with white, then continue framing and adjusting your photo.</p>
-            <label id="background-permission-row" class="check-row" hidden><input id="background-permission" type="checkbox"><span data-i18n="backgroundPermission">I’ve checked that my document allows background changes.</span></label>
-            <p id="background-download-note" class="hint" data-i18n="backgroundDownloadNote">Runs on your device. First use loads about 26 MB of model data plus processing tools.</p>
+            <label id="background-permission-row" class="check-row" hidden><input id="background-permission" type="checkbox"><span data-i18n="backgroundPermission">My document allows background changes.</span></label>
+            <p id="background-download-note" class="hint" data-i18n="backgroundDownloadNote">On-device. First use downloads the 26 MB model and tools.</p>
             <div class="background-actions">
               <button id="remove-background" type="button" class="button primary" data-i18n="backgroundTool">Remove background</button>
               <button id="cancel-background" type="button" class="button quiet" data-i18n="backgroundCancel" hidden>Cancel</button>
               <button id="restore-background" type="button" class="button quiet" data-i18n="backgroundRestore" hidden>Restore original background</button>
             </div>
-            <progress id="background-progress" max="1" hidden></progress>
+            <progress id="background-progress" max="1" aria-labelledby="background-status" hidden></progress>
             <p id="background-status" class="hint" role="status"></p>
           </div>
           <div id="framing-panel" role="tabpanel" aria-labelledby="framing-tab">
-          <p class="hint" id="framing-help" data-i18n="drag">Drag the photo to frame it, or use the position sliders. Pinch to zoom.</p>
+          <p class="hint" id="framing-help" data-i18n="drag">Drag to move. Pinch to zoom.</p>
           <div id="crop-controls">
           <label class="slider-label" for="zoom"><span data-i18n="zoom">Zoom</span><output id="zoom-value">1.00×</output></label><input id="zoom" type="range" min="1" max="4" step="0.01" value="1">
           <details id="position-controls"><summary data-i18n="finePosition">Fine positioning</summary>
@@ -115,8 +119,7 @@
           <div class="guide-tools">          <label class="check-row" id="guide-control"><input id="guides" type="checkbox"><span data-i18n="guides">Show head-size guides</span></label><p id="guide-note" class="hint" data-i18n="guideNote" hidden>Dashed lines show a centered head-height range only. Align crown and chin manually; no face detection or acceptance check.</p><p id="head-reference" class="hint" hidden><a id="head-source" target="_blank" rel="noopener noreferrer" data-i18n="headReference">Head-size reference: VFS Portugal (UK)</a></p><details id="manual-guide-controls" hidden><summary data-i18n="manualGuideSettings">Position guide lines</summary><label class="slider-label" for="guide-crown"><span data-i18n="guideCrown">Crown line</span><output id="guide-crown-value">15%</output></label><input id="guide-crown" type="range" min="0" max="99" step="1" value="15"><label class="slider-label" for="guide-chin"><span data-i18n="guideChin">Chin line</span><output id="guide-chin-value">85%</output></label><input id="guide-chin" type="range" min="1" max="100" step="1" value="85"></details></div>
           </div>
           <div id="adjustments-panel" role="tabpanel" aria-labelledby="adjustments-tab" hidden>
-            <p class="hint" data-i18n="editWarning">Document rules may restrict edits. Neutral settings are recommended.</p>
-            <label class="check-row" id="allow-edits-row"><input id="allow-edits" type="checkbox"><span data-i18n="allowEdits">Enable adjustments despite document editing restrictions</span></label>
+            <label class="check-row" id="allow-edits-row"><input id="allow-edits" type="checkbox"><span data-i18n="allowEdits">My document allows tonal adjustments.</span></label>
             <fieldset id="adjust-controls" disabled>
               <div class="tonal-sliders"><div><label class="slider-label" for="brightness"><span data-i18n="brightness">Brightness</span><output id="brightness-value">0</output></label><input id="brightness" type="range" min="-15" max="15" value="0">
               </div><div><label class="slider-label" for="contrast"><span data-i18n="contrast">Contrast</span><output id="contrast-value">0</output></label><input id="contrast" type="range" min="-15" max="15" value="0">
@@ -125,7 +128,8 @@
             <label class="check-row"><input id="original" type="checkbox"><span data-i18n="original">Compare original</span></label>
           </div>
         </fieldset>
-        <p id="resolution" class="hint"></p><p id="upscale" class="warning" data-i18n="upscale" hidden>Below 600 ppi: this crop will be enlarged. Zoom out or use a higher-resolution photo; enlargement cannot restore detail.</p>
+        <p id="inspect-edit-error" class="error" role="alert" data-i18n="inspectEditError" hidden>Couldn’t open the preview. Try again.</p>
+        <p id="resolution" class="hint"></p><p id="upscale" class="warning" data-i18n="upscale" hidden>Output enlarges this crop. Zoom out for more detail.</p>
         <p id="bounded" class="hint" data-i18n="bounded" hidden>Large photos are reduced to a maximum working edge of 4096 pixels to limit memory use.</p>
         </div></div>
       </section>
@@ -201,7 +205,7 @@
     </div>
   </main>
   <dialog id="jpeg-viewer" aria-labelledby="viewer-title" aria-describedby="viewer-meta viewer-help">
-    <header class="viewer-header"><div><h2 id="viewer-title" data-i18n="inspectJpeg">Inspect JPEG</h2><p id="viewer-meta"></p></div><button id="viewer-close" type="button" class="button quiet" data-i18n="closeViewer" autofocus>Close</button></header>
+    <header class="viewer-header"><div><h2 id="viewer-title">Inspect JPEG</h2><p id="viewer-meta"></p></div><button id="viewer-close" type="button" class="button quiet" data-i18n="closeViewer" autofocus>Close</button></header>
     <div id="viewer-viewport" tabindex="0" role="region" aria-label="JPEG preview"><div class="viewer-surface"><img id="viewer-image" alt="" draggable="false"></div></div>
     <footer class="viewer-footer"><div class="viewer-controls"><button id="viewer-fit" type="button" data-i18n="fitView">Fit</button><button id="viewer-actual" type="button" data-i18n="actualView">100%</button><button id="viewer-out" type="button" aria-label="Zoom out">−</button><output id="viewer-zoom" aria-live="polite">100%</output><button id="viewer-in" type="button" aria-label="Zoom in">+</button></div><p id="viewer-help" data-i18n="viewerHelp">Pinch or use + / − to zoom. Drag or use arrow keys to explore.</p></footer>
   </dialog>

@@ -52,6 +52,7 @@ function updateLanguage() {
   document.title = t('title'); $('language').checked = lang === 'zh';
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
   $('crop').ariaLabel = lang === 'zh' ? '裁剪预览，可用方向键移动照片' : 'Crop preview; use arrow keys to move the photo';
+  $('inspect-edit').ariaLabel = $('inspect-edit').title = t('inspectEdit');
   $('sheet').ariaLabel = t(mode==='print'?'sheetPreview':'singlePreview');
   $('photo').ariaLabel = t(photo ? 'replace' : 'choose');
   $('language').ariaLabel = t('language');
@@ -266,6 +267,7 @@ function updateReadouts() {
   $('bounded').hidden = !photo || Math.max(photo.originalWidth,photo.originalHeight) <= 4096;
   $('resolution').textContent = '';
   $('upscale').hidden = true;
+  $('upscale').textContent = t(mode==='print'?'upscale':'upscaleSingle');
   if (photo && (mode==='print'?layout:singleOptions)) {
     const rect = cropRect(photo.canvas.width, photo.canvas.height, settings.ratio, settings.zoom,settings.x,settings.y);
     if(mode==='print') {
@@ -325,13 +327,14 @@ function scheduleRender() {
   $('output-preview').setAttribute('aria-busy',String(mode==='single'&&!!photo));
   $('preview-status').hidden=mode!=='single'||!singleResult;
   $('preview-status').textContent=t('previewUpdating');
+  drawCrop();
   if (!photo || !(mode==='print'?layout:singleOptions)) {
     $('output-preview').removeAttribute('aria-busy');
     $('preview-status').textContent=t('previewPrevious');
     $('sheet').hidden = !singleResult; $('sheet-empty').hidden = !!singleResult; return;
   }
   if(mode==='single') {setError();$('single-error').hidden=true;}
-  drawCrop(); updateReadouts();
+  updateReadouts();
   setExport('saving');
   renderTimer = setTimeout(async () => {
     let sheet;
@@ -366,18 +369,45 @@ function scheduleRender() {
   }, 110);
 }
 
+function renderEditPreview(width, height) {
+  const original = $('original').checked;
+  return renderCrop(original?photo.canvas:editedPhoto(), original?settings:renderSettings(), width, height, original);
+}
+
 function drawCrop() {
-  if (!photo || !(mode==='print'?layout:singleOptions)) return;
+  if (!photo) return;
   const width = Math.max(1,Math.round(600*Math.min(1,settings.ratio)));
   const height = Math.max(1,Math.round(600*Math.min(1,1/settings.ratio)));
-  const original = $('original').checked;
-  const preview = renderCrop(original?photo.canvas:editedPhoto(), original?settings:renderSettings(), width, height, original);
+  const preview = renderEditPreview(width, height);
   $('crop').width = width; $('crop').height = height;
   $('crop').getContext('2d').drawImage(preview,0,0);
   preview.width = preview.height = 1;
   // Keep overlay and canvas bounds identical even for a tall custom photo.
   $('crop-wrap').style.setProperty('--crop-ratio', settings.ratio);
 }
+
+$('inspect-edit').onclick = async event => {
+  const button = event.currentTarget;
+  if (!photo || button.hasAttribute('aria-busy')) return;
+  const current = revision;
+  button.setAttribute('aria-busy','true');
+  $('inspect-edit-error').hidden = true;
+  let preview;
+  try {
+    const crop = cropRect(photo.canvas.width, photo.canvas.height, settings.ratio, settings.zoom, settings.x, settings.y);
+    const width = Math.max(1, Math.round(crop.width)), height = Math.max(1, Math.round(crop.height));
+    preview = renderEditPreview(width, height);
+    const blob = await new Promise(resolve => preview.toBlob(resolve, 'image/png'));
+    if (current !== revision) return;
+    if (!blob) throw new Error('Could not create photo preview');
+    viewer.open(blob,width,height,button,'inspectEdit');
+  } catch {
+    if (current === revision) $('inspect-edit-error').hidden = false;
+  } finally {
+    if (preview) preview.width = preview.height = 1;
+    button.removeAttribute('aria-busy');
+  }
+};
 
 function updateBackgroundControls() {
   const busy = !!backgroundJob;
@@ -389,9 +419,9 @@ function updateBackgroundControls() {
   $('cancel-background').hidden = !busy;
   $('restore-background').hidden = !backgroundCanvas;
   $('background-download-note').hidden = !!backgroundCanvas;
-  $('background-progress').hidden = !busy || backgroundProgress == null;
-  if (backgroundProgress != null) $('background-progress').value = backgroundProgress;
-  $('background-progress').ariaLabel = t('backgroundPreparing');
+  $('background-progress').hidden = !busy;
+  if (backgroundProgress == null) $('background-progress').removeAttribute('value');
+  else $('background-progress').value = backgroundProgress;
   const message = status ? t(status) : '';
   if ($('background-status').textContent !== message) $('background-status').textContent = message;
   $('background-status').toggleAttribute('data-error', status === 'backgroundFailed');
@@ -422,7 +452,7 @@ $('remove-background').onclick = async () => {
     const result = await removeBackground(source, job.signal, ({stage, progress}) => {
       if (backgroundJob !== job) return;
       if (stage) {
-        backgroundStatus = ['download','verify','initialize'].includes(stage) ? 'backgroundPreparing' : 'backgroundWorking';
+        backgroundStatus = ['download','verify','initialize'].includes(stage) ? 'backgroundPreparing' : stage === 'mask' ? 'backgroundFinishing' : 'backgroundWorking';
         if (stage !== 'download') backgroundProgress = null;
       }
       if (progress) backgroundProgress = progress.current / progress.total;
@@ -461,6 +491,7 @@ $('background-permission').onchange = () => { updateBackgroundControls(); schedu
 
 function clearPhoto() {
   resetBackground();
+  $('inspect-edit-error').hidden = true;
   pixelsEdited=false;pixelEdge='width';$('jpeg-quality').value=$('jpeg-quality-slider').value=100;
   selectTool('framing');
   revision++; clearTimeout(renderTimer); discardExport();

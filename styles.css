@@ -72,6 +72,7 @@ select:hover, input[type=number]:hover { border-color: var(--color-ink); }
 .empty .button { margin-top: 20px; }
 #crop-wrap { position: relative; max-width: min(100%, calc(var(--preview-height) * var(--crop-ratio,1))); width: 100%; }
 #crop { display: block; width: 100%; height: auto; touch-action: none; cursor: grab; }
+#inspect-edit { position: absolute; inset-block-start: var(--space-xs); inset-inline-end: var(--space-xs); min-width: 44px; min-height: 44px; padding: 0; }
 #crop:active { cursor: grabbing; }
 #guide-overlay { position: absolute; inset: 0; pointer-events: none; }
 .guide-line { position: absolute; width: 100%; border-top: 2px dashed var(--color-guide); filter: drop-shadow(0 1px 0 var(--color-guide-shadow)); }
@@ -81,7 +82,7 @@ select:hover, input[type=number]:hover { border-color: var(--color-ink); }
 .tool-tabs button:hover { background: var(--color-paper); }
 .background-actions { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-block: var(--space-sm) var(--space-xs); }
 .background-actions .button { max-width: 100%; white-space: normal; }
-#background-progress { display: block; width: 100%; accent-color: var(--color-accent); }
+#background-progress { display: block; width: 100%; height: var(--space-xs); accent-color: var(--color-accent); }
 #background-status:empty { display: none; }
 #background-status[data-error] { color: var(--color-error); }
 fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }

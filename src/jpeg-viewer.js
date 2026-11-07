@@ -1,15 +1,19 @@
-// The viewer reads the export blob, never the downsampled page canvas.
+// Display the full-resolution image, independently of the page preview.
 export function createJpegViewer(t) {
   const $=id=>document.getElementById(id);
   const dialog=$('jpeg-viewer'),viewport=$('viewer-viewport'),image=$('viewer-image');
   let opener=null,url=null,revision=0,width=0,height=0,bytes=0,zoom=1,fitted=true,ready=false;
+  let title='inspectJpeg';
   const points=new Map();let gesture;
   const fitScale=()=>Math.min(1,viewport.clientWidth/width,viewport.clientHeight/height);
   const minimum=()=>Math.min(0.1,fitScale());
   function refresh(){
     $('viewer-in').ariaLabel=t('zoomIn');$('viewer-out').ariaLabel=t('zoomOut');
-    viewport.ariaLabel=t('inspectJpeg');image.alt=t('singlePreview');
-    $('viewer-meta').textContent=ready?`${width}×${height} px · ${(bytes/1000).toFixed(1)} KB`:t('viewerLoading');
+    const editing=title==='inspectEdit';
+    $('viewer-title').textContent=viewport.ariaLabel=t(title);
+    image.alt=t(editing?'editedPreview':'singlePreview');
+    const dimensions=`${width}×${height} px`;
+    $('viewer-meta').textContent=ready?(editing?dimensions:`${dimensions} · ${(bytes/1000).toFixed(1)} KB`):t(editing?'inspectEditLoading':'viewerLoading');
   }
   function setZoom(value,anchor){
     if(!ready) return;
@@ -64,15 +68,15 @@ export function createJpegViewer(t) {
   for(const event of ['pointerup','pointercancel','lostpointercapture']) viewport.addEventListener(event,e=>{points.delete(e.pointerId);start();});
   viewport.ondblclick=()=>{if(fitted){fitted=false;setZoom(1);}else fit();};
   window.addEventListener('resize',()=>{if(dialog.open&&ready){if(fitted)fit();else setZoom(zoom);}});
-  return {close,refresh,async open(blob,w,h,trigger){
+  return {close,refresh,async open(blob,w,h,trigger,heading='inspectJpeg'){
     close();opener=trigger;const current=++revision;
-    width=w;height=h;bytes=blob.size;fitted=true;
+    width=w;height=h;bytes=blob.size;fitted=true;title=heading;
     url=URL.createObjectURL(blob);image.src=url;
     viewport.setAttribute('aria-busy','true');refresh();dialog.showModal();
     try {
       await image.decode();if(current!==revision)return;
       ready=true;refresh();fit();
-    } catch {if(current===revision) $('viewer-meta').textContent=t('exportError');}
+    } catch {if(current===revision) $('viewer-meta').textContent=t(title==='inspectEdit'?'inspectEditError':'exportError');}
     finally {if(current===revision)viewport.removeAttribute('aria-busy');}
   }};
 }

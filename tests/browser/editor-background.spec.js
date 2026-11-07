@@ -21,15 +21,17 @@ test('background removal is optional, reversible, and composes with both outputs
             data.pixels[(y*data.width+x)*4+3] = 0;
           }
         }
-        self.postMessage({id:data.id,cutout:data.pixels}, [data.pixels.buffer]);
+        self.postMessage({id:data.id,stage:'inference'});
+        setTimeout(() => self.postMessage({id:data.id,cutout:data.pixels}, [data.pixels.buffer]), 750);
       };
     `});
   });
   await openApp(page,'single');
   const q = id => page.locator('#' + id);
   const png = await page.evaluate(() => {
-    const c = document.createElement('canvas'); c.width = c.height = 400;
+    const c = document.createElement('canvas'); c.width = c.height = 900;
     const ctx = c.getContext('2d');
+    ctx.scale(2.25,2.25);
     ctx.fillStyle = '#204080'; ctx.fillRect(0,0,400,400);
     ctx.fillStyle = '#a04020'; ctx.fillRect(100,100,200,200);
     return c.toDataURL().split(',')[1];
@@ -45,12 +47,17 @@ test('background removal is optional, reversible, and composes with both outputs
   expect(requests.some(url => /\/models\/|\/modnet-experiment\/|\/remove-background\.js/.test(url))).toBe(false);
   await q('remove-background').click();
   await expect(q('background-progress')).toBeVisible();
+  await expect(q('background-progress')).toHaveAttribute('value','0.5');
   await expect(q('save')).toBeDisabled();
   await q('cancel-background').click();
   await expect(q('background-status')).toContainText('cancelled');
   await expect(q('save')).toBeEnabled();
   await q('remove-background').click();
+  await expect(q('background-status')).toContainText('Removing background');
+  await expect(q('background-progress')).toBeVisible();
+  await expect(q('background-progress')).not.toHaveAttribute('value',/./);
   await expect(q('background-status')).toContainText('White background applied');
+  await expect(q('background-progress')).toBeHidden();
   const sample = (id,x,y) => q(id).evaluate((canvas,[x,y]) => [...canvas.getContext('2d').getImageData(x,y,1,1).data],[x,y]);
   expect(await sample('crop',20,20)).toEqual([255,255,255,255]);
   const subject = await sample('crop',300,300);
@@ -61,6 +68,20 @@ test('background removal is optional, reversible, and composes with both outputs
   expect(await sample('crop',300,300)).not.toEqual(subject);
   expect(await sample('crop',20,20)).toEqual([255,255,255,255]);
   expect(await sample('sheet',20,20)).toEqual([255,255,255,255]);
+  await q('inspect-edit').focus();
+  await page.keyboard.press('Enter');
+  await expect(q('viewer-title')).toHaveText('Magnify photo');
+  await expect(q('viewer-meta')).toHaveText('900×900 px');
+  const enlarged = await q('viewer-image').evaluate(image => {
+    const canvas = document.createElement('canvas'); canvas.width = 900; canvas.height = 900;
+    const ctx = canvas.getContext('2d'); ctx.drawImage(image,0,0);
+    return [...ctx.getImageData(30,30,1,1).data];
+  });
+  expect(enlarged).toEqual([255,255,255,255]);
+  await q('viewer-actual').click();
+  await expect(q('viewer-zoom')).toHaveText('100%');
+  await page.keyboard.press('Escape');
+  await expect(q('inspect-edit')).toBeFocused();
   await q('original').check();
   expect(await sample('crop',20,20)).toEqual([32,64,128,255]);
   await page.locator('[name=output-mode][value=print]').check();
