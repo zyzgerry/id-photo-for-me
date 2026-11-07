@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/serve.mjs",
-    "test": "node --test tests/geometry.test.mjs tests/portrait-processing.test.mjs",
+    "test": "node --test tests/geometry.test.mjs tests/portrait-processing.test.mjs tests/modnet-processing.test.mjs",
     "test:browser": "playwright test"
   },
   "dependencies": {

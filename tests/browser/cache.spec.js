@@ -12,10 +12,11 @@ for(const prefix of ['/id-photo-for-me','']) test(`cached ${prefix||'root'} page
   let releaseCheck;
   const startupGate=new Promise(resolve=>{releaseCheck=resolve;});
   try {
-    for(const dir of ['scripts','src/portrait-experiment','node_modules/heic-to/dist/csp','node_modules/heic-to/src','node_modules/onnxruntime-web/dist','node_modules/hash-wasm/dist'])
+    for(const dir of ['scripts','src/portrait-experiment','src/modnet-experiment','node_modules/heic-to/dist/csp','node_modules/heic-to/src','node_modules/onnxruntime-web/dist','node_modules/hash-wasm/dist'])
       await mkdir(resolve(fixture,dir),{recursive:true});
     await cp(resolve(root,'scripts/build.mjs'),resolve(fixture,'scripts/build.mjs'));
     await cp(resolve(root,'src/portrait-experiment/index.html'),resolve(fixture,'src/portrait-experiment/index.html'));
+    await cp(resolve(root,'src/modnet-experiment/index.html'),resolve(fixture,'src/modnet-experiment/index.html'));
     // This fixture tests cache versioning, so runtime binaries can be empty build inputs.
     for(const name of ['ort.webgpu.min.mjs','ort.wasm.min.mjs','ort-wasm-simd-threaded.asyncify.mjs','ort-wasm-simd-threaded.asyncify.wasm','ort-wasm-simd-threaded.mjs','ort-wasm-simd-threaded.wasm'])
       await writeFile(resolve(fixture,'node_modules/onnxruntime-web/dist',name),'');

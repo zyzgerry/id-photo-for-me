@@ -48,11 +48,13 @@ html = html.replace('<html lang="en">', `<html lang="en" data-release="${version
   .replace("script-src 'self';", `script-src 'self' 'sha256-${scriptHash}';`)
   .replace("connect-src 'none';", "connect-src 'self';");
 await writeFile(resolve(dist,'index.html'), html);
-let portraitHtml = await readFile(resolve(dist,'src/portrait-experiment/index.html'),'utf8');
-portraitHtml = portraitHtml.replace('<html lang="en">', `<html lang="en" data-release="${version}">`)
-  .replace('href="./portrait.css"', `href="../../assets/${version}/src/portrait-experiment/portrait.css"`)
-  .replace('src="./portrait.js"', `src="../../assets/${version}/src/portrait-experiment/portrait.js"`);
-await writeFile(resolve(dist,'src/portrait-experiment/index.html'), portraitHtml);
+for (const experiment of ['portrait-experiment', 'modnet-experiment']) {
+  let html = await readFile(resolve(dist, 'src', experiment, 'index.html'), 'utf8');
+  html = html.replace('<html lang="en">', '<html lang="en" data-release="' + version + '">')
+    .replace('href="./portrait.css"', 'href="../../assets/' + version + '/src/' + experiment + '/portrait.css"')
+    .replace('src="./portrait.js"', 'src="../../assets/' + version + '/src/' + experiment + '/portrait.js"');
+  await writeFile(resolve(dist, 'src', experiment, 'index.html'), html);
+}
 await writeFile(resolve(dist,'release.json'), JSON.stringify({version}));
 await writeFile(resolve(dist, '.nojekyll'), '');
 console.log(`Static site built: ${dist} (${version})`);

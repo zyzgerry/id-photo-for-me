@@ -4,7 +4,8 @@ import {createHash} from 'node:crypto';
 import {resolve, dirname, basename} from 'node:path';
 import {once} from 'node:events';
 import assert from 'node:assert/strict';
-import {MODEL} from '../src/portrait-experiment/model.js';
+const isModnet = process.argv.includes('--modnet');
+const {MODEL} = await import(isModnet ? '../src/modnet-experiment/model.js' : '../src/portrait-experiment/model.js');
 
 const root = resolve(import.meta.dirname, '..'), models = resolve(root, 'dist/models'), target = resolve(models, MODEL.directory);
 assert(target.startsWith(models + '/') || target.startsWith(models + '\\'));
@@ -14,7 +15,7 @@ assert(dirname(work) === models && basename(work).startsWith('.portrait-'));
 let completed = false;
 try {
   let source;
-  if (process.env.PORTRAIT_MODEL_FILE) source = createReadStream(resolve(process.env.PORTRAIT_MODEL_FILE));
+  if (process.env[isModnet ? 'MODNET_MODEL_FILE' : 'PORTRAIT_MODEL_FILE']) source = createReadStream(resolve(process.env[isModnet ? 'MODNET_MODEL_FILE' : 'PORTRAIT_MODEL_FILE']));
   else {
     const response = await fetch(MODEL.source, {signal: AbortSignal.timeout(600000)});
     if (!response.ok || !response.body) throw new Error(`Model asset download failed (${response.status})`);
@@ -40,7 +41,7 @@ try {
   const manifest = {sha256: MODEL.sha256, bytes: total, parts: MODEL.partSizes.map((bytes, i) => ({file: `part-${i}.bin`, bytes}))};
   for (let i = 0; i < MODEL.partSizes.length; i++) assert.equal((await stat(resolve(work, `part-${i}.bin`))).size, MODEL.partSizes[i]);
   await writeFile(resolve(work, 'manifest.json'), JSON.stringify(manifest, null, 2));
-  await writeFile(resolve(work, 'MODEL-NOTICE.txt'), await readFile(resolve(root, 'src/portrait-experiment/MODEL-NOTICE.txt')));
+  await writeFile(resolve(work, 'MODEL-NOTICE.txt'), await readFile(resolve(root, isModnet ? 'src/modnet-experiment/MODEL-NOTICE.txt' : 'src/portrait-experiment/MODEL-NOTICE.txt')));
   try { await stat(target); throw new Error('Model output already exists; run a fresh build first.'); } catch (error) { if (error.code !== 'ENOENT') throw error; }
   await rename(work, target); completed = true;
   console.log(`Verified model prepared outside Git: ${total} bytes in ${part} same-origin parts.`);

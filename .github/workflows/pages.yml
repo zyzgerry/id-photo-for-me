@@ -27,7 +27,9 @@ jobs:
       - run: pnpm exec playwright install --with-deps chromium webkit firefox
       - run: pnpm test:browser
       - name: Prepare verified experimental model (weights stay outside Git)
-        run: node scripts/prepare-portrait-model.mjs
+        run: |
+          node scripts/prepare-portrait-model.mjs
+          node scripts/prepare-portrait-model.mjs --modnet
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
