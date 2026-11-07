@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self' blob:; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+  <title>iPhone portrait test · ID Photo for Me</title>
+  <link rel="stylesheet" href="./portrait.css">
+  <script type="module" src="./portrait.js"></script>
+</head>
+<body><main>
+  <a href="../../" target="_blank" rel="noopener">Open the photo editor</a>
+  <h1>Try the portrait model on your iPhone</h1>
+  <p>This separate test uses the approved 4-bit model and keeps the portrait’s original colors. It does not apply changes to the photo editor.</p>
+  <p><strong>Your photos stay on this device.</strong> First preparation downloads about 299 MB of model data, plus processing tools. Your browser may cache these files. Processing needs substantially more working memory.</p>
+  <section aria-labelledby="prepare-title">
+    <h2 id="prepare-title">Prepare the model</h2>
+    <label for="mode">Processing mode</label>
+    <select id="mode"><option value="webgpu">Graphics-assisted · try this first</option><option value="wasm">CPU compatibility test · slower</option></select>
+    <p id="capabilities" class="note"></p>
+    <label class="check"><input id="fresh" type="checkbox"> Fresh download, bypassing the browser’s cache</label>
+    <div class="actions"><button id="prepare" class="primary">Prepare model · about 299 MB</button><button id="release" disabled>Release model memory</button></div>
+    <p id="model-status" class="note">The model loads only when you choose Prepare model.</p>
+  </section>
+  <section aria-labelledby="photo-title">
+    <h2 id="photo-title">Choose a portrait</h2>
+    <label for="photo">Photo from Photos or Files</label>
+    <input id="photo" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif">
+    <p class="note">JPEG, PNG or HEIC, up to 30 MB and 50 megapixels. The longest working edge is limited to 4096 pixels.</p>
+    <p id="photo-info"></p>
+    <div class="actions"><button id="run" disabled>Remove background</button><button id="cancel" disabled>Cancel</button></div>
+    <p id="status" role="status" aria-live="polite">Prepare the model and choose a photo to begin.</p>
+    <progress id="progress" hidden aria-label="Model download"></progress>
+    <p id="elapsed" class="note"></p>
+    <p class="note">Keep Safari in the foreground for the first run. After saving a result, run the same photo again to compare repeat speed. Release model memory when finished; your preview and saved results stay available.</p>
+  </section>
+  <section aria-labelledby="compare-title">
+    <h2 id="compare-title">Inspect the result</h2>
+    <p>Check hair, ears, shoulders and clothing. Open a full-size image to zoom in.</p>
+    <div id="comparisons">
+      <figure id="original-figure" hidden><figcaption>Original working photo</figcaption><img id="original" alt="Your original working portrait"><a id="original-open" target="_blank" rel="noopener">Open full-size original</a></figure>
+      <figure id="result-figure" hidden><figcaption>White background · original colors</figcaption><img id="result" alt="Your portrait with a white background"><a id="result-open" target="_blank" rel="noopener">Open full-size result</a><a id="save">Save PNG</a></figure>
+    </div>
+  </section>
+  <section aria-labelledby="report-title">
+    <h2 id="report-title">Save the test report</h2>
+    <p>The report contains timings, browser capabilities, model identity and errors. It contains no photo pixels, masks or original filenames.</p>
+    <div class="device-fields"><div><label for="device">Device label</label><input id="device" value="iPhone 17 Pro" autocomplete="off"></div><div><label for="os">iOS / operating system version</label><input id="os" value="27.0.1" autocomplete="off"></div></div>
+    <label for="notes">Your observations (optional)</label><textarea id="notes" rows="3" placeholder="For example: first run succeeded, repeat was faster, Safari reloaded while processing…"></textarea>
+    <div class="actions"><button id="report">Save diagnostic report</button><button id="reset">Reset test</button></div>
+    <pre id="measurements">No completed runs yet.</pre>
+    <p class="note">A small photo-free stage marker is kept on this device to help diagnose interrupted runs. Reset test removes it. Reloading clears the selected photo and previews; browser-cached model files may remain.</p>
+  </section>
+  <footer><a href="./MODEL-NOTICE.txt">Model and software notices</a></footer>
+</main></body></html>

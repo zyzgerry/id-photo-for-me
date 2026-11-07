@@ -6,10 +6,10 @@ A personal, mobile-friendly utility for arranging accurately sized ID photos on 
 
 - Code: public GitHub repository `zyzgerry/id-photo-for-me`, made public with the owner's explicit authorization so the current GitHub plan can host Pages.
 - Local development: clone this repository under the device's `repos` folder.
-- Canonical purpose and specification: `AI_Project/id-photo-for-me/id-photo-print-spec.md` in iCloud Drive. Keep that document as the source of truth; do not maintain a duplicate specification here.
+- Canonical purpose and specification: `AI_Project/id-photo-for-me/specs/id-photo-print-spec.md` in iCloud Drive. Keep that document as the source of truth; do not maintain a duplicate specification here.
 
-On Windows, the specification is normally at `~/iCloudDrive/AI_Project/id-photo-for-me/id-photo-print-spec.md`.
-On macOS, it is normally at `~/Library/Mobile Documents/com~apple~CloudDocs/AI_Project/id-photo-for-me/id-photo-print-spec.md`.
+On Windows, the specification is normally at `~/iCloudDrive/AI_Project/id-photo-for-me/specs/id-photo-print-spec.md`.
+On macOS, it is normally at `~/Library/Mobile Documents/com~apple~CloudDocs/AI_Project/id-photo-for-me/specs/id-photo-print-spec.md`.
 
 ## Requirements-first workflow
 

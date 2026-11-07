@@ -21,11 +21,13 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --frozen-lockfile --ignore-scripts
       - run: pnpm test
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium webkit firefox
       - run: pnpm test:browser
+      - name: Prepare verified experimental model (weights stay outside Git)
+        run: node scripts/prepare-portrait-model.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

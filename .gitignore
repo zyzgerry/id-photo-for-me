@@ -11,3 +11,7 @@ playwright-report/
 .qa/
 .hallmark/
 .playwright-cli/
+
+# Large model weights and private numeric fixtures are never source assets.
+*.onnx
+*.f32

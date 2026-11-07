@@ -9,6 +9,14 @@ await mkdir(resolve(dist, 'vendor'), { recursive: true });
 for (const file of ['index.html', 'favicon.svg', 'styles.css', 'tokens.css', 'base.css', 'src', 'THIRD_PARTY.md']) {
   await cp(resolve(root, file), resolve(dist, file), { recursive: true });
 }
+// Experimental runtime files are isolated; ordinary editor imports never reference them.
+const portraitVendor = resolve(dist, 'src/portrait-experiment/vendor');
+await mkdir(portraitVendor, {recursive:true});
+for (const file of ['ort.webgpu.min.mjs','ort.wasm.min.mjs','ort-wasm-simd-threaded.asyncify.mjs','ort-wasm-simd-threaded.asyncify.wasm','ort-wasm-simd-threaded.mjs','ort-wasm-simd-threaded.wasm']) {
+  await cp(resolve(root, 'node_modules/onnxruntime-web/dist', file), resolve(portraitVendor, file));
+}
+await cp(resolve(root, 'node_modules/hash-wasm/dist/sha256.umd.min.js'), resolve(portraitVendor, 'sha256.js'));
+await cp(resolve(root, 'node_modules/hash-wasm/LICENSE'), resolve(portraitVendor, 'SHA256-LICENSE.txt'));
 await cp(resolve(root, 'node_modules/heic-to/dist/csp/heic-to.js'), resolve(dist, 'vendor/heic-to.js'));
 await cp(resolve(root, 'node_modules/heic-to/LICENSE'), resolve(dist, 'vendor/heic-to.LICENSE.txt'));
 await cp(resolve(root, 'node_modules/heic-to/src'), resolve(dist, 'vendor/heic-to-source'), { recursive: true });
@@ -40,6 +48,11 @@ html = html.replace('<html lang="en">', `<html lang="en" data-release="${version
   .replace("script-src 'self';", `script-src 'self' 'sha256-${scriptHash}';`)
   .replace("connect-src 'none';", "connect-src 'self';");
 await writeFile(resolve(dist,'index.html'), html);
+let portraitHtml = await readFile(resolve(dist,'src/portrait-experiment/index.html'),'utf8');
+portraitHtml = portraitHtml.replace('<html lang="en">', `<html lang="en" data-release="${version}">`)
+  .replace('href="./portrait.css"', `href="../../assets/${version}/src/portrait-experiment/portrait.css"`)
+  .replace('src="./portrait.js"', `src="../../assets/${version}/src/portrait-experiment/portrait.js"`);
+await writeFile(resolve(dist,'src/portrait-experiment/index.html'), portraitHtml);
 await writeFile(resolve(dist,'release.json'), JSON.stringify({version}));
 await writeFile(resolve(dist, '.nojekyll'), '');
 console.log(`Static site built: ${dist} (${version})`);

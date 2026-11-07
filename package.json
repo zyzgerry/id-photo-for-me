@@ -6,11 +6,13 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/serve.mjs",
-    "test": "node --test tests/geometry.test.mjs",
+    "test": "node --test tests/geometry.test.mjs tests/portrait-processing.test.mjs",
     "test:browser": "playwright test"
   },
   "dependencies": {
-    "heic-to": "1.6.7"
+    "hash-wasm": "4.12.0",
+    "heic-to": "1.6.7",
+    "onnxruntime-web": "1.31.1"
   },
   "devDependencies": {
     "@playwright/test": "1.64.1"

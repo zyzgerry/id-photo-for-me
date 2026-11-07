@@ -1,0 +1,43 @@
+BiRefNet Portrait INT4 browser experiment
+
+Original model: https://huggingface.co/ZhengPeng7/BiRefNet-portrait
+Original project: https://github.com/ZhengPeng7/BiRefNet
+
+This derivative uses 4-bit matrix weights with original float32 activations.
+Large Split/Concat operations are rewritten and final-decoder sampling is
+batched in independent channel groups. Learned weights and 1024 input remain
+unchanged. No training photos or user photographs are included.
+
+Artifact: birefnet-portrait-int4-web-chunked.onnx
+Bytes: 298520795
+SHA-256: b0e39ef6eeaf57d16f1aaa6be974330fac861a5f15c6691e62f4b2aa84b317c1
+
+ONNX Runtime Web 1.31.1: https://github.com/microsoft/onnxruntime
+Runtime license and third-party notices are included in this directory.
+hash-wasm 4.12.0: https://github.com/Daninet/hash-wasm (MIT).
+The streaming SHA-256 verifier avoids a second full model buffer.
+Lanczos resampling follows Pillow's documented 8-bit algorithm:
+https://github.com/python-pillow/Pillow/blob/13.0.0/src/libImaging/Resample.c
+
+Original BiRefNet license follows:
+MIT License
+
+Copyright (c) 2024 ZhengPeng
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
