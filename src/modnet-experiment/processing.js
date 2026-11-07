@@ -1,6 +1,6 @@
 import {compositeWhite} from '../portrait-experiment/processing.js';
 export {compositeWhite};
-import {RECIPES} from './model.js';
+import {RECIPES, edgeRadius} from './model.js';
 const roundEven = value => value % 1 === .5 ? 2 * Math.round(value / 2) : Math.round(value);
 
 function geometry(width, height, inputWidth, inputHeight) {
@@ -75,4 +75,36 @@ export function buildMask(values, width, height, recipe = RECIPES.standard) {
     }
   }
   return mask;
+}
+
+// Blend the strongest mark at overlaps so a second tap does not compound the curve.
+export function tightenMarkedEdges(mask, width, height, marks, cutoff) {
+  const radius = edgeRadius(width, height), weights = new Float32Array(width);
+  const startY = Math.max(0, Math.floor(Math.min(...marks.map(mark => mark.y)) - radius));
+  const endY = Math.min(height - 1, Math.ceil(Math.max(...marks.map(mark => mark.y)) + radius));
+  for (let y = startY; y <= endY; y++) {
+    weights.fill(0);
+    let first = width, last = -1;
+    for (const mark of marks) {
+      const dy = y - mark.y;
+      if (Math.abs(dy) >= radius) continue;
+      const halfWidth = Math.sqrt(radius * radius - dy * dy);
+      const left = Math.max(0, Math.ceil(mark.x - halfWidth));
+      const right = Math.min(width - 1, Math.floor(mark.x + halfWidth));
+      first = Math.min(first, left); last = Math.max(last, right);
+      for (let x = left; x <= right; x++) {
+        const value = mask[y * width + x];
+        if (value === 0 || value === 255) continue;
+        const distance = Math.hypot(x - mark.x, dy);
+        const weight = Math.max(0, Math.min(1, (radius - distance) / (radius * .25)));
+        weights[x] = Math.max(weights[x], weight);
+      }
+    }
+    for (let x = first; x <= last; x++) {
+      if (weights[x] === 0) continue;
+      const index = y * width + x, alpha = mask[index] / 255;
+      const tightened = Math.max(0, Math.min(1, (alpha - cutoff) / (1 - 2 * cutoff)));
+      mask[index] = roundEven((alpha + weights[x] * (tightened - alpha)) * 255);
+    }
+  }
 }

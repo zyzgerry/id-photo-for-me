@@ -1,13 +1,37 @@
 import {decodePhoto} from '../image.js';
-import {MODEL, RECIPES} from './model.js';
+import {MODEL, RECIPES, MAX_EDGE_MARKS, edgeRadius} from './model.js';
 const $ = id => document.getElementById(id), checkpointKey = 'modnet-checkpoint-v1';
 const build = document.documentElement.dataset.release || 'modnet-development';
 let worker, ready = false, busy = false, active = 0, source, originalUrl, resultUrl, photoSession = 0, phase = 'idle', started = 0, ticker, deadline;
 let preparation, priorCheckpoint;
 const runs = [], errors = [], preparations = [], stages = [];
+const marks = [];
 try { priorCheckpoint = JSON.parse(localStorage.getItem(checkpointKey) || 'null'); } catch {}
+function drawMarks() {
+  const overlay = $('edge-overlay');
+  overlay.replaceChildren();
+  if (!source) return;
+  overlay.setAttribute('viewBox', '0 0 ' + source.width + ' ' + source.height);
+  for (const mark of marks) {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', mark.x); circle.setAttribute('cy', mark.y);
+    circle.setAttribute('r', edgeRadius(source.width, source.height));
+    overlay.append(circle);
+  }
+}
 function controls() {
-  $('prepare').disabled = busy; $('run').disabled = busy || !ready || !source;
+  const cutoff = RECIPES[$('recipe').value].edgeCutoff;
+  $('edge-target').hidden = !cutoff;
+  $('edge-overlay').toggleAttribute('hidden', !cutoff);
+  const previewParent = cutoff ? $('edge-preview') : $('comparisons');
+  const figure = $('original-figure');
+  if (figure.parentElement !== previewParent) previewParent.prepend(figure);
+  if (cutoff) {
+    $('edge-meaning').textContent = 'Below ' + Math.round(cutoff * 100) + '% becomes background. Above ' + Math.round((1 - cutoff) * 100) + '% becomes solid.';
+    $('mark-count').textContent = marks.length ? marks.length + ' of ' + MAX_EDGE_MARKS + ' marks' : 'Mark at least one area to run this option.';
+  }
+  $('clear-marks').disabled = busy || !marks.length;
+  $('prepare').disabled = busy; $('run').disabled = busy || !ready || !source || (cutoff && !marks.length);
   $('release').disabled = busy || !worker; $('cancel').disabled = !busy; $('mode').disabled = busy; $('fresh').disabled = busy;
   $('photo').disabled = busy; $('recipe').disabled = busy; $('prepare').textContent = ready ? 'Prepare model again' : 'Prepare model · about 26 MB';
 }
@@ -78,10 +102,20 @@ $('prepare').onclick = () => {
   const base = new URL(`../../models/${MODEL.directory}/`, document.baseURI).href;
   try { attachWorker().postMessage({type: 'prepare', id, base, provider: $('mode').value, fresh: $('fresh').checked}); } catch (error) { fail(error.message); }
 };
+$('recipe').onchange = controls;
+$('clear-marks').onclick = () => { marks.length = 0; drawMarks(); controls(); };
+$('edge-overlay').onclick = event => {
+  if (busy || !source || marks.length >= MAX_EDGE_MARKS) return;
+  const matrix = $('edge-overlay').getScreenCTM();
+  if (!matrix) return;
+  const {x, y} = new DOMPoint(event.clientX, event.clientY).matrixTransform(matrix.inverse());
+  if (x < 0 || y < 0 || x >= source.width || y >= source.height) return;
+  marks.push({x, y}); drawMarks(); controls();
+};
 $('run').onclick = () => {
-  if (busy || !source || !ready || !worker) return;
+  if ($('run').disabled || !worker) return;
   const id = begin('preprocess', 300000); status('Preparing the photo…', 'preprocess');
-  try { const pixels = source.getContext('2d').getImageData(0, 0, source.width, source.height).data; worker.postMessage({type: 'run', id, pixels, width: source.width, height: source.height, recipeKey: $('recipe').value}, [pixels.buffer]); } catch (error) { fail(error.message); }
+  try { const pixels = source.getContext('2d').getImageData(0, 0, source.width, source.height).data; worker.postMessage({type: 'run', id, pixels, width: source.width, height: source.height, recipeKey: $('recipe').value, marks}, [pixels.buffer]); } catch (error) { fail(error.message); }
 };
 $('cancel').onclick = () => cancel();
 $('release').onclick = () => { active++; terminate(); finish(); status('Model memory released. Your photo and result are preserved.', 'released'); };
@@ -95,7 +129,7 @@ $('photo').onchange = async () => {
     const blob = await new Promise(resolve => decoded.canvas.toBlob(resolve, 'image/png'));
     if (id !== active) { decoded.canvas.width = decoded.canvas.height = 1; return; }
     if (!blob) throw new Error('Could not prepare the original preview.');
-    if (source) source.width = source.height = 1; source = decoded.canvas; photoSession++;
+    if (source) source.width = source.height = 1; source = decoded.canvas; photoSession++; marks.length = 0; drawMarks();
     if (originalUrl) URL.revokeObjectURL(originalUrl); if (resultUrl) URL.revokeObjectURL(resultUrl); resultUrl = null;
     originalUrl = URL.createObjectURL(blob); $('original').src = originalUrl; $('original-open').href = originalUrl; $('original-figure').hidden = false;
     $('result').removeAttribute('src'); $('result-figure').hidden = true;
@@ -113,7 +147,7 @@ $('report').onclick = () => {
   link.href = url; link.download = 'modnet-report.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
 $('reset').onclick = () => {
-  active++; terminate(); finish(); if (source) source.width = source.height = 1; source = null;
+  active++; terminate(); finish(); if (source) source.width = source.height = 1; source = null; marks.length = 0; drawMarks();
   for (const url of [originalUrl, resultUrl]) if (url) URL.revokeObjectURL(url); originalUrl = resultUrl = null;
   for (const id of ['original', 'result']) $(id).removeAttribute('src'); $('original-figure').hidden = $('result-figure').hidden = true;
   $('recipe').value = 'standard'; $('photo').value = ''; $('photo-info').textContent = ''; $('elapsed').textContent = ''; $('notes').value = '';

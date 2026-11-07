@@ -1,5 +1,5 @@
-import {MODEL, RECIPES} from './model.js';
-import {prepareInput, buildMask, compositeWhite} from './processing.js';
+import {MODEL, RECIPES, MAX_EDGE_MARKS} from './model.js';
+import {prepareInput, buildMask, tightenMarkedEdges, compositeWhite} from './processing.js';
 let session, ort, mode, preparation;
 const now = () => performance.now();
 const send = (id, data, transfer = []) => self.postMessage({id, ...data}, transfer);
@@ -53,11 +53,15 @@ async function prepare({id, base, provider, fresh}) {
   send(id, {ready: true, preparation: {...preparation, resources}});
 }
 
-async function run({id, pixels, width, height, recipeKey}) {
+async function run({id, pixels, width, height, recipeKey, marks}) {
   if (!session) throw new Error('Prepare the model first.');
-  if (!Object.hasOwn(RECIPES, recipeKey)) throw new Error('Choose Standard or Detail.');
+  if (!Object.hasOwn(RECIPES, recipeKey)) throw new Error('Choose a processing option.');
   const recipe = RECIPES[recipeKey], {inputWidth, inputHeight} = recipe;
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 || Math.max(width, height) > 4096 || pixels.length !== width * height * 4) throw new Error('Invalid working image.');
+  if (recipe.edgeCutoff && (!Array.isArray(marks) || marks.length < 1 || marks.length > MAX_EDGE_MARKS ||
+    marks.some(mark => !mark || !Number.isFinite(mark.x) || !Number.isFinite(mark.y) || mark.x < 0 || mark.x >= width || mark.y < 0 || mark.y >= height))) {
+    throw new Error('Mark the ear or neck edge on the original photo.');
+  }
   const started = now(); let tensor, output;
   try {
     stage(id, 'preprocess', 'Preparing the photo…');
@@ -68,9 +72,13 @@ async function run({id, pixels, width, height, recipeKey}) {
     const values = await output[session.outputNames[0]].getData(), inferred = now();
     if (values.length !== inputWidth * inputHeight) throw new Error('Unexpected model output dimensions.');
     stage(id, 'mask', 'Finishing the edges and keeping the original colors…');
-    const mask = buildMask(values, width, height, recipe); compositeWhite(pixels, mask);
+    const mask = buildMask(values, width, height, recipe);
+    const refine = now();
+    if (recipe.edgeCutoff) tightenMarkedEdges(mask, width, height, marks, recipe.edgeCutoff);
+    const edgeRefineMs = now() - refine;
+    compositeWhite(pixels, mask);
     const composited = now();
-    const timing = {mode, recipe: recipeKey, inputWidth, inputHeight, width, height, reusedModel: true, prepareImageMs: prepared - started, inferenceMs: inferred - infer, maskAndCompositeMs: composited - inferred};
+    const timing = {mode, recipe: recipeKey, inputWidth, inputHeight, width, height, edgeMarks: recipe.edgeCutoff ? marks.length : 0, edgeRefineMs, reusedModel: true, prepareImageMs: prepared - started, inferenceMs: inferred - infer, maskAndCompositeMs: composited - inferred};
     stage(id, 'encode', 'Preparing the full-size PNG…');
     if (typeof OffscreenCanvas !== 'undefined') {
       const canvas = new OffscreenCanvas(width, height), ctx = canvas.getContext('2d', {colorSpace: 'srgb'});

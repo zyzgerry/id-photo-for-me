@@ -30,19 +30,26 @@
     <p class="note">JPEG, PNG or HEIC, up to 30 MB and 50 megapixels. The longest working edge is limited to 4096 pixels.</p>
     <p id="photo-info"></p>
     <label for="recipe">Edge detail</label>
-    <select id="recipe"><option value="standard">Standard · 512 × 768</option><option value="detail">Detail · 1024 × 1536</option></select>
+    <select id="recipe"><option value="standard">Standard · 512 × 768</option><option value="detail">Detail · 1024 × 1536</option><option value="edge-20-80">20–80% · targeted edges</option><option value="edge-30-70">30–70% · targeted edges</option></select>
     <p class="note">Detail adds gentle edge cleanup and reduces fading where clothing meets the bottom edge. It takes longer and uses more working memory.</p>
+    <div id="edge-target" hidden>
+      <p class="note">Tap the exposed ear or neck edge on the original. Add another mark for a longer edge and keep the circles away from fine hair. Both strengths reuse your marks.</p>
+      <p class="note" id="edge-meaning"></p>
+      <div id="edge-preview"></div>
+      <button id="clear-marks" type="button" disabled>Clear marks</button>
+      <p id="mark-count" class="note" aria-live="polite"></p>
+    </div>
     <div class="actions"><button id="run" disabled>Remove background</button><button id="cancel" disabled>Cancel</button></div>
     <p id="status" role="status" aria-live="polite">Prepare the model and choose a photo to begin.</p>
     <progress id="progress" hidden aria-label="Model download"></progress>
     <p id="elapsed" class="note"></p>
-    <p class="note">Save the Standard PNG, switch to Detail, then run the same photo again. Both options use the model and photo you already loaded.</p>
+    <p class="note">Save each PNG before switching options. All options reuse the model and photo you already loaded.</p>
   </section>
   <section aria-labelledby="compare-title">
     <h2 id="compare-title">Inspect the result</h2>
     <p>Check hair, ears, shoulders and clothing. Open a full-size image to zoom in.</p>
     <div id="comparisons">
-      <figure id="original-figure" hidden><figcaption>Original working photo</figcaption><img id="original" alt="Your original working portrait"><a id="original-open" target="_blank" rel="noopener">Open full-size original</a></figure>
+      <figure id="original-figure" hidden><figcaption>Original working photo</figcaption><div class="edge-image"><img id="original" alt="Your original working portrait"><svg id="edge-overlay" aria-label="Tap to mark the exposed ear or neck" hidden></svg></div><a id="original-open" target="_blank" rel="noopener">Open full-size original</a></figure>
       <figure id="result-figure" hidden><figcaption id="result-label">White background</figcaption><img id="result" alt="Your portrait with a white background"><a id="result-open" target="_blank" rel="noopener">Open full-size result</a><a id="save">Save PNG</a></figure>
     </div>
   </section>

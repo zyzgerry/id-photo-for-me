@@ -10,7 +10,13 @@ export const MODEL = Object.freeze({
   inputHeight: 768,
 });
 
+const STANDARD = Object.freeze({label: 'Standard', inputWidth: 512, inputHeight: 768, alphaCutoff: 0, extendBottom: false});
+export const MAX_EDGE_MARKS = 8;
+export const edgeRadius = (width, height) => Math.max(1, Math.round(Math.min(width, height) * .085));
+
 export const RECIPES = Object.freeze({
-  standard: Object.freeze({label: 'Standard', inputWidth: 512, inputHeight: 768, alphaCutoff: 0, extendBottom: false}),
+  standard: STANDARD,
+  'edge-20-80': Object.freeze({...STANDARD, label: '20–80% edges', edgeCutoff: .20}),
+  'edge-30-70': Object.freeze({...STANDARD, label: '30–70% edges', edgeCutoff: .30}),
   detail: Object.freeze({label: 'Detail', inputWidth: 1024, inputHeight: 1536, alphaCutoff: .02, extendBottom: true}),
 });

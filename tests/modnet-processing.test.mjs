@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {prepareInput, buildMask, compositeWhite} from '../src/modnet-experiment/processing.js';
+import {prepareInput, buildMask, tightenMarkedEdges, compositeWhite} from '../src/modnet-experiment/processing.js';
 import {RECIPES} from '../src/modnet-experiment/model.js';
 test('MODNet letterboxing preserves channels, normalization and neutral padding', () => {
  const rgba = Uint8Array.from({length:4*512*512}, (_,i) => [255,0,128,255][i%4]);
@@ -36,4 +36,19 @@ test('Detail extends only the bottom padding and remaps faint alpha', () => {
  alpha[256 * width + 1] = .99;
  alpha[256 * width + 2] = .5;
  assert.deepEqual(Array.from(buildMask(alpha, width, width, recipe).subarray(0, 4)), [0, 255, 128, 0]);
+});
+test('Targeted tightening preserves unmarked pixels and overlapping marks do not compound', () => {
+ const width = 100, height = 100, mark = {x: 50, y: 50};
+ const original = new Uint8Array(width * height).fill(64);
+ original[5051] = 255;
+ const mild = original.slice(), strong = original.slice(), overlap = original.slice();
+ tightenMarkedEdges(mild, width, height, [mark], .20);
+ tightenMarkedEdges(strong, width, height, [mark], .30);
+ tightenMarkedEdges(overlap, width, height, [mark, mark], .20);
+ assert.equal(mild[5050], 22);
+ assert.equal(strong[5050], 0);
+ assert.equal(mild[5051], 255);
+ assert.equal(mild[0], 64);
+ assert.equal(mild[5058], 45);
+ assert.deepEqual(overlap, mild);
 });

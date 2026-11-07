@@ -22,6 +22,16 @@ test('portrait test page is isolated, responsive and preserves the loaded origin
   expect(requests.some(url => /\/models\/|modnet-experiment\/vendor\//.test(url))).toBe(false);
   await page.locator('#photo').setInputFiles({name:'synthetic.png', mimeType:'image/png', buffer:await portrait(page)});
   await expect(page.locator('#original')).toBeVisible(); await expect(page.locator('#status')).toContainText('Photo ready');
+  await page.locator('#recipe').selectOption('edge-20-80');
+  await expect(page.locator('#edge-overlay')).toBeVisible();
+  await page.locator('#edge-overlay').click();
+  await expect(page.locator('#edge-overlay circle')).toHaveCount(1);
+  await page.locator('#recipe').selectOption('edge-30-70');
+  await expect(page.locator('#edge-overlay circle')).toHaveCount(1);
+  await page.locator('#clear-marks').click();
+  await expect(page.locator('#edge-overlay circle')).toHaveCount(0);
+  await page.locator('#recipe').selectOption('detail');
+  await expect(page.locator('#edge-overlay')).toBeHidden();
   await expect(page.locator('#run')).toBeDisabled();
   await page.locator('#photo').setInputFiles({name:'broken.jpg', mimeType:'image/jpeg', buffer:Buffer.from('invalid')});
   await expect(page.locator('#status')).toContainText('Choose a JPEG'); await expect(page.locator('#original')).toBeVisible();
