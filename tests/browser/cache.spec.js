@@ -24,7 +24,7 @@ for(const prefix of ['/id-photo-for-me','']) test(`cached ${prefix||'root'} page
     await writeFile(resolve(fixture,'node_modules/hash-wasm/LICENSE'),'');
     try {await cp(resolve(root,'src/bootstrap.js'),resolve(fixture,'src/bootstrap.js'));}
     catch(e){if(e.code!=='ENOENT')throw e;}
-    for(const file of ['favicon.svg','THIRD_PARTY.md','node_modules/heic-to/LICENSE','node_modules/heic-to/dist/csp/heic-to.js'])
+    for(const file of ['favicon.svg','LICENSE.txt','THIRD_PARTY.md','node_modules/heic-to/LICENSE','node_modules/heic-to/dist/csp/heic-to.js'])
       await writeFile(resolve(fixture,file),'');
     await writeFile(resolve(fixture,'src/app.js'),"import {label} from './i18n.js';document.querySelector('#size-title').textContent=label;");
     await writeFile(resolve(fixture,'styles.css'),"@import url('./tokens.css');@import url('./base.css');");

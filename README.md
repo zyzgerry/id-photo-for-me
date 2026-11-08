@@ -62,6 +62,12 @@ The GitHub Actions workflow verifies the app, builds static files, and deploys `
 - Brightness and contrast are neutral by default. Presets with editing restrictions show a reminder beside the photo requirements. Short document labels and dimensions stay visible; detailed guidance, application scope and source links are in the collapsed Requirements & sources section. Location-specific presets keep a brief visible caveat; paper, photographer, appointment, and portal requirements still apply. The app checks geometry, not government acceptance.
 - HEIC HDR/wide-gamut appearance, large-photo memory behavior, native sharing, and saving on real iPhones remain subject to the release checks below. Current-browser orientation handling and sRGB canvas conversion are used; universal color fidelity is not claimed.
 
+## License
+
+The original app code is licensed under the [MIT License](LICENSE.txt). Bundled dependencies, models, and third-party material retain the licenses listed in [Third-party notices](THIRD_PARTY.md).
+
+If you publish a fork, a link back to [ID Photo for Me](https://github.com/zyzgerry/id-photo-for-me) is appreciated.
+
 ## Release validation
 
 See [VALIDATION.md](VALIDATION.md) for automated evidence and the remaining real-iPhone and physical-print checklist. Desktop emulation is not a substitute for those checks.

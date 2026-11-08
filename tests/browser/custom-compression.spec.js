@@ -53,11 +53,42 @@ test('close-up reads the exact downloaded JPEG, supports keyboard zoom and resto
   await page.screenshot({path:'.qa/viewer-desktop-'+info.project.name+'.png'});
 });
 
+test('print sheet close-up shows the exact saved JPEG and returns focus', async ({page})=>{
+  await page.setViewportSize({width:375,height:812});
+  await openApp(page);
+  const preview=page.locator('#sheet');
+  await expect(preview).toHaveAttribute('role','img');
+  await page.locator('#photo').setInputFiles(fixture);
+  await reviewFraming(page);
+  await expect(page.locator('#save')).toHaveText('Save print sheet');
+  await expect(page.locator('#save')).toBeEnabled();
+  const saved=await download(page);
+  await page.evaluate(()=>{const create=URL.createObjectURL.bind(URL);URL.createObjectURL=blob=>{window.inspectedBlob=blob;return create(blob);};});
+  await preview.click();
+  await expect(page.locator('#viewer-title')).toHaveText('Inspect print sheet');
+  await expect(page.locator('#viewer-meta')).toContainText('3600×2400 px');
+  const bytes=await page.evaluate(async()=>[...new Uint8Array(await window.inspectedBlob.arrayBuffer())]);
+  expect(Buffer.from(bytes).equals(saved)).toBe(true);
+  await page.locator('#viewer-actual').click();
+  await expect(page.locator('#viewer-zoom')).toHaveText('100%');
+  await page.keyboard.press('Escape');
+  await expect(preview).toBeFocused();
+  await preview.press('Enter');
+  await expect(page.locator('#jpeg-viewer')).toBeVisible();
+  await page.locator('#viewer-close').click();
+  await expect(preview).toBeFocused();
+});
+
 test('phone close-up supports pinch and drag with compact bilingual controls',async({page},info)=>{
   await page.setViewportSize({width:375,height:812});await page.emulateMedia({reducedMotion:'reduce'});await start(page);
   await page.locator('#pixel-height').fill('1200');await expect(page.locator('#pixel-width-label')).toContainText('calculated');
   await page.locator('#language').check();await expect(page.locator('#pixel-width-label')).toContainText('自动计算');
-  await expect(page.locator('#save')).toBeEnabled();await page.locator('#sheet').click();
+  await expect(page.locator('#save')).toBeEnabled();
+  const magnifier=page.locator('.output-magnifier');
+  await magnifier.scrollIntoViewIfNeeded();
+  const icon=await magnifier.boundingBox();
+  await page.mouse.click(icon.x+icon.width/2,icon.y+icon.height/2);
+  await expect(page.locator('#jpeg-viewer')).toBeVisible();
   await expect(page.locator('#viewer-viewport')).not.toHaveAttribute('aria-busy','true');
   const viewport=page.locator('#viewer-viewport');
   const box=await viewport.boundingBox();const x=box.x+box.width/2,y=box.y+box.height/2;

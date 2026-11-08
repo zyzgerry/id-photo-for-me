@@ -6,7 +6,7 @@ const dist = resolve(root, 'dist');
 // Only the generated output directory is replaced on each build.
 await rm(dist, { recursive: true, force: true });
 await mkdir(resolve(dist, 'vendor'), { recursive: true });
-for (const file of ['index.html', 'favicon.svg', 'styles.css', 'tokens.css', 'base.css', 'src', 'THIRD_PARTY.md']) {
+for (const file of ['index.html', 'favicon.svg', 'styles.css', 'tokens.css', 'base.css', 'src', 'LICENSE.txt', 'THIRD_PARTY.md']) {
   await cp(resolve(root, file), resolve(dist, file), { recursive: true });
 }
 // The editor requests the background runtime only when removal starts.

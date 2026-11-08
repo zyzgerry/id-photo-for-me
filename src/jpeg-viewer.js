@@ -11,7 +11,7 @@ export function createJpegViewer(t) {
     $('viewer-in').ariaLabel=t('zoomIn');$('viewer-out').ariaLabel=t('zoomOut');
     const editing=title==='inspectEdit';
     $('viewer-title').textContent=viewport.ariaLabel=t(title);
-    image.alt=t(editing?'editedPreview':'singlePreview');
+    image.alt=t(editing?'editedPreview':title==='inspectSheet'?'sheetPreview':'singlePreview');
     const dimensions=`${width}×${height} px`;
     $('viewer-meta').textContent=ready?(editing?dimensions:`${dimensions} · ${(bytes/1000).toFixed(1)} KB`):t(editing?'inspectEditLoading':'viewerLoading');
   }

@@ -48,7 +48,7 @@ test('ID preparation is first and defaults to source-detail JPEG quality; compre
   await expect(page.locator('[name=output-quality][value=quality]')).toBeChecked();
   await expect(page.locator('#compression-settings')).toBeHidden();
   const preview=await page.locator('.sheet-stage').boundingBox();expect(preview.height).toBeLessThanOrEqual(270);
-  const exportHeading=await page.locator('.export-title').boundingBox(), actions=await page.locator('.export-actions').boundingBox();expect(actions.y).toBeGreaterThanOrEqual(exportHeading.y+exportHeading.height);
+  const exportHeading=await page.locator('#export-title').boundingBox(), actions=await page.locator('.export-actions').boundingBox();expect(actions.y).toBeGreaterThanOrEqual(exportHeading.y+exportHeading.height);
   const best=await downloadInfo(page);expect([best.width,best.height]).toEqual([1200,1200]);await expect(page.locator('#single-result')).toContainText(new Intl.NumberFormat('en',{minimumFractionDigits:1,maximumFractionDigits:1}).format(best.bytes/1000)+' KB');await expect(page.locator('#result-quality')).toContainText('100/100');
   await page.locator('#sheet-title').scrollIntoViewIfNeeded();await page.locator('.sheet').screenshot({path:`.qa/customize-quality-${testInfo.project.name}.png`});
   await page.locator('[name=output-quality][value=compress]').check();await expect(page.locator('#save')).toBeEnabled();

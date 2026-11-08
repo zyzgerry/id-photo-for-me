@@ -43,13 +43,20 @@ test('short document labels keep detailed scope and linked sources collapsed unt
   const disclosure=page.locator('.requirements summary');
   await expect(disclosure).toHaveText('Requirements & sources');
   await disclosure.focus();await page.keyboard.press('Enter');
-  await expect(page.locator('#preset-note')).toBeVisible();
-  await expect(page.locator('#preset-scope')).toContainText('Hong Kong / Macao');
+  const rows = page.locator('.requirements > p:visible');
+  await expect(rows).toHaveText([
+    'Requirements source: Italian Consulate-General in Hong Kong.',
+    'Tourist visa checklist for Hong Kong / Macao: two recent 35×45 mm photographs, not older than six months, submitted with the printed and signed application.',
+    'Checked: 2026-11-01',
+    'Confirm with your consulate or authority on photo requirements before proceeding.',
+  ]);
   await expect(page.locator('#reference')).toHaveAttribute('href',PRESETS.find(p=>p.country==='it').source);
   await page.locator('#language').setChecked(('zh')==='zh');
   await expect(page.locator('#document option:checked')).toHaveText('申根签证');
   await expect(disclosure).toHaveText('要求与来源');
-  await expect(page.locator('#preset-scope')).toContainText('香港／澳门');
+  await expect(page.locator('#reference')).toContainText('意大利驻香港总领事馆');
+  await expect(page.locator('#preset-note')).toContainText('香港／澳门旅游签证清单');
+  await expect(rows).toHaveCount(4);
   await disclosure.click();await expect(page.locator('#preset-note')).toBeHidden();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBe(320);
   await page.locator('#country').selectOption('us');await expect(page.locator('#preset-location')).toBeVisible();

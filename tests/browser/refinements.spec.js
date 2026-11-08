@@ -8,8 +8,14 @@ test('requirements and upload precede editing at every layout size',async({page}
   await page.emulateMedia({reducedMotion:'reduce'});
   for(const [width,height] of [[1440,1000],[1024,900],[760,900],[375,812],[320,640],[844,390]]){
     await page.setViewportSize({width,height});await openApp(page);
+    let introHeight;
     for(const language of ['en','zh']){
-      await page.locator('#language').setChecked((language)==='zh');
+      await page.locator('#language').setChecked(language==='zh');
+      const intro = await page.locator('.intro').boundingBox();
+      if (introHeight === undefined) introHeight = intro.height;
+      else expect(intro.height).toBeCloseTo(introHeight, 0);
+      const heights = await page.locator('.section-heading').evaluateAll(rows=>rows.map(row=>row.getBoundingClientRect().height));
+      expect(heights).toEqual([44,44,44,44,44]);
       for(const mode of ['print','single']){
         const radio=page.locator(`[name=output-mode][value=${mode}]`);
         await radio.check();await radio.focus();await expect(radio).toBeFocused();

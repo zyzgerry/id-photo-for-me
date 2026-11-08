@@ -3,7 +3,7 @@ import {openApp} from './open-app.js';
 
 test('requirements tabs hide locked fields, retain selections and support keyboard and languages',async({page},info)=>{
   await openApp(page,'single');
-  await expect(page.locator('#size-title')).toHaveText('1. Photo size');
+  await expect(page.locator('#size-title')).toHaveText('1. ID photo size requirement');
   await expect(page.locator('#document-requirements')).toHaveAttribute('aria-selected','true');
   await expect(page.locator('#digital-framing')).toBeHidden();
   await expect(page.locator('#country option[value=custom]')).toHaveCount(0);

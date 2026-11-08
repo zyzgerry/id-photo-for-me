@@ -12,9 +12,8 @@ test('requirements precede upload and editing, with output inactive before uploa
   await expect(page.locator('.mode-picker .mini-mockup')).toHaveCount(2);
   await expect(page.locator('.sheet .mode-picker')).toBeVisible();
   await expect(page.locator('#copies')).toBeDisabled();
-  await expect(page.locator('#country-help')).toBeHidden();
+  await expect(page.locator('#reference')).toBeHidden();
   await page.locator('.requirements summary').press('Enter');
-  await expect(page.locator('#country-help')).toBeVisible();
   await expect(page.locator('#reference')).toBeVisible();
   await page.locator('.requirements summary').press('Enter');
   await page.screenshot({path:`.qa/ux-phone-${testInfo.project.name}.png`,fullPage:true});

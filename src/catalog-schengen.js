@@ -248,17 +248,16 @@ export const SCHENGEN_PRESETS = [
     "id": "it-visa-hong-kong",
     "country": "it",
     "document": "schengen",
-    "scope": {
-      "en": "Tourist visa — Hong Kong / Macao",
-      "zh": "旅游签证 — 香港／澳门申请"
-    },
     "widthMm": 35,
     "heightMm": 45,
     "source": "https://conshongkong.esteri.it/wp-content/uploads/2024/11/NEO-Checklist-TOURIST-With-Chinese-Translation-112024.pdf",
-    "sourceName": "Italian Consulate-General in Hong Kong",
+    "sourceName": {
+      "en": "Italian Consulate-General in Hong Kong",
+      "zh": "意大利驻香港总领事馆"
+    },
     "note": {
-      "en": "Tourist-visa checklist for Hong Kong/Macao: two recent 35×45 mm photographs, not older than six months, submitted with the printed and signed application. Confirm the consulate’s current photo-quality and background instructions.",
-      "zh": "香港／澳门旅游签证清单：两张六个月内拍摄的35×45毫米照片，随已打印并签名的申请表提交。请核对领馆最新的照片质量和背景要求。"
+      "en": "Tourist visa checklist for Hong Kong / Macao: two recent 35×45 mm photographs, not older than six months, submitted with the printed and signed application.",
+      "zh": "香港／澳门旅游签证清单：两张六个月内拍摄的 35×45 毫米照片，随打印并签名的申请表提交。"
     },
     "checked": "2026-11-01",
     "restrictEdits": true

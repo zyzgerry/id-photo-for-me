@@ -3,7 +3,9 @@ Author project https://github.com/ZHKKKe/MODNet
 Author-linked ONNX https://github.com/ZHKKKe/MODNet/tree/master/onnx
 Model SHA-256 07c308cf0fc7e6e8b2065a12ed7fc07e1de8febb7dc7839d7b7f15dd66584df9
 Code and models licensed Apache-2.0 by the author.
-Unmodified model, 25,888,640 bytes. Full image, normalized RGB, aspect-preserving 512x768 input.
+Unmodified model, 25,888,640 bytes.
+The main editor and standalone MODNet trial process the full photo with
+normalized RGB, 1024x1536 neutral letterboxing, and 20–80% mask tightening.
 Apache license at ./MODNET-LICENSE.txt
 ONNX Runtime notices at ../portrait-experiment/ORT-NOTICES.txt
 ONNX Runtime license at ../portrait-experiment/ORT-LICENSE.txt

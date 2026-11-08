@@ -21,11 +21,12 @@
   </header>
   <main class="shell">
     <section class="intro" aria-labelledby="intro-title">
-      <div>
+      <div class="intro-copy">
         <h1 id="intro-title" data-i18n="workspaceTitle">Make an ID photo</h1>
+        <p class="intro-purpose" data-i18n="introPurpose">Prepare an ID photo for an application or make a 4×6 print sheet.</p>
         <p id="privacy" class="privacy">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-          <span data-i18n="privacy">Photos stay on your device.</span>
+          <span data-i18n="privacy">All photo editing happens in this browser. Your photos stay on this device.</span>
         </p>
       </div>
       <div class="intro-workflow">
@@ -65,11 +66,8 @@
     <div class="workspace">
       <div class="setup-column">
       <section class="settings region" aria-labelledby="size-title">
-        <div class="size-heading">
-          <h2 id="size-title" data-i18n="step1">1. Photo size</h2>
-          <p class="size-readout" id="size-readout"></p>
-        </div>
-        <div class="requirements-tabs" role="tablist" aria-label="Photo size">
+        <div class="section-heading"><h2 id="size-title" data-i18n="step1">1. ID photo size requirement</h2></div>
+        <div class="requirements-tabs" role="tablist" aria-label="ID photo size requirement">
           <button id="document-requirements" type="button" role="tab" aria-selected="true" aria-controls="document-requirements-panel" data-i18n="pickByDocument">Pick by document</button>
           <button id="custom-requirements" type="button" role="tab" aria-selected="false" aria-controls="custom-requirements-panel" tabindex="-1" data-i18n="customDimensions">Custom dimensions</button>
         </div>
@@ -86,19 +84,21 @@
         <div id="digital-framing" hidden>          <label for="single-fit" data-i18n="singleFit">Framing</label>
           <select id="single-fit"><option value="original" data-i18n="keepFull">Keep the full photo</option><option value="crop" selected data-i18n="cropOutput">Crop to output ratio</option></select><div id="ratio-fields" class="two-fields"><label><span data-i18n="ratioWidth">Crop ratio: width</span><input id="ratio-width" type="number" min="1" max="4096" value="1" step="any"></label><label><span data-i18n="ratioHeight">Crop ratio: height</span><input id="ratio-height" type="number" min="1" max="4096" value="1" step="any"></label></div></div>
         </div>
+        <p class="size-readout" id="size-readout"></p>
         <p class="hint" id="preset-location" data-i18n="locationCaveat">Check official rules before printing.</p>
         <p class="warning" id="preset-warning" hidden></p>
         <p class="hint" id="preset-edit-guidance" data-i18n="editGuidance" hidden>Edit only if your document allows it.</p>
         <details class="requirements"><summary data-i18n="documentGuidance">Requirements &amp; sources</summary>
-        <p id="country-help" class="hint" data-i18n="countryHelp">Choose the country issuing your passport or visa. These presets are for printed photos; online applications may have different rules.</p>
+        <p class="hint" id="preset-reference" hidden><a id="reference" target="_blank" rel="noopener noreferrer">Requirements source</a></p>
         <p class="hint" id="preset-scope" hidden></p>
         <p class="hint" id="preset-note"></p>
-        <p class="hint" id="preset-reference"><a id="reference" target="_blank" rel="noopener noreferrer" data-i18n="reference">Requirements source</a><br><span id="verified"></span></p>
-        <p class="hint" data-i18n="acceptance">Correct size does not guarantee document acceptance. Check the linked requirements.</p>
+        <p class="hint" id="verified" hidden></p>
+        <p class="hint" data-i18n="confirmRequirements">Confirm with your consulate or authority on photo requirements before proceeding.</p>
         </details>
         </div>
       </section>
-      <section class="setup region" aria-labelledby="upload-title"><h2 id="upload-title" data-i18n="uploadTitle">2. Upload photo</h2>
+      <section class="setup region" aria-labelledby="upload-title">
+        <div class="section-heading"><h2 id="upload-title" data-i18n="uploadTitle">2. Choose photo</h2></div>
 
     <div class="photo-setup">
       <div class="file-actions">
@@ -168,15 +168,15 @@
         </div></div>
       </section>
       <section class="sheet region" aria-labelledby="sheet-title">
-        <h2 id="sheet-title" data-i18n="singleStep3">4. Customize output</h2>
+        <div class="section-heading"><h2 id="sheet-title" data-i18n="singleStep3">4. Customize output</h2></div>
         <fieldset class="mode-picker"><legend class="visually-hidden" data-i18n="outputMode">Output format</legend>
-          <label><input type="radio" name="output-mode" value="single"><span class="mini-mockup" aria-hidden="true"><span class="example-digital"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><span class="output-choice-copy"><strong data-i18n="singleMode">Single photo</strong><span class="hint" data-i18n="digitalExample">Download one JPEG, with optional file compression.</span></span></label>
+          <label><input type="radio" name="output-mode" value="single"><span class="mini-mockup" aria-hidden="true"><span class="example-digital"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><span class="output-choice-copy"><strong data-i18n="singleMode">Single photo</strong><span class="hint" data-i18n="digitalExample">Save one JPEG, with optional compression.</span></span></label>
           <label><input type="radio" name="output-mode" value="print" checked><span class="mini-mockup" aria-hidden="true"><span class="example-sheet"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><span class="output-choice-copy"><strong data-i18n="printMode">Printable sheet</strong><span class="hint" data-i18n="printExample">Arrange copies on a 4×6 sheet for printing.</span></span></label>
         </fieldset>
-        <p id="output-empty" class="hint" data-i18n="outputInactive">Upload a photo to prepare the output.</p>
+        <p id="output-empty" class="hint" data-i18n="outputInactive">Choose a photo to prepare the output.</p>
         <div class="output-body">
           <div id="output-preview" class="output-preview">
-            <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="3600" height="2400" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
+            <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="3600" height="2400" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div><span class="output-magnifier" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5M8 10.5h5m-2.5-2.5v5"/></svg></span></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
 
             <div class="preview-details"><div id="single-result" role="status" hidden><span class="hint" data-i18n="resultFileSize">Resulting file size</span><strong id="result-size"></strong><span id="result-pixels" class="hint"></span></div><p class="hint" id="output-info"></p><p id="preview-status" class="hint" role="status" hidden></p></div>
           </div>
@@ -228,9 +228,9 @@
         </div>
       </section>
       <section class="export region" aria-labelledby="export-title">
-        <h2 id="export-title" class="export-title" data-i18n="exportTitle">5. Export</h2>
-        <div class="export-actions"><button id="save" class="button primary" data-i18n="save" disabled>Download JPEG</button><button id="share" class="button quiet" data-i18n="share" disabled>Share JPEG</button></div>
-        <p class="hint" data-i18n="exportSizeNote">Saving an image to iPhone Photos may slightly change its file size. Download to Files or a drive to preserve the exact size.</p>
+        <div class="section-heading"><h2 id="export-title" data-i18n="exportTitle">5. Export</h2></div>
+        <div class="export-actions"><button id="save" class="button primary" data-i18n="save" disabled>Save JPEG</button><button id="share" class="button quiet" data-i18n="share" disabled>Share JPEG</button></div>
+        <p class="hint" data-i18n="exportSizeNote">Saving an image to iPhone Photos may slightly change its file size. Save to Files or a drive to preserve the exact size.</p>
         <p id="export-status" class="hint" role="status" aria-live="polite"></p>
         <details class="print-note" id="print-note"><summary data-i18n="printTitle">Print at exactly 4×6 inches</summary><p data-i18n="print">Keep the entire sheet. Turn off automatic cropping, enlargement, and fit/fill options. Borderless printing may trim the edges. Measure your first test print.</p></details>
 
@@ -243,6 +243,14 @@
     <div id="viewer-viewport" tabindex="0" role="region" aria-label="JPEG preview"><div class="viewer-surface"><img id="viewer-image" alt="" draggable="false"></div></div>
     <footer class="viewer-footer"><div class="viewer-controls"><button id="viewer-fit" type="button" data-i18n="fitView">Fit</button><button id="viewer-actual" type="button" data-i18n="actualView">100%</button><button id="viewer-out" type="button" aria-label="Zoom out">−</button><output id="viewer-zoom" aria-live="polite">100%</output><button id="viewer-in" type="button" aria-label="Zoom in">+</button></div><p id="viewer-help" data-i18n="viewerHelp">Pinch or use + / − to zoom. Drag or use arrow keys to explore.</p></footer>
   </dialog>
-  <footer class="shell"><span data-i18n="local">Local processing</span><a href="./THIRD_PARTY.md" target="_blank" rel="noopener" data-i18n="source">Decoder notices</a></footer>
+  <footer class="shell about" aria-labelledby="about-title">
+    <h2 id="about-title" data-i18n="aboutTitle">About this tool</h2>
+    <p data-i18n="aboutDescription">Gerald built ID Photo for Me to make it easier to prepare ID photos at home. The app code is open source under the MIT License.</p>
+    <div class="about-links">
+      <a href="https://github.com/zyzgerry/id-photo-for-me" target="_blank" rel="noopener noreferrer" data-i18n="aboutSource">View source on GitHub</a>
+      <a href="./LICENSE.txt" target="_blank" rel="noopener" data-i18n="aboutLicense">MIT License</a>
+      <a href="./THIRD_PARTY.md" target="_blank" rel="noopener" data-i18n="aboutNotices">Third-party notices</a>
+    </div>
+  </footer>
 </body>
 </html>
