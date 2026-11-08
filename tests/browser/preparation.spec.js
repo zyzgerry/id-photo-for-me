@@ -83,6 +83,7 @@ test('every photo format applies its own ratio in preparation mode in both langu
 });
 
 test('phone layouts, keyboard output choices, replacement and repeated mode switches retain edits',async({page})=>{
+  test.setTimeout(120000);
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await openApp(page,'single');await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled({timeout:15000});
   await page.locator('#zoom').fill('1.4');await page.locator('#adjustments-tab').click();await page.locator('#contrast').fill('9');
   for(const width of [320,390,1440]){

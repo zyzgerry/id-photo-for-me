@@ -356,7 +356,6 @@ function scheduleRender() {
       if(mode==='single'){$('sheet').tabIndex=0;$('sheet').ariaLabel=t('inspectJpeg');$('sheet').setAttribute('aria-haspopup','dialog');}
       else $('sheet').removeAttribute('aria-haspopup');
       $('share').hidden = !navigator.canShare || !navigator.canShare({ files: [file] });
-      updateExportAvailability();
       setExport();updateReadouts();
     } catch(e) { if (current === revision) { if(mode==='single') showSingleError(e.message==='fileTargetError'?e.message:'exportError');else setError('exportError'); setExport(); $('sheet').hidden = !singleResult; $('sheet-empty').hidden = !!singleResult; $('output-preview').removeAttribute('aria-busy');$('preview-status').hidden=!singleResult;$('preview-status').textContent=t('previewPrevious'); } }
     finally { if (sheet) sheet.width = sheet.height = 1; }
