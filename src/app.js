@@ -57,10 +57,29 @@ function discardExport() {
   file = null; if (downloadUrl) URL.revokeObjectURL(downloadUrl); downloadUrl = null;
   $('save').disabled = $('share').disabled = true;
 }
+function reserveBilingualIntroSpace() {
+  // Hidden translations share the visible grid cells so font wrapping cannot shift the editor.
+  const other = lang === 'en' ? 'zh' : 'en';
+  for (const original of document.querySelectorAll('.intro-copy > div:first-child, .intro-workflow > ol:first-of-type')) {
+    const measure = original.cloneNode(true);
+    measure.classList.add('intro-measure');
+    measure.lang = other === 'zh' ? 'zh-Hans' : 'en';
+    measure.setAttribute('aria-hidden','true');
+    for (const el of measure.querySelectorAll('[id]')) el.removeAttribute('id');
+    for (const el of measure.querySelectorAll('[data-i18n]')) {
+      el.textContent = messages[other][el.dataset.i18n];
+      el.removeAttribute('data-i18n');
+    }
+    const previous = original.nextElementSibling;
+    if (previous?.classList.contains('intro-measure')) previous.replaceWith(measure);
+    else original.after(measure);
+  }
+}
 function updateLanguage() {
   document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
   document.title = t('title'); $('language').checked = lang === 'zh';
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
+  reserveBilingualIntroSpace();
   $('crop').ariaLabel = lang === 'zh' ? '裁剪预览，可用方向键移动照片' : 'Crop preview; use arrow keys to move the photo';
   $('inspect-edit').ariaLabel = $('inspect-edit').title = t('inspectEdit');
   $('photo').ariaLabel = t(photo ? 'replace' : 'choose');
@@ -137,7 +156,6 @@ function updatePresetDetails() {
 }
 
 function updateModeLabels() {
-  document.querySelector('.intro h1').textContent=t('workspaceTitle');
   $('size-title').textContent=t('step1');
   $('save').textContent=t(mode==='print'?'savePrint':'saveSingle');
   updateOutputPreviewControl($('sheet').getAttribute('role')==='button');

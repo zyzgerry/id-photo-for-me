@@ -6,9 +6,9 @@ const fixture=fileURLToPath(new URL('../fixtures/orientation-6.jpg',import.meta.
 test('requirements precede upload and editing, with output inactive before upload',async({page},testInfo)=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.setViewportSize({width:390,height:844});await openApp(page);
-  await expect(page.locator('.intro h1')).toHaveText('Make an ID photo');
+  await expect(page.locator('#intro-title')).toHaveText('Make an ID photo');
   await expect(page.locator('.intro .mode-picker')).toHaveCount(0);
-  await expect(page.locator('.intro-workflow li')).toHaveText(['Raw photo','Remove background','Print-ready']);
+  await expect(page.locator('.intro-workflow li:visible')).toHaveText(['Raw photo','Remove background','Print-ready']);
   await expect(page.locator('.mode-picker .mini-mockup')).toHaveCount(2);
   await expect(page.locator('.sheet .mode-picker')).toBeVisible();
   await expect(page.locator('#copies')).toBeDisabled();
@@ -21,6 +21,11 @@ test('requirements precede upload and editing, with output inactive before uploa
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
   const captionsFit = await page.locator('.intro-workflow li').evaluateAll(items=>items.every(item=>item.scrollWidth<=item.clientWidth));
   expect(captionsFit).toBe(true);
+  const englishIntro=await page.locator('.intro').boundingBox();
+  await page.locator('#language').check();
+  await expect(page.locator('#intro-title')).toHaveText('制作证件照');
+  expect((await page.locator('.intro').boundingBox()).height).toBeCloseTo(englishIntro.height,0);
+  await page.locator('#language').uncheck();
   await page.evaluate(()=>document.documentElement.style.removeProperty('font-size'));
   await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:`.qa/ux-desktop-${testInfo.project.name}.png`});
   await page.setViewportSize({width:390,height:844});
