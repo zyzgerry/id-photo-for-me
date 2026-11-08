@@ -88,8 +88,8 @@ function updatePresetDetails() {
   $('digital-framing').hidden=mode!=='single'||!customRequirements;
   $('ratio-fields').hidden=mode!=='single'||$('single-fit').value==='original';
   for(const id of ['single-fit','ratio-width','ratio-height']) $(id).disabled=!!preset;
+  $('country-help').hidden = !requirement;
   $('country-help').textContent=t(mode==='print'?'countryHelp':'digitalCountryHelp');
-  $('document-fields').hidden = customRequirements;
   $('preset-location').hidden = !requirement;
   $('preset-warning').hidden = !requirement?.warning;
   $('preset-warning').textContent = requirement?.warning?.[lang] || '';
@@ -110,7 +110,7 @@ function updatePresetDetails() {
   $('copies').disabled=$('cut-guides').disabled=!photo;
   $('output-empty').hidden=!!photo;
   if(mode==='single'){
-    $('size-readout').textContent=preset?`${preset.widthMm}×${preset.heightMm} ${lang==='zh'?'毫米':'mm'}`:t('digitalCustomSummary');
+    $('size-readout').textContent=preset?`${preset.widthMm}×${preset.heightMm} ${lang==='zh'?'毫米':'mm'}`:'';
   }
   $('compression-settings').hidden=!compressing();
   $('file-size-settings').hidden=pixelTarget();$('pixel-settings').hidden=!pixelTarget();

@@ -6,13 +6,23 @@ const fixture=fileURLToPath(new URL('../fixtures/orientation-6.jpg',import.meta.
 test('requirements precede upload and editing, with output inactive before upload',async({page},testInfo)=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.setViewportSize({width:390,height:844});await openApp(page);
-  await expect(page.locator('.intro')).toContainText('printing or upload');
+  await expect(page.locator('.intro h1')).toHaveText('Make an ID photo');
   await expect(page.locator('.intro .mode-picker')).toHaveCount(0);
-  await expect(page.locator('.intro .result-example')).toHaveCount(2);
+  await expect(page.locator('.intro-workflow li')).toHaveText(['Raw photo','Remove background','Print-ready']);
   await expect(page.locator('.mode-picker .mini-mockup')).toHaveCount(2);
   await expect(page.locator('.sheet .mode-picker')).toBeVisible();
   await expect(page.locator('#copies')).toBeDisabled();
+  await expect(page.locator('#country-help')).toBeHidden();
+  await page.locator('.requirements summary').press('Enter');
+  await expect(page.locator('#country-help')).toBeVisible();
+  await expect(page.locator('#reference')).toBeVisible();
+  await page.locator('.requirements summary').press('Enter');
   await page.screenshot({path:`.qa/ux-phone-${testInfo.project.name}.png`,fullPage:true});
+  await page.setViewportSize({width:320,height:700});
+  await page.evaluate(()=>document.documentElement.style.fontSize='200%');
+  const captionsFit = await page.locator('.intro-workflow li').evaluateAll(items=>items.every(item=>item.scrollWidth<=item.clientWidth));
+  expect(captionsFit).toBe(true);
+  await page.evaluate(()=>document.documentElement.style.removeProperty('font-size'));
   await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:`.qa/ux-desktop-${testInfo.project.name}.png`});
   await page.setViewportSize({width:390,height:844});
   const boxes=await Promise.all(['.settings','.setup','.editor','.sheet'].map(s=>page.locator(s).boundingBox()));
