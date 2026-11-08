@@ -31,6 +31,7 @@ test('changing requirements preserves edits, blocks export for review, and retai
   await page.locator('#zoom').fill('1.5');await page.locator('#adjustments-tab').click();
   await page.locator('#brightness').fill('8');await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#country').selectOption('us');await expect(page.locator('#framing-review')).toBeVisible();
+  await expect(page.locator('#export-status')).toBeEmpty();
   await expect(page.locator('#save')).toBeDisabled();await expect(page.locator('#brightness')).toHaveValue('8');
   await page.locator('#review-framing').click();await expect(page.locator('#crop')).toBeFocused();
   await expect(page.locator('#zoom')).toHaveValue('1.5');await page.locator('#confirm-framing').click();await expect(page.locator('#save')).toBeEnabled();

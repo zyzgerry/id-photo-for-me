@@ -14,14 +14,10 @@ let file = null, downloadUrl = null, revision = 0, renderTimer, loading = false;
 let statusKey = '', errorKey = '', exportKey = '';
 const settings = { ratio:1,zoom:1,x:50,y:50,brightness:0,contrast:0 };
 const catalog=PREPARATION_PRESETS;
-const activeRequirement=()=>preset;
 const pixelTarget=()=>document.querySelector('[name=compression-target]:checked').value==='pixels';
 const compressing=()=>document.querySelector('[name=output-quality]:checked').value==='compress';
-const effectiveSettings=()=>activeRequirement()?.restrictEdits&&!$('allow-edits').checked?{...settings,brightness:0,contrast:0}:settings;
-const backgroundAllowed=()=>!activeRequirement()?.restrictEdits||$('background-permission').checked;
-const backgroundActive=()=>!!backgroundCanvas&&backgroundAllowed();
-const editedPhoto=()=>backgroundActive()?backgroundCanvas:photo.canvas;
-const renderSettings=()=>({...effectiveSettings(),whiteBackground:backgroundActive()});
+const editedPhoto=()=>backgroundCanvas||photo.canvas;
+const renderSettings=()=>({...settings,whiteBackground:!!backgroundCanvas});
 function markFramingReview(){if(photo) settings.review=true;}
 function updateExportAvailability(){
   $('framing-review').hidden=!photo||!settings.review;
@@ -83,7 +79,7 @@ function updateDocuments(reset = true) {
 }
 
 function updatePresetDetails() {
-  const requirement=activeRequirement();
+  const requirement=preset;
   $('document-requirements-panel').hidden=customRequirements;
   $('custom-requirements-panel').hidden=!customRequirements;
   for(const [id,selected] of [['document-requirements',!customRequirements],['custom-requirements',customRequirements]]) {$(id).setAttribute('aria-selected',String(selected));$(id).tabIndex=selected?0:-1;}
@@ -108,8 +104,7 @@ function updatePresetDetails() {
     $('verified').textContent=`${t('checked')}: ${details.checked||VERIFIED}`;
   }
   $('guide-control').hidden=!preset;
-  $('allow-edits-row').hidden=!requirement?.restrictEdits;
-  $('adjust-controls').disabled=!photo||(!!requirement?.restrictEdits&&!$('allow-edits').checked);
+  $('preset-edit-guidance').hidden=!requirement?.restrictEdits;
   updateBackgroundControls();
   $('output-controls').disabled=!photo;
   $('copies').disabled=$('cut-guides').disabled=!photo;
@@ -360,9 +355,8 @@ function scheduleRender() {
       $('sheet').setAttribute('role',mode==='single'?'button':'img');
       if(mode==='single'){$('sheet').tabIndex=0;$('sheet').ariaLabel=t('inspectJpeg');$('sheet').setAttribute('aria-haspopup','dialog');}
       else $('sheet').removeAttribute('aria-haspopup');
-      $('save').disabled = false;
       $('share').hidden = !navigator.canShare || !navigator.canShare({ files: [file] });
-      $('share').disabled = $('share').hidden;
+      updateExportAvailability();
       setExport();updateReadouts();
     } catch(e) { if (current === revision) { if(mode==='single') showSingleError(e.message==='fileTargetError'?e.message:'exportError');else setError('exportError'); setExport(); $('sheet').hidden = !singleResult; $('sheet-empty').hidden = !!singleResult; $('output-preview').removeAttribute('aria-busy');$('preview-status').hidden=!singleResult;$('preview-status').textContent=t('previewPrevious'); } }
     finally { if (sheet) sheet.width = sheet.height = 1; }
@@ -411,20 +405,17 @@ $('inspect-edit').onclick = async event => {
 
 function updateBackgroundControls() {
   const busy = !!backgroundJob;
-  const status = backgroundCanvas && !backgroundAllowed() ? 'backgroundPaused' : backgroundStatus;
-  $('background-permission-row').hidden = !photo || !activeRequirement()?.restrictEdits;
-  $('background-permission').disabled = busy;
   $('remove-background').hidden = !!backgroundCanvas;
-  $('remove-background').disabled = !photo || loading || busy || !backgroundAllowed();
+  $('remove-background').disabled = !photo || loading || busy;
   $('cancel-background').hidden = !busy;
   $('restore-background').hidden = !backgroundCanvas;
-  $('background-download-note').hidden = !!backgroundCanvas;
+  $('background-download-note').hidden = busy || !!backgroundCanvas;
   $('background-progress').hidden = !busy;
   if (backgroundProgress == null) $('background-progress').removeAttribute('value');
   else $('background-progress').value = backgroundProgress;
-  const message = status ? t(status) : '';
+  const message = backgroundStatus ? t(backgroundStatus) : '';
   if ($('background-status').textContent !== message) $('background-status').textContent = message;
-  $('background-status').toggleAttribute('data-error', status === 'backgroundFailed');
+  $('background-status').toggleAttribute('data-error', backgroundStatus === 'backgroundFailed');
 }
 
 function cancelBackground() {
@@ -438,15 +429,16 @@ function resetBackground() {
   if (backgroundCanvas) backgroundCanvas.width = backgroundCanvas.height = 1;
   backgroundCanvas = null;
   backgroundStatus = '';
-  $('background-permission').checked = false;
 }
 
 $('remove-background').onclick = async () => {
   if ($('remove-background').disabled) return;
+  const focusCancel = document.activeElement === $('remove-background');
   const job = backgroundJob = new AbortController();
   const source = photo.canvas;
   backgroundStatus = 'backgroundPreparing';
   updateBackgroundControls(); updateExportAvailability();
+  if (focusCancel) $('cancel-background').focus();
   try {
     const {removeBackground} = await import('./remove-background.js');
     const result = await removeBackground(source, job.signal, ({stage, progress}) => {
@@ -470,7 +462,7 @@ $('remove-background').onclick = async () => {
       backgroundJob = null;
       backgroundProgress = null;
       updateBackgroundControls(); updateExportAvailability();
-      if (returnFocus) $(backgroundCanvas?'restore-background':backgroundAllowed()?'remove-background':'background-tab').focus();
+      if (returnFocus) $(backgroundCanvas?'restore-background':'remove-background').focus();
     }
   }
 };
@@ -478,7 +470,7 @@ $('cancel-background').onclick = () => {
   cancelBackground();
   backgroundStatus = 'backgroundCancelled';
   updateBackgroundControls(); updateExportAvailability();
-  $(backgroundAllowed()?'remove-background':'background-tab').focus();
+  $('remove-background').focus();
 };
 $('restore-background').onclick = () => {
   backgroundCanvas.width = backgroundCanvas.height = 1;
@@ -487,7 +479,6 @@ $('restore-background').onclick = () => {
   updateBackgroundControls(); scheduleRender();
   $($('remove-background').disabled?'background-tab':'remove-background').focus();
 };
-$('background-permission').onchange = () => { updateBackgroundControls(); scheduleRender(); };
 
 function clearPhoto() {
   resetBackground();
@@ -504,7 +495,7 @@ function clearPhoto() {
   for (const id of ['crop','sheet']) $(id).getContext('2d').clearRect(0,0,$(id).width,$(id).height);
   Object.assign(settings,{zoom:1,x:50,y:50,brightness:0,contrast:0,review:false});
   singleResult=null;$('single-result').hidden=true;$('single-error').hidden=true;
-  $('allow-edits').checked = $('original').checked = false;
+  $('original').checked = false;
   $('choose-label').textContent = t('choose'); setStatus(); setError(); setExport(); updatePresetDetails(); updateReadouts();
 }
 
@@ -535,9 +526,7 @@ $('photo').addEventListener('change', async event => {
 });
 $('clear').onclick = clearPhoto;
 function updateRequirementSelection(){
-  const previous = preset;
   preset=customRequirements?null:catalog.find(p=>p.id===$('document').value)||null;
-  if (preset !== previous) $('background-permission').checked = false;
   if(preset){
     $('single-fit').value=preset.fit||'crop';
     $('ratio-width').value=preset.widthMm;
@@ -578,10 +567,6 @@ $('units').onchange = () => {
 for (const id of ['zoom','x','y','brightness','contrast']) $(id).oninput = () => { settings[id] = Number($(id).value); scheduleRender(); };
 $('reset-crop').onclick = () => { Object.assign(settings,{zoom:1,x:50,y:50}); scheduleRender(); };
 $('reset-edits').onclick = () => { settings.brightness = settings.contrast = 0; scheduleRender(); };
-$('allow-edits').onchange = () => {
-  if (!$('allow-edits').checked) settings.brightness = settings.contrast = 0;
-  updatePresetDetails(); scheduleRender();
-};
 $('original').onchange = () => { if (photo) drawCrop(); };
 $('guides').onchange = updateReadouts;
 for(const id of ['guide-crown','guide-chin']) $(id).oninput=()=>{

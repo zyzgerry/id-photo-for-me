@@ -44,7 +44,6 @@ test('mobile preview stays visible while changing tonal adjustments',async({page
   await page.setViewportSize({width:390,height:700}); await openApp(page);
   await page.locator('#photo').setInputFiles(fixture);await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#adjustments-tab').click();
-  await page.locator('#allow-edits').check();
   await page.locator('#contrast').scrollIntoViewIfNeeded();
   const crop=await page.locator('#crop').boundingBox();const contrast=await page.locator('#contrast').boundingBox();
   expect(crop.y).toBeGreaterThanOrEqual(0);
@@ -71,7 +70,7 @@ test('editing tabs support keyboard navigation, retain edits, and fit narrow scr
   await page.setViewportSize({width:320,height:640});await openApp(page);await page.locator('#photo').setInputFiles(fixture);await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#framing-tab').focus();await page.keyboard.press('ArrowRight');await expect(page.locator('#adjustments-tab')).toBeFocused();
   await expect(page.locator('#adjustments-panel')).toBeVisible();await expect(page.locator('#framing-panel')).toBeHidden();
-  await page.locator('#allow-edits').check();await page.locator('#brightness').evaluate(el=>{el.value='8';el.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.locator('#brightness').evaluate(el=>{el.value='8';el.dispatchEvent(new Event('input',{bubbles:true}));});
   await page.locator('#framing-tab').click();await page.locator('#adjustments-tab').click();await expect(page.locator('#brightness')).toHaveValue('8');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });

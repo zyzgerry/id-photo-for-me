@@ -15,7 +15,7 @@ test('switching output modes carries current framing and tonal edits in both dir
   await openApp(page);await page.locator('[name=output-mode][value=print]').check();
   await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#zoom').fill('1.7');await page.locator('#position-controls summary').click();await page.locator('#x').fill('65');
-  await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();await page.locator('#brightness').fill('8');
+  await page.locator('#adjustments-tab').click();await page.locator('#brightness').fill('8');
   await page.locator('[name=output-mode][value=single]').check();
   await expect(page.locator('#zoom')).toHaveValue('1.7');await expect(page.locator('#x')).toHaveValue('65');
   await page.locator('#adjustments-tab').click();await expect(page.locator('#brightness')).toHaveValue('8');
@@ -84,7 +84,7 @@ test('every photo format applies its own ratio in preparation mode in both langu
 
 test('phone layouts, keyboard output choices, replacement and repeated mode switches retain edits',async({page})=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));await openApp(page,'single');await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled({timeout:15000});
-  await page.locator('#zoom').fill('1.4');await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();await page.locator('#contrast').fill('9');
+  await page.locator('#zoom').fill('1.4');await page.locator('#adjustments-tab').click();await page.locator('#contrast').fill('9');
   for(const width of [320,390,1440]){
     await page.setViewportSize({width,height:900});
     for(const lang of ['en','zh']){

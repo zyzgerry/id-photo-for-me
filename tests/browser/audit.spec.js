@@ -10,7 +10,7 @@ const pixel = page => page.evaluate(()=>({
 
 test('leaving original comparison restores the edited preview in Framing',async({page})=>{
   await openApp(page);await page.locator('#photo').setInputFiles(fixture);await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
-  await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();
+  await page.locator('#adjustments-tab').click();
   await page.locator('#brightness').focus();await page.keyboard.press('End');await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
   const edited=await pixel(page);expect(edited.crop).toEqual(edited.sheet);
   await page.locator('#original').check();expect((await pixel(page)).crop).not.toEqual(edited.crop);
@@ -23,7 +23,7 @@ test('failed replacements preserve the current crop, edits and downloaded JPEG',
   const {readFile}=await import('node:fs/promises');
   const download=async()=>{const pending=page.waitForEvent('download');await page.locator('#save').click();return readFile(await (await pending).path());};
   await openApp(page);await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
-  await page.locator('#zoom').fill('1.8');await page.locator('#adjustments-tab').click();await page.locator('#allow-edits').check();await page.locator('#brightness').fill('8');
+  await page.locator('#zoom').fill('1.8');await page.locator('#adjustments-tab').click();await page.locator('#brightness').fill('8');
   await expect(page.locator('#save')).toBeEnabled();const before=await download();
   for(const buffer of [Buffer.from([255,216,255,0]),Buffer.alloc(30*1024*1024+1)]) {
     await page.locator('#photo').setInputFiles({name:'bad.jpg',mimeType:'image/jpeg',buffer});

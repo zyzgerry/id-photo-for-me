@@ -54,6 +54,7 @@
         </div>
         <p class="hint" id="preset-location" data-i18n="locationCaveat">Confirm the photo dimensions and other requirements with the embassy or passport authority before printing.</p>
         <p class="warning" id="preset-warning" hidden></p>
+        <p class="hint" id="preset-edit-guidance" data-i18n="editGuidance" hidden>Only change the background or adjust brightness and contrast if your document allows it.</p>
         <p class="size-readout" id="size-readout"></p>
         <details class="requirements"><summary data-i18n="documentGuidance">Requirements &amp; sources</summary>
         <p class="hint" id="preset-scope" hidden></p>
@@ -96,8 +97,6 @@
         </div>
         <fieldset id="edit-controls" disabled>
           <div id="background-panel" role="tabpanel" aria-labelledby="background-tab" hidden>
-            <label id="background-permission-row" class="check-row" hidden><input id="background-permission" type="checkbox"><span data-i18n="backgroundPermission">My document allows background changes.</span></label>
-            <p id="background-download-note" class="hint" data-i18n="backgroundDownloadNote">On-device. First use downloads the 26 MB model and tools.</p>
             <div class="background-actions">
               <button id="remove-background" type="button" class="button primary" data-i18n="backgroundTool">Remove background</button>
               <button id="cancel-background" type="button" class="button quiet" data-i18n="backgroundCancel" hidden>Cancel</button>
@@ -105,6 +104,7 @@
             </div>
             <progress id="background-progress" max="1" aria-labelledby="background-status" hidden></progress>
             <p id="background-status" class="hint" role="status"></p>
+            <p id="background-download-note" class="hint" data-i18n="backgroundDownloadNote">On-device. First use downloads the 26 MB model and tools.</p>
           </div>
           <div id="framing-panel" role="tabpanel" aria-labelledby="framing-tab">
           <p class="hint" id="framing-help" data-i18n="drag">Drag to move. Pinch to zoom.</p>
@@ -119,13 +119,13 @@
           <div class="guide-tools">          <label class="check-row" id="guide-control"><input id="guides" type="checkbox"><span data-i18n="guides">Show head-size guides</span></label><p id="guide-note" class="hint" data-i18n="guideNote" hidden>Dashed lines show a centered head-height range only. Align crown and chin manually; no face detection or acceptance check.</p><p id="head-reference" class="hint" hidden><a id="head-source" target="_blank" rel="noopener noreferrer" data-i18n="headReference">Head-size reference: VFS Portugal (UK)</a></p><details id="manual-guide-controls" hidden><summary data-i18n="manualGuideSettings">Position guide lines</summary><label class="slider-label" for="guide-crown"><span data-i18n="guideCrown">Crown line</span><output id="guide-crown-value">15%</output></label><input id="guide-crown" type="range" min="0" max="99" step="1" value="15"><label class="slider-label" for="guide-chin"><span data-i18n="guideChin">Chin line</span><output id="guide-chin-value">85%</output></label><input id="guide-chin" type="range" min="1" max="100" step="1" value="85"></details></div>
           </div>
           <div id="adjustments-panel" role="tabpanel" aria-labelledby="adjustments-tab" hidden>
-            <label class="check-row" id="allow-edits-row"><input id="allow-edits" type="checkbox"><span data-i18n="allowEdits">My document allows tonal adjustments.</span></label>
-            <fieldset id="adjust-controls" disabled>
               <div class="tonal-sliders"><div><label class="slider-label" for="brightness"><span data-i18n="brightness">Brightness</span><output id="brightness-value">0</output></label><input id="brightness" type="range" min="-15" max="15" value="0">
               </div><div><label class="slider-label" for="contrast"><span data-i18n="contrast">Contrast</span><output id="contrast-value">0</output></label><input id="contrast" type="range" min="-15" max="15" value="0">
-              </div></div><button id="reset-edits" class="text-button" data-i18n="resetEdits">Reset adjustments</button>
-            </fieldset>
-            <label class="check-row"><input id="original" type="checkbox"><span data-i18n="original">Compare original</span></label>
+              </div></div>
+            <div class="adjustment-actions">
+              <label class="check-row"><input id="original" type="checkbox"><span data-i18n="original">Compare original</span></label>
+              <button id="reset-edits" class="text-button" data-i18n="resetEdits">Reset adjustments</button>
+            </div>
           </div>
         </fieldset>
         <p id="inspect-edit-error" class="error" role="alert" data-i18n="inspectEditError" hidden>Couldn’t open the preview. Try again.</p>
