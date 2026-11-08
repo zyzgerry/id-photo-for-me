@@ -47,8 +47,6 @@
             </g>
           </defs>
           <rect x="19" y="7" width="82" height="68" rx="6" fill="#d9e6dc"/>
-          <path d="M24 69V13h27v56z" fill="#edf0e6"/>
-          <path d="M81 68V24m0 23c-13 0-17-9-17-15 9 0 17 4 17 15m0 7c12 0 16-9 16-15-9 0-16 4-16 15" fill="none" stroke="#719584" stroke-width="2" stroke-linecap="round"/>
           <use href="#demo-portrait" transform="translate(32 19) scale(.9)"/>
           <rect x="147" y="7" width="66" height="68" rx="5" fill="white" stroke="var(--color-rule)"/>
           <use href="#demo-portrait" transform="translate(153 19) scale(.9)"/>
@@ -134,10 +132,11 @@
         <fieldset id="edit-controls" disabled>
           <div id="background-panel" role="tabpanel" aria-labelledby="background-tab" hidden>
             <div class="background-actions">
-              <button id="remove-background" type="button" class="button primary" data-i18n="backgroundTool">Remove background</button>
+              <button id="remove-background" type="button" class="button primary" aria-describedby="background-photo-tip" data-i18n="backgroundTool">Remove background</button>
               <button id="cancel-background" type="button" class="button quiet" data-i18n="backgroundCancel" hidden>Cancel</button>
               <button id="restore-background" type="button" class="button quiet" data-i18n="backgroundRestore" hidden>Restore original background</button>
             </div>
+            <p id="background-photo-tip" class="hint" data-i18n="backgroundPhotoTip">For best results, use a photo with a plain, light-colored background.</p>
             <progress id="background-progress" max="1" aria-labelledby="background-status" hidden></progress>
             <p id="background-status" class="hint" role="status"></p>
             <p id="background-download-note" class="hint" data-i18n="backgroundDownloadNote">On-device. First use downloads the 26 MB model and tools.</p>
