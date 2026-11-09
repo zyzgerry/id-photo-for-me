@@ -15,6 +15,7 @@ for(const prefix of ['/id-photo-for-me','']) test(`cached ${prefix||'root'} page
     for(const dir of ['scripts','src/portrait-experiment','src/modnet-experiment','node_modules/heic-to/dist/csp','node_modules/heic-to/src','node_modules/onnxruntime-web/dist','node_modules/hash-wasm/dist'])
       await mkdir(resolve(fixture,dir),{recursive:true});
     await cp(resolve(root,'scripts/build.mjs'),resolve(fixture,'scripts/build.mjs'));
+    await cp(resolve(root,'src/photo-examples'),resolve(fixture,'src/photo-examples'),{recursive:true});
     await cp(resolve(root,'src/portrait-experiment/index.html'),resolve(fixture,'src/portrait-experiment/index.html'));
     await cp(resolve(root,'src/modnet-experiment/index.html'),resolve(fixture,'src/modnet-experiment/index.html'));
     // This fixture tests cache versioning, so runtime binaries can be empty build inputs.
@@ -52,20 +53,22 @@ for(const prefix of ['/id-photo-for-me','']) test(`cached ${prefix||'root'} page
         const file=resolve(fixture,'dist','.'+(entry?'/index.html':path));
         if(!file.startsWith(resolve(fixture,'dist')+sep)){res.writeHead(403).end();return;}
         const data=entry&&!url.searchParams.has('release')?cachedHtml:await readFile(file);
-        const mime={'.html':'text/html','.js':'text/javascript','.json':'application/json','.css':'text/css','.svg':'image/svg+xml'};
+        const mime={'.html':'text/html','.js':'text/javascript','.json':'application/json','.css':'text/css','.svg':'image/svg+xml','.jpg':'image/jpeg'};
         res.writeHead(200,{'Content-Type':mime[extname(file)]||'text/plain','Cache-Control':'public, max-age=31536000'}).end(data);
       }catch{res.writeHead(404).end();}
     });
     await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
     const url=`http://127.0.0.1:${server.address().port}${prefix}/`;
-    await page.goto(url);await expect(page.locator('body')).toHaveAttribute('inert','');
+    // Release metadata is deliberately held until the page is confirmed inert.
+    await page.goto(url,{waitUntil:'commit'});
+    await expect(page.locator('body')).toHaveAttribute('inert','');
     releaseCheck();await expect(page.locator('#size-title')).toHaveText('first');
     await expect(page.locator('body')).not.toHaveAttribute('inert');
     await build('second');
     const release=await readFile(resolve(fixture,'dist/release.json'),'utf8');
     await build('second');expect(await readFile(resolve(fixture,'dist/release.json'),'utf8')).toBe(release);
     await expect(page.locator('#size-title')).toHaveText('first');
-    await page.goto(url);
+    await page.goto(url,{waitUntil:'commit'});
     await expect(page.locator('#size-title')).toHaveText('second');
     await expect(page.locator('body')).toHaveAttribute('data-shell','second');
     expect(await page.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--release').trim())).toBe('second');
@@ -73,12 +76,15 @@ for(const prefix of ['/id-photo-for-me','']) test(`cached ${prefix||'root'} page
     expect(new Set(requests.filter(u=>u.pathname.endsWith('/src/i18n.js')).map(u=>u.pathname)).size).toBe(2);
     const currentUrl=page.url();
     for(const failure of ['unavailable','invalid']) {
-      manifest=failure;await page.goto(currentUrl);
+      manifest=failure;await page.goto(currentUrl,{waitUntil:'commit'});
       await expect(page.locator('#size-title')).toHaveText('second');
     }
   }finally{
     releaseCheck();
-    if(server)await new Promise(resolve=>server.close(resolve));
+    if(server)await new Promise(resolve=>{
+      server.close(resolve);
+      server.closeAllConnections();
+    });
     if(!fixture.startsWith(qa+sep))throw new Error('Unexpected fixture path');
     await rm(fixture,{recursive:true,force:true});
   }
