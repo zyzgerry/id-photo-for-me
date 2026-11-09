@@ -31,8 +31,8 @@ html { scroll-padding-top: 20px; }
 .photo-example-label { display: grid; margin-top: var(--space-2xs); font-size: var(--text-xs); line-height: 1.3; font-weight: 600; overflow-wrap: anywhere; }
 .photo-example-note { margin-top: var(--space-xs); color: var(--color-muted); font-weight: 400; }
 @media (max-width: 680px) {
-  .intro { grid-template-columns: minmax(0, 1fr); gap: var(--space-lg); padding-block: 28px var(--space-lg); }
-  .photo-example { --example-height: 64px; width: min(100%, 344px); }
+  .intro { grid-template-columns: minmax(0, 1fr); gap: var(--space-md); padding-block: 28px var(--space-lg); }
+  .photo-example { --example-height: 60px; width: min(100%, 344px); }
 }
 h1 { font-size: clamp(2rem, 4.4vw, 3.5rem); line-height: 1.08; letter-spacing: -0.04em; max-width: none; }
 h1:lang(zh-Hans) { letter-spacing: 0; }
@@ -310,6 +310,13 @@ footer { display: flex; justify-content: space-between; gap: 16px; padding-block
 .settings .requirements:not([open]), .setup .input-help:not([open]) { margin-bottom: calc(-1 * var(--space-xs)); }
 .setup .input-help { margin-top: var(--space-2xs); }
 .setup-column :is(.requirements, .input-help) summary { color: var(--color-muted); font-size: var(--text-sm); font-weight: 500; }
+@media (max-width: 680px) {
+  .photo-example-note { margin-top: var(--space-2xs); }
+  .privacy { margin-top: var(--space-xs); }
+  .setup-column .section-heading { margin-bottom: var(--space-xs); }
+  .requirements-tabs { margin-bottom: var(--space-sm); }
+  .settings .requirements { margin-top: var(--space-xs); }
+}
 @container (min-width: 17.5rem) {
   #document-requirements-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
