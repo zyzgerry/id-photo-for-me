@@ -28,8 +28,17 @@ jobs:
       - run: pnpm test:browser
       - name: Prepare verified experimental model (weights stay outside Git)
         run: |
-          node scripts/prepare-portrait-model.mjs
-          node scripts/prepare-portrait-model.mjs --modnet
+          prepare_model() {
+            for delay in 0 5 20; do
+              sleep "$delay"
+              if node scripts/prepare-portrait-model.mjs "$@"; then
+                return 0
+              fi
+            done
+            return 1
+          }
+          prepare_model
+          prepare_model --modnet
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
