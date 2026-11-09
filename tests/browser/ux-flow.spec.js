@@ -6,11 +6,29 @@ const fixture=fileURLToPath(new URL('../fixtures/orientation-6.jpg',import.meta.
 test('requirements precede upload and editing, with output inactive before upload',async({page},testInfo)=>{
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.setViewportSize({width:390,height:844});await openApp(page);
-  await expect(page.locator('#intro-title')).toHaveText('Make an ID photo');
-  await expect(page.locator('.intro .mode-picker')).toHaveCount(0);
-  await expect(page.locator('.intro-workflow li:visible')).toHaveText(['Raw photo','Remove background','Print-ready']);
+  await expect(page.locator('#intro-title')).toHaveText('Make an ID‑ready photo');
+  const example=page.locator('.photo-example');
+  await expect(example).toBeVisible();
+  await expect(example.locator('img')).toHaveCount(3);
+  await expect.poll(()=>example.locator('img').evaluateAll(images=>images.every(img=>img.complete&&img.naturalWidth>0))).toBe(true);
+  await expect(page.locator('.wordmark')).not.toHaveAttribute('href');
+  await expect(page.locator('.file-button')).toBeInViewport({ratio:1});
+  await expect(page.locator('#size-readout')).toBeInViewport({ratio:1});
+  const fieldBoxes=()=>Promise.all(['#country','#document'].map(selector=>page.locator(selector).boundingBox()));
+  const [countryField,documentField]=await fieldBoxes();
+  expect(countryField.y).toBeCloseTo(documentField.y);
+  expect(countryField.width).toBeCloseTo(documentField.width);
+  await page.setViewportSize({width:320,height:640});
+  const [narrowCountry,narrowDocument]=await fieldBoxes();
+  expect(narrowDocument.y).toBeGreaterThanOrEqual(narrowCountry.y+narrowCountry.height);
+  await page.locator('.file-button').scrollIntoViewIfNeeded();
+  await expect(page.locator('.file-button')).toBeInViewport({ratio:1});
+  await page.setViewportSize({width:390,height:844});
+  await expect(page.locator('#crop-empty .empty-portrait')).toBeVisible();
+  await expect(page.locator('#tool-tabs')).toBeHidden();
   await expect(page.locator('.mode-picker .mini-mockup')).toHaveCount(2);
-  await expect(page.locator('.sheet .mode-picker')).toBeVisible();
+  await expect(page.locator('.sheet .mode-picker')).toBeHidden();
+  await expect(page.locator('#save')).toBeHidden();
   await expect(page.locator('#copies')).toBeDisabled();
   await expect(page.locator('#reference')).toBeHidden();
   await page.locator('.requirements summary').press('Enter');
@@ -19,23 +37,61 @@ test('requirements precede upload and editing, with output inactive before uploa
   await page.screenshot({path:`.qa/ux-phone-${testInfo.project.name}.png`,fullPage:true});
   await page.setViewportSize({width:320,height:700});
   await page.evaluate(()=>document.documentElement.style.fontSize='200%');
-  const captionsFit = await page.locator('.intro-workflow li').evaluateAll(items=>items.every(item=>item.scrollWidth<=item.clientWidth));
-  expect(captionsFit).toBe(true);
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
   const englishIntro=await page.locator('.intro').boundingBox();
-  await page.locator('#language').check();
+  await page.locator('[name=language][value=zh]').check();
   await expect(page.locator('#intro-title')).toHaveText('制作证件照');
+  await expect(example.locator('[data-i18n=examplePrint]')).toHaveText('4×6 英寸打印排版');
+  await expect(example.getByRole('img',{name:'白色背景的裁剪人像'})).toBeVisible();
+  await page.getByRole('radio',{name:'中文'}).click();
+  await expect(page.locator('html')).toHaveAttribute('lang','zh-Hans');
   expect((await page.locator('.intro').boundingBox()).height).toBeCloseTo(englishIntro.height,0);
-  await page.locator('#language').uncheck();
+  await page.locator('[name=language][value=en]').check();
   await page.evaluate(()=>document.documentElement.style.removeProperty('font-size'));
   await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:`.qa/ux-desktop-${testInfo.project.name}.png`});
   await page.setViewportSize({width:390,height:844});
   const boxes=await Promise.all(['.settings','.setup','.editor','.sheet'].map(s=>page.locator(s).boundingBox()));
-  for(let i=1;i<boxes.length;i++) expect(boxes[i].y).toBeGreaterThanOrEqual(boxes[i-1].y+boxes[i-1].height);
+  for(let i=1;i<boxes.length;i++) expect(boxes[i].y-(boxes[i-1].y+boxes[i-1].height)).toBeGreaterThanOrEqual(23);
+  const exampleBox=await example.boundingBox();
+  expect(boxes[0].y-(exampleBox.y+exampleBox.height)).toBeGreaterThanOrEqual(23);
+  await page.locator('#output-options-toggle').press('Enter');
   await page.locator('[name=output-mode][value=single]').focus();await page.keyboard.press('ArrowRight');
   await expect(page.locator('[name=output-mode][value=print]')).toBeChecked();
   await page.locator('#custom-requirements').click();await expect(page.locator('#custom-requirements')).toHaveAttribute('aria-selected','true');
   await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled({timeout:15000});
+  await expect(page.locator('#crop')).toBeFocused();
+  await expect(page.locator('#setup-controls')).toBeHidden();
+  await expect(page.locator('#setup-summary')).toContainText('Custom size');
+  await page.locator('#setup-toggle').press('Enter');
+  await expect(page.locator('#custom-requirements')).toBeFocused();
+  await expect(page.locator('#setup-controls')).toBeVisible();
+  await page.locator('#setup-toggle').press('Enter');
+  await expect(page.locator('#setup-controls')).toBeHidden();
+  await expect(page.locator('#setup-toggle')).toBeFocused();
+  await page.setViewportSize({width:1024,height:844});
+  await expect(page.locator('#custom-requirements')).toBeFocused();
+  await expect(page.locator('#setup-toggle')).toBeHidden();
   await expect(page.locator('#copies')).toBeEnabled();expect(errors).toEqual([]);
+});
+
+
+test('upload preserves focus when the user moves on during decoding',async({page})=>{
+  await page.setViewportSize({width:390,height:844});
+  await openApp(page);
+  await page.evaluate(()=>{
+    const decode=HTMLImageElement.prototype.decode;
+    HTMLImageElement.prototype.decode=async function(){
+      await new Promise(resolve=>{window.resumePhotoDecode=resolve;});
+      return decode.call(this);
+    };
+  });
+  await page.locator('#photo').setInputFiles(fixture);
+  await page.waitForFunction(()=>typeof window.resumePhotoDecode==='function');
+  const language=page.locator('[name=language][value=en]');
+  await language.focus();
+  await page.evaluate(()=>window.resumePhotoDecode());
+  await expect(page.locator('#save')).toBeEnabled();
+  await expect(language).toBeFocused();
 });
 
 
@@ -60,7 +116,7 @@ test('changing requirements preserves edits, blocks export for review, and retai
 });
 
 test('full-photo mode ignores hidden crop errors and relinks a replacement photo across modes',async({page})=>{
-  await openApp(page);await page.locator('[value=single][name=output-mode]').check();
+  await openApp(page,'single');
   await page.locator('#custom-requirements').click();await page.locator('#single-fit').selectOption('crop');await page.locator('#ratio-width').fill('0');
   await page.locator('#single-fit').selectOption('original');
   await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();

@@ -52,7 +52,7 @@ test('source-detail warning follows crop resolution and does not block printing'
 test('embassy caveat and material restrictions are visible without opening source details',async({page},info)=>{
   await page.setViewportSize({width:320,height:812});await openApp(page);
   for(const lang of ['en','zh']){
-    await page.locator('#language').setChecked(lang==='zh');
+    await page.locator(`[name=language][value=${lang}]`).check();
     await expect(page.locator('#preset-location')).toBeVisible();
     await expect(page.locator('#preset-location')).toContainText(lang==='en'?'before printing':'打印前');
     for(const country of ['bg','fr','gr','nl']){
@@ -65,6 +65,18 @@ test('embassy caveat and material restrictions are visible without opening sourc
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
     await page.screenshot({path:'.qa/requirements-'+lang+'-'+info.project.name+'.png',fullPage:true});
   }
+  const france=PRESETS.find(p=>p.country==='fr'&&p.warning);
+  await page.locator('#country').selectOption(france.country);
+  await page.locator('#document').selectOption(france.id);
+  await upload(page,600);
+  await expect(page.locator('#setup-controls')).toBeHidden();
+  await expect(page.locator('#setup-caveats')).toContainText(france.warning.zh);
+  await expect(page.locator('#setup-caveats')).toBeVisible();
+  await page.locator('[name=language][value=en]').check();
+  await expect(page.locator('#setup-caveats')).toContainText(france.warning.en);
+  await page.locator('#setup-toggle').click();
+  await expect(page.locator('#setup-caveats')).toBeHidden();
+  await expect(page.locator('#preset-warning')).toBeVisible();
   await page.locator('#custom-requirements').click();
   await expect(page.locator('#preset-warning')).toBeHidden();
   await expect(page.locator('#preset-location')).toBeHidden();

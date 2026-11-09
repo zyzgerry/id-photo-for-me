@@ -1,12 +1,12 @@
 # ID Photo for Me interface
 
-The app is a practical, private ID-photo workbench: cool neutral background, white surfaces, navy text, restrained blue actions, system fonts, English and Simplified Chinese. Photos remain local; no personal photographs or credentials enter Git.
+The app is a practical, private ID-photo workbench: warm paper background, white work surfaces, navy text, restrained blue actions, system fonts, English and Simplified Chinese. Photos remain local; no personal photographs or credentials enter Git.
 
 ## Requirements-first flow
 
-A compact illustrated strip shows the on-device workflow from raw photo through background removal to a printable sheet. Choose requirements, upload, and edit before choosing an output. A compact native radio selector immediately below the editor offers Single photo or Printable sheet (default). The latter reveals the existing sheet arrangement controls. Both use the same current edits; no output decision is needed at the beginning.
+The intro describes photo cleanup, print preparation, and on-device processing. The same visible photo sequence sits beside the intro on laptops and below it on phones. It shows a generated portrait of a fictional person, the cleaned-up crop, and the resulting 4×6-inch print sheet. A small portrait illustrates the editor's empty state. The main flow is requirements, upload, edit, then output. A native radio selector below the editor offers Single photo or Printable sheet (default). Both use the same current edits. An optional disclosure lets users choose an output early, including when setting custom requirements.
 
-Keep the existing two-column desktop layout. Left: Requirements, then Choose photo. Right: Edit photo, then 4. Customize output, then a separate 5. Export section. Phones read the same logical sequence vertically. All sections remain visible; editing/output/export controls are inactive before upload, with readable empty-state guidance. No wizard or duplicated controls. Requirements stay before upload in DOM, visual and keyboard order at every breakpoint.
+Requirements and photo upload have separate white panels with a 24px gap. They stack in a rail beside the editor on desktop and above it on phones and narrow tablets. The intro has more space above and below than the controls within each step. Before upload, later steps appear as simple rows divided by rules. After a successful upload, the setup becomes a summary with Change and Done controls on narrow screens. The collapsed summary keeps the current document caveats visible. Editor, output, and export headings stay visible before upload with compact guidance. Requirements stay before upload in DOM, visual and keyboard order.
 
 Requirements include country/document or a direct custom option, essential dimensions and critical scope caveats. Detailed bilingual guidance, source links and check dates stay in Requirements & sources. Upload has one primary picker, format disclosure and decoding feedback. The empty editor explains its purpose without a competing picker.
 
@@ -14,7 +14,7 @@ Crop proportions come from requirements before editing. In custom preparation mo
 
 Changing requirements retains the photo, valid framing and adjustments, updates proportions, and flags framing review. Export stays blocked until the user confirms Framing reviewed. Both outputs share the current requirements, crop, tonal adjustments and framing-review state. Switching output modes must not restore an older edit session. Keep print arrangement and preparation output controls separately adjustable; clearing/replacing the source photo explicitly resets its edits.
 
-Remove background sits beside Framing and Adjustments in the same editor. Framing remains the opening view. Background removal loads on demand, offers cancel and restore, and shows the same edited photo in both outputs. Tonal controls affect the subject while the replacement background stays white.
+Framing, Background, and Adjustments appear in that order in the editor. Framing is the opening view. Background removal loads on demand, offers cancel and restore, and shows the same edited photo in both outputs. Tonal controls affect the subject while the replacement background stays white.
 
 ## Output
 
@@ -44,9 +44,9 @@ Offer head-placement guides for every preset, including full-photo online routes
 
 Output radio choices include miniature examples. Single-photo output places a compact preview and measured size before its quality/compression controls in DOM order. The preview sticks within the output section while settings scroll; photo and metadata share a row on phones and desktop. Preserve the last encoded result while updating, label it explicitly as previous, and disable export until valid. Keep native controls and disclosure behavior.
 
-The header uses a native checkbox switch styled as an English / 中文 pill, with both language labels always visible. The intro pairs a short title, one sentence on output options, and the on-device privacy note with the illustrated workflow. A compact About footer credits the creator and links to the source, project license, and third-party notices. Session reset information is in the upload disclosure. Output labels remain Single photo / Printable sheet.
+The compact header pairs a static wordmark with native English and 中文 radio choices. A compact About footer credits the creator and links to the source, project license, and third-party notices. Session reset information is in the upload disclosure. Output labels remain Single photo / Printable sheet.
 
-Section 1 is ID photo size requirement. The selected size appears below the document controls, which share a row when there is room. A keyboard-accessible two-tab switch defaults to Pick by document (country/document, sourced dimensions). Custom dimensions exposes only editable framing/ratio fields for single output or physical dimensions/units for sheets. Custom is not a country. Country/document selection survives switching to custom and back; current photo edits retain existing review safeguards.
+Section 1 is Photo requirements. The selected size appears below the country and document controls, which have equal widths when they share a row. The keyboard-accessible tabs default to By document for sourced dimensions. Custom size exposes editable framing and ratio fields for single output or physical dimensions and units for sheets. Country and document selection survive switching to custom and back, and existing edits retain their review safeguards.
 
 Full custom compression combines a synchronized quality slider/number input (1–100) and two compact, editable, linked pixel inputs. The other side is labeled calculated after either is edited. Reset restores automatic crop-derived dimensions without changing quality or the inactive Auto KB value.
 

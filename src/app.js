@@ -7,6 +7,7 @@ import { decodePhoto, prepareDecoder } from './image.js';
 import { validateSingle, exportSingle, drawJpegPreview } from './single.js';
 
 const $ = id => document.getElementById(id);
+const compactSetup = matchMedia('(max-width: 900px)');
 let lang = navigator.language.toLowerCase().startsWith('zh') ? 'zh' : 'en';
 let photo = null, preset = PRESETS[0], layout = null;
 let backgroundCanvas, backgroundJob, backgroundProgress, backgroundStatus = '';
@@ -60,13 +61,14 @@ function discardExport() {
 function reserveBilingualIntroSpace() {
   // Hidden translations share the visible grid cells so font wrapping cannot shift the editor.
   const other = lang === 'en' ? 'zh' : 'en';
-  for (const original of document.querySelectorAll('.intro-copy > div:first-child, .intro-workflow > ol:first-of-type')) {
+  for (const original of document.querySelectorAll('.intro-copy > div:first-child, .photo-example-label > span:first-child')) {
     const measure = original.cloneNode(true);
     measure.classList.add('intro-measure');
     measure.lang = other === 'zh' ? 'zh-Hans' : 'en';
     measure.setAttribute('aria-hidden','true');
     for (const el of measure.querySelectorAll('[id]')) el.removeAttribute('id');
-    for (const el of measure.querySelectorAll('[data-i18n]')) {
+    const labels = measure.matches('[data-i18n]') ? [measure] : measure.querySelectorAll('[data-i18n]');
+    for (const el of labels) {
       el.textContent = messages[other][el.dataset.i18n];
       el.removeAttribute('data-i18n');
     }
@@ -77,13 +79,16 @@ function reserveBilingualIntroSpace() {
 }
 function updateLanguage() {
   document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
-  document.title = t('title'); $('language').checked = lang === 'zh';
+  document.title = t('title');
+  document.querySelector(`[name=language][value=${lang}]`).checked = true;
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
+  for (const img of document.querySelectorAll('[data-i18n-alt]')) img.alt = t(img.dataset.i18nAlt);
   reserveBilingualIntroSpace();
   $('crop').ariaLabel = lang === 'zh' ? '裁剪预览，可用方向键移动照片' : 'Crop preview; use arrow keys to move the photo';
   $('inspect-edit').ariaLabel = $('inspect-edit').title = t('inspectEdit');
   $('photo').ariaLabel = t(photo ? 'replace' : 'choose');
-  $('language').ariaLabel = t('language');
+  $('language-picker').ariaLabel = t('language');
+  setSetupExpanded($('setup-toggle').getAttribute('aria-expanded') === 'true');
   $('tool-tabs').ariaLabel = lang === 'zh' ? '照片调整工具' : 'Photo editing tools';
   $('choose-label').textContent = t(photo ? 'replace' : 'choose');
   updateCountries(); updateDocuments(false); updatePresetDetails();
@@ -136,6 +141,10 @@ function updatePresetDetails() {
   }
   $('guide-control').hidden=!preset;
   $('preset-edit-guidance').hidden=!requirement?.restrictEdits;
+  const caveats = ['preset-location', 'preset-warning', 'preset-edit-guidance']
+    .map($).filter(note => !note.hidden).map(note => note.textContent);
+  $('setup-caveats').textContent = caveats.join(lang === 'zh' ? '' : ' ');
+  $('setup-caveats').hidden = caveats.length === 0;
   updateBackgroundControls();
   $('output-controls').disabled=!photo;
   $('copies').disabled=$('cut-guides').disabled=!photo;
@@ -282,6 +291,13 @@ function updateReadouts() {
       ['x','y'].includes(key) ? `${Math.round(settings[key])}%` : settings[key];
   }
   if(mode==='print') $('size-readout').textContent = sizeLabel();
+  if(photo) {
+    const choice = preset ? [$('country').selectedOptions[0]?.textContent, $('document').selectedOptions[0]?.textContent] : [t('customDimensions')];
+    const customRatio = mode === 'single' && ($('single-fit').value === 'original'
+      ? t('keepFull') : `${$('ratio-width').value} : ${$('ratio-height').value}`);
+    const size = $('size-readout').textContent || customRatio;
+    $('setup-summary').textContent = [...choice, size].filter(Boolean).join(' · ');
+  }
   updateExportAvailability();
   $('copies').max=printCapacity;
   $('copy-error').hidden=mode!=='print'||!!layout||!errorKey;
@@ -507,6 +523,45 @@ $('restore-background').onclick = () => {
   $($('remove-background').disabled?'background-tab':'remove-background').focus();
 };
 
+function setSetupExpanded(expanded) {
+  $('setup-toggle').setAttribute('aria-expanded', String(expanded));
+  $('setup-toggle').textContent = t(expanded ? 'setupDone' : 'setupChange');
+}
+
+function focusRequirements() {
+  $(customRequirements ? 'custom-requirements' : 'document-requirements').focus();
+}
+
+function updateSetupOverview() {
+  if (!compactSetup.matches && document.activeElement === $('setup-toggle')) focusRequirements();
+  $('setup-overview').hidden = !photo || !compactSetup.matches;
+}
+
+compactSetup.addEventListener('change', () => {
+  if (photo && compactSetup.matches && $('setup-controls').contains(document.activeElement)) setSetupExpanded(true);
+  updateSetupOverview();
+});
+
+function updatePhotoLayout() {
+  const loaded = !!photo;
+  updateSetupOverview();
+  for (const selector of ['.editor-actions', '.editor-tools', '.output-body']) {
+    document.querySelector(selector).hidden = !loaded;
+  }
+  $('output-options').open = loaded;
+  $('output-options-toggle').hidden = loaded;
+  $('export-content').hidden = !loaded;
+  $('export-empty').hidden = loaded;
+  setSetupExpanded(false);
+}
+
+$('setup-toggle').onclick = () => {
+  const expanded = $('setup-toggle').getAttribute('aria-expanded') === 'true';
+  setSetupExpanded(!expanded);
+  if (expanded) $('setup-toggle').focus();
+  else focusRequirements();
+};
+
 function clearPhoto() {
   resetBackground();
   $('inspect-edit-error').hidden = true;
@@ -523,11 +578,14 @@ function clearPhoto() {
   Object.assign(settings,{zoom:1,x:50,y:50,brightness:0,contrast:0,review:false});
   singleResult=null;$('single-result').hidden=true;$('single-error').hidden=true;
   $('original').checked = false;
-  $('choose-label').textContent = t('choose'); setStatus(); setError(); setExport(); updatePresetDetails(); updateReadouts();
+  $('choose-label').textContent = $('photo').ariaLabel = t('choose');
+  updatePhotoLayout();
+  setStatus(); setError(); setExport(); updatePresetDetails(); updateReadouts();
 }
 
 $('photo').addEventListener('change', async event => {
   const selected = event.target.files[0]; if (!selected || loading) return;
+  const uploadFocus = document.activeElement;
   loading = true; $('photo').disabled = $('clear').disabled = true; $('photo').setAttribute('aria-busy','true');
   if (backgroundJob) { cancelBackground(); backgroundStatus = 'backgroundCancelled'; updateExportAvailability(); }
   updateBackgroundControls();
@@ -540,6 +598,7 @@ $('photo').addEventListener('change', async event => {
     $('clear').disabled = $('edit-controls').disabled = $('reset-crop').disabled = false;
     $('crop-empty').hidden = true; $('crop-wrap').hidden = false;
     $('choose-label').textContent = t('replace'); $('photo').ariaLabel = t('replace');
+    updatePhotoLayout();
     const scale=Math.min(1,1200/Math.max(photo.canvas.width,photo.canvas.height));
     if(!preset){
       $('pixel-width').value=Math.max(1,Math.round(photo.canvas.width*scale));
@@ -547,11 +606,20 @@ $('photo').addEventListener('change', async event => {
     }
     updateModeLabels();updatePresetDetails();
     if(mode==='single') configureSingle('photo');else chooseSize(false);
-    if (matchMedia('(max-width: 760px)').matches) $('crop-title').scrollIntoView({block:'start',behavior:'auto'});
-  } catch (e) { setStatus(photo?'ready':''); setError(messages.en[e.message] ? e.message : 'decodeError'); }
+    if (compactSetup.matches) {
+      const focused = document.activeElement;
+      if (focused === uploadFocus || focused === document.body) {
+        $('crop-title').scrollIntoView({block:'start',behavior:'auto'});
+        $('crop').focus({preventScroll:true});
+      } else if ($('setup-controls').contains(focused)) setSetupExpanded(true);
+    }
+  } catch (e) {
+    if (photo) setSetupExpanded(true);
+    setStatus(photo?'ready':''); setError(messages.en[e.message] ? e.message : 'decodeError');
+  }
   finally { loading = false; $('photo').disabled = false; $('clear').disabled = !photo; $('photo').value = ''; $('photo').removeAttribute('aria-busy'); updateBackgroundControls(); }
 });
-$('clear').onclick = clearPhoto;
+$('clear').onclick = () => { clearPhoto(); $('photo').focus(); };
 function updateRequirementSelection(){
   preset=customRequirements?null:catalog.find(p=>p.id===$('document').value)||null;
   if(preset){
@@ -659,7 +727,7 @@ function selectTool(name, focus = false) {
   }
   if (focus) $(`${name}-tab`).focus();
 }
-const photoTools = ['background','framing','adjustments'];
+const photoTools = ['framing','background','adjustments'];
 for (const [index,name] of photoTools.entries()) {
   $(`${name}-tab`).onclick = () => selectTool(name);
   $(`${name}-tab`).onkeydown = e => {
@@ -670,7 +738,7 @@ for (const [index,name] of photoTools.entries()) {
     }
   };
 }
-$('language').onchange = () => { lang = $('language').checked ? 'zh' : 'en'; updateLanguage(); };
+$('language-picker').onchange = event => { lang = event.target.value; updateLanguage(); };
 $('save').onclick = () => {
   if (!file||settings.review||backgroundJob) return;
   if (downloadUrl) URL.revokeObjectURL(downloadUrl);

@@ -10,23 +10,23 @@ test('requirements and upload precede editing at every layout size',async({page}
     await page.setViewportSize({width,height});await openApp(page);
     let introHeight;
     for(const language of ['en','zh']){
-      await page.locator('#language').setChecked(language==='zh');
+      await page.locator(`[name=language][value=${language}]`).check();
       const intro = await page.locator('.intro').boundingBox();
       if (introHeight === undefined) introHeight = intro.height;
       else expect(intro.height).toBeCloseTo(introHeight, 0);
-      const heights = await page.locator('.section-heading').evaluateAll(rows=>rows.map(row=>row.getBoundingClientRect().height));
-      expect(heights).toEqual([44,44,44,44,44]);
+      await page.locator('#output-options-toggle').press('Enter');
       for(const mode of ['print','single']){
         const radio=page.locator(`[name=output-mode][value=${mode}]`);
         await radio.check();await radio.focus();await expect(radio).toBeFocused();
         expect(await page.locator('.mode-picker').evaluate(el=>!!(document.querySelector('.editor').compareDocumentPosition(el)&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
-        const [settings,setup,editor,sheet]=await page.evaluate(()=>['.settings','.setup','.editor','.sheet'].map(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
+        const [rail,settings,setup,editor,sheet]=await page.evaluate(()=>['.setup-column','.settings','.setup','.editor','.sheet'].map(selector=>{const r=document.querySelector(selector).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height};}));
         expect(setup.y).toBeGreaterThanOrEqual(settings.y+settings.height);
-        if(width>760){expect(editor.y).toBeCloseTo(settings.y);expect(editor.x).toBeGreaterThan(settings.x+settings.width);}
+        if(width>900){expect(editor.y).toBeCloseTo(rail.y);expect(editor.x).toBeGreaterThan(rail.x+rail.width);}
         else expect(editor.y).toBeGreaterThanOrEqual(setup.y+setup.height);
         expect(sheet.y).toBeGreaterThanOrEqual(editor.y+editor.height);
         expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
       }
+      await page.locator('#output-options-toggle').press('Enter');
     }
     await expect(page.locator('.input-help')).not.toHaveAttribute('open');await page.locator('.input-help summary').click();await expect(page.locator('#formats')).toBeVisible();
   }
@@ -39,7 +39,8 @@ test('resizing retains photo, settings, focus and exports in the requirements-fi
   await expect(page.locator('.sheet #copies')).toBeVisible();await expect(page.locator('.sheet #cut-guides')).toBeVisible();
   for(const width of [375,1440,320,1024]){
     await page.locator('#copies').focus();await page.setViewportSize({width,height:900});await expect(page.locator('#copies')).toBeFocused();
-    await expect(page.locator('#copies')).toHaveValue('4');await expect(page.locator('#save')).toBeEnabled({timeout:15000});await expect(page.locator('.setup-column > .settings')).toBeVisible();
+    await expect(page.locator('#copies')).toHaveValue('4');await expect(page.locator('#save')).toBeEnabled({timeout:15000});
+    await expect(page.locator(width<=900?'#setup-summary':'#setup-controls')).toBeVisible();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
   }
   await page.locator('[name=output-mode][value=single]').check();await expect(page.locator('#print-summary')).toBeHidden();await expect(page.locator('#save')).toBeEnabled();
@@ -74,7 +75,8 @@ test('cutting guides change only cut edges and can be disabled without changing 
 
 test('editing tabs support keyboard navigation, retain edits, and fit narrow screens',async({page})=>{
   await page.setViewportSize({width:320,height:640});await openApp(page);await page.locator('#photo').setInputFiles(fixture);await reviewFraming(page);await expect(page.locator('#save')).toBeEnabled();
-  await page.locator('#framing-tab').focus();await page.keyboard.press('ArrowRight');await expect(page.locator('#adjustments-tab')).toBeFocused();
+  await page.locator('#framing-tab').focus();await page.keyboard.press('ArrowRight');await expect(page.locator('#background-tab')).toBeFocused();
+  await page.keyboard.press('ArrowRight');await expect(page.locator('#adjustments-tab')).toBeFocused();
   await expect(page.locator('#adjustments-panel')).toBeVisible();await expect(page.locator('#framing-panel')).toBeHidden();
   await page.locator('#brightness').evaluate(el=>{el.value='8';el.dispatchEvent(new Event('input',{bubbles:true}));});
   await page.locator('#framing-tab').click();await page.locator('#adjustments-tab').click();await expect(page.locator('#brightness')).toHaveValue('8');

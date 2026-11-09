@@ -44,6 +44,7 @@ let html = await readFile(resolve(dist,'index.html'),'utf8');
 html = html.replace('<html lang="en">', `<html lang="en" data-release="${version}">`)
   .replace(/<body([^>]*)>/, '<body$1 inert>')
   .replace('href="./styles.css"', `href="./assets/${version}/styles.css"`)
+  .replaceAll('src="./src/photo-examples/', `src="./assets/${version}/src/photo-examples/`)
   .replace('<script type="module" src="./src/app.js"></script>', `<script type="module">${bootstrap}</script>`)
   .replace("script-src 'self' 'wasm-unsafe-eval';", `script-src 'self' 'wasm-unsafe-eval' 'sha256-${scriptHash}';`)
   .replace("connect-src 'none';", "connect-src 'self';");

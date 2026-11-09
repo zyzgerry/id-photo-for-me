@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 const fixture=fileURLToPath(new URL('../fixtures/orientation-6.jpg',import.meta.url));
 
 test('US to Schengen updates the preparation crop instead of keeping the square',async({page})=>{
-  await openApp(page);await page.locator('[name=output-mode][value=single]').check();
+  await openApp(page,'single');
   await page.locator('#country').selectOption('us');await page.locator('#photo').setInputFiles(fixture);
   await expect(page.locator('#crop')).toBeVisible();
   await page.locator('#country').selectOption('pt');
@@ -41,6 +41,7 @@ test('ID preparation is first and defaults to source-detail JPEG quality; compre
   await page.goto('./');await expect(page.locator('body')).not.toHaveAttribute('inert');
   await expect(page.locator('[name=output-mode]').first()).toHaveValue('single');
   await expect(page.locator('[name=output-mode][value=print]')).toBeChecked();
+  await page.locator('#output-options-toggle').click();
   await page.locator('[name=output-mode][value=single]').check();
   await expect(page.locator('.mode-picker')).toContainText('Single photo');
   await expect(page.locator('#sheet-title')).toHaveText('4. Customize output');
@@ -70,7 +71,7 @@ test('every photo format applies its own ratio in preparation mode in both langu
   test.setTimeout(120000);const {PREPARATION_PRESETS}=await import('../../src/presets.js');await openApp(page,'single');
   await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled({timeout:15000});
   for(const lang of ['en','zh']){
-    await page.locator('#language').setChecked((lang)==='zh');
+    await page.locator(`[name=language][value=${lang}]`).check();
     for(const p of PREPARATION_PRESETS){
       await page.locator('#country').selectOption(p.country);await page.locator('#document').selectOption(p.id);
       await expect(page.locator('#document')).toHaveValue(p.id);await expect(page.locator('#error')).toBeHidden();
@@ -89,7 +90,7 @@ test('phone layouts, keyboard output choices, replacement and repeated mode swit
   for(const width of [320,390,1440]){
     await page.setViewportSize({width,height:900});
     for(const lang of ['en','zh']){
-      await page.locator('#language').setChecked((lang)==='zh');
+      await page.locator(`[name=language][value=${lang}]`).check();
       for(const mode of ['print','single','print','single']){await page.locator(`[name=output-mode][value=${mode}]`).check();await expect(page.locator('#zoom')).toHaveValue('1.4');await expect(page.locator('#contrast')).toHaveValue('9');await expect(page.locator('#save')).toBeEnabled({timeout:15000});}
       await page.locator('[name=output-quality][value=quality]').focus();await page.keyboard.press('ArrowRight');await expect(page.locator('[name=output-quality][value=compress]')).toBeChecked();
       await page.keyboard.press('ArrowLeft');await expect(page.locator('[name=output-quality][value=quality]')).toBeChecked();
@@ -141,5 +142,5 @@ test('reset pixels recovers invalid overrides without changing framing',async({p
   await page.locator('#zoom').fill('1.5');await page.locator('#reset-pixels').click();
   await expect(page.locator('#zoom')).toHaveValue('1.5');expect(Number(await page.locator('#pixel-width').inputValue())).toBeLessThan(Number(width));
   await expect(page.locator('#min-width')).toHaveCount(0);await expect(page.locator('#allow-resize')).toHaveCount(0);
-  await page.locator('#language').check();await expect(page.locator('#reset-pixels')).toHaveText('重置像素尺寸');
+  await page.locator('[name=language][value=zh]').check();await expect(page.locator('#reset-pixels')).toHaveText('重置像素尺寸');
 });

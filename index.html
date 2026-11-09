@@ -13,63 +13,61 @@
 </head>
 <body>
   <header class="topbar shell">
-    <a class="wordmark" href="./" data-i18n="title">ID Photo for Me</a>
-    <label class="language language-switch">
-      <input id="language" type="checkbox" role="switch" aria-label="语言 / Language">
-      <span class="language-track" aria-hidden="true"><span>English</span><span>中文</span></span>
-    </label>
+    <span class="wordmark" data-i18n="title">ID Photo for Me</span>
+    <fieldset class="language-picker" id="language-picker" aria-label="Language">
+      <label class="language-choice"><input type="radio" name="language" value="en" checked><span lang="en">English</span></label>
+      <label class="language-choice"><input type="radio" name="language" value="zh"><span lang="zh-Hans">中文</span></label>
+    </fieldset>
   </header>
   <main class="shell">
     <section class="intro" aria-labelledby="intro-title">
       <div class="intro-copy">
         <div>
-        <h1 id="intro-title" data-i18n="workspaceTitle">Make an ID photo</h1>
-        <p class="intro-purpose" data-i18n="introPurpose">Prepare an ID photo for an application or make a 4×6 print sheet.</p>
-        <p id="privacy" class="privacy">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-          <span data-i18n="privacy">All photo editing happens in this browser. Your photos stay on this device.</span>
-        </p>
+          <h1 id="intro-title" data-i18n="workspaceTitle">Make an ID‑ready photo</h1>
+          <p class="intro-purpose" data-i18n="introPurpose">Clean up your photo and get it ready to print.</p>
+          <p id="privacy" class="privacy">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <span data-i18n="privacy">Processed in your browser. No uploads.</span>
+          </p>
         </div>
       </div>
-      <div class="intro-workflow">
-        <svg viewBox="0 0 360 82" aria-hidden="true" focusable="false">
-          <defs>
-            <g id="demo-portrait">
-              <path d="M3 62c0-14 11-21 21-24h12c11 3 21 10 21 24z" fill="#314b6a"/>
-              <path d="M24 31h12v11l-6 5-6-5z" fill="#ad715b"/>
-              <path d="M15 21c0-10 6-16 15-16s15 6 15 16c0 12-6 20-15 20s-15-8-15-20z" fill="#c99175"/>
-              <path d="M15 24c-3-6-2-14 2-18 6-6 19-7 25 0 4 4 5 11 2 18l-3-11c-7 4-15 4-22 3z" fill="#493d38"/>
-              <path d="M25 32q5 3 10 0" fill="none" stroke="#8d5444" stroke-linecap="round"/>
-            </g>
-            <g id="demo-print-cell">
-              <rect width="27" height="23" rx="1" fill="#f3f5f8"/>
-              <use href="#demo-portrait" transform="translate(3 2) scale(.34)"/>
-            </g>
-          </defs>
-          <rect x="19" y="7" width="82" height="68" rx="6" fill="#d9e6dc"/>
-          <use href="#demo-portrait" transform="translate(32 19) scale(.9)"/>
-          <rect x="147" y="7" width="66" height="68" rx="5" fill="white" stroke="var(--color-rule)"/>
-          <use href="#demo-portrait" transform="translate(153 19) scale(.9)"/>
-          <path d="M155 21v-6h6m38 0h6v6m0 40v6h-6m-38 0h-6v-6" fill="none" stroke="var(--color-accent)" stroke-width="1.5"/>
-          <rect x="252" y="10" width="96" height="62" rx="4" fill="white" stroke="var(--color-rule)"/>
-          <use href="#demo-print-cell" x="257" y="17"/><use href="#demo-print-cell" x="286" y="17"/><use href="#demo-print-cell" x="315" y="17"/>
-          <use href="#demo-print-cell" x="257" y="42"/><use href="#demo-print-cell" x="286" y="42"/><use href="#demo-print-cell" x="315" y="42"/>
-          <path d="M114 41h17m-6-6 6 6-6 6m100-6h17m-6-6 6 6-6 6" fill="none" stroke="var(--color-muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        <ol role="list">
-          <li data-i18n="workflowRaw">Raw photo</li>
-          <li data-i18n="backgroundTool">Remove background</li>
-          <li data-i18n="workflowPrint">Print-ready</li>
-        </ol>
-      </div>
+      <figure class="photo-example">
+        <div class="photo-example-flow">
+          <figure class="photo-example-item">
+            <div class="photo-example-media"><img src="./src/photo-examples/original.jpg" width="384" height="480" decoding="async" alt="Uncropped portrait against a sage wall" data-i18n-alt="exampleOriginalAlt"></div>
+            <figcaption class="photo-example-label"><span data-i18n="exampleOriginal">Original</span></figcaption>
+          </figure>
+          <span class="photo-example-connector" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+          </span>
+          <figure class="photo-example-item">
+            <div class="photo-example-media"><img src="./src/photo-examples/single-id.jpg" width="420" height="420" decoding="async" alt="Tighter crop against a white background" data-i18n-alt="exampleSingleAlt"></div>
+            <figcaption class="photo-example-label"><span data-i18n="exampleSingle">Clean-up</span></figcaption>
+          </figure>
+          <span class="photo-example-connector" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 12h14m-6-6 6 6-6 6"/></svg>
+          </span>
+          <figure class="photo-example-item">
+            <div class="photo-example-media"><img src="./src/photo-examples/print-sheet.jpg" width="780" height="520" decoding="async" alt="Six copies of the cropped portrait on one sheet" data-i18n-alt="examplePrintAlt"></div>
+            <figcaption class="photo-example-label"><span data-i18n="examplePrint">4×6″ Print-ready</span></figcaption>
+          </figure>
+        </div>
+        <figcaption class="photo-example-label photo-example-note"><span data-i18n="exampleNote">Example workflow</span></figcaption>
+      </figure>
     </section>
     <div class="workspace">
       <div class="setup-column">
+        <div class="setup-overview region" id="setup-overview" hidden>
+          <div><h2 data-i18n="setupTitle">1–2. Photo setup</h2><p id="setup-summary"></p></div>
+          <button id="setup-toggle" type="button" class="button quiet" aria-controls="setup-controls" aria-expanded="false" data-i18n="setupChange">Change</button>
+          <p id="setup-caveats" class="hint" hidden></p>
+        </div>
+      <div id="setup-controls">
       <section class="settings region" aria-labelledby="size-title">
-        <div class="section-heading"><h2 id="size-title" data-i18n="step1">1. ID photo size requirement</h2></div>
-        <div class="requirements-tabs" role="tablist" aria-label="ID photo size requirement">
-          <button id="document-requirements" type="button" role="tab" aria-selected="true" aria-controls="document-requirements-panel" data-i18n="pickByDocument">Pick by document</button>
-          <button id="custom-requirements" type="button" role="tab" aria-selected="false" aria-controls="custom-requirements-panel" tabindex="-1" data-i18n="customDimensions">Custom dimensions</button>
+        <div class="section-heading"><h2 id="size-title" data-i18n="step1">1. Photo requirements</h2></div>
+        <div class="requirements-tabs" role="tablist" aria-label="Photo requirements">
+          <button id="document-requirements" type="button" role="tab" aria-selected="true" aria-controls="document-requirements-panel" data-i18n="pickByDocument">By document</button>
+          <button id="custom-requirements" type="button" role="tab" aria-selected="false" aria-controls="custom-requirements-panel" tabindex="-1" data-i18n="customDimensions">Custom size</button>
         </div>
         <div id="print-settings">
         <div id="document-requirements-panel" role="tabpanel" aria-labelledby="document-requirements">
@@ -88,6 +86,7 @@
         <p class="hint" id="preset-location" data-i18n="locationCaveat">Check official rules before printing.</p>
         <p class="warning" id="preset-warning" hidden></p>
         <p class="hint" id="preset-edit-guidance" data-i18n="editGuidance" hidden>Edit only if your document allows it.</p>
+        </div>
         <details class="requirements"><summary data-i18n="documentGuidance">Requirements &amp; sources</summary>
         <p class="hint" id="preset-reference" hidden><a id="reference" target="_blank" rel="noopener noreferrer">Requirements source</a></p>
         <p class="hint" id="preset-scope" hidden></p>
@@ -95,27 +94,42 @@
         <p class="hint" id="verified" hidden></p>
         <p class="hint" data-i18n="confirmRequirements">Confirm with your consulate or authority on photo requirements before proceeding.</p>
         </details>
-        </div>
       </section>
       <section class="setup region" aria-labelledby="upload-title">
-        <div class="section-heading"><h2 id="upload-title" data-i18n="uploadTitle">2. Choose photo</h2></div>
+        <div class="section-heading"><h2 id="upload-title" data-i18n="uploadTitle">2. Add a photo</h2></div>
 
     <div class="photo-setup">
       <div class="file-actions">
-        <label class="button primary file-button" for="photo"><span id="choose-label" data-i18n="choose">Choose a photo</span><input id="photo" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" aria-describedby="formats privacy"></label>
+        <label class="button primary file-button" for="photo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6M4 16l4-4 4 4 2-2 6 6m-2-17v6m-3-3h6"/><circle cx="9" cy="8" r="1"/></svg>
+          <span id="choose-label" data-i18n="choose">Choose a photo</span><input id="photo" type="file" accept="image/jpeg,image/png,image/heic,image/heif,.heic,.heif" aria-describedby="formats privacy">
+        </label>
       </div>
-      <details class="input-help"><summary data-i18n="supportedFormats">Supported photos and limits</summary><p id="formats" class="hint" data-i18n="formats">JPEG, PNG, or HEIC/HEIF. Up to 30 MB, 50 megapixels, and 12,000 pixels per side. Still images only.</p><p class="hint" data-i18n="sessionPrivacy">Photos are never uploaded or saved by the app. Reloading clears your edits.</p></details>
       <p id="status" role="status" aria-live="polite"></p>
-      <p id="error" class="error" role="alert" hidden></p>
+      <details class="input-help"><summary data-i18n="supportedFormats">Supported photos and limits</summary><p id="formats" class="hint" data-i18n="formats">JPEG, PNG, or HEIC/HEIF. Up to 30 MB, 50 megapixels, and 12,000 pixels per side. Still images only.</p><p class="hint" data-i18n="sessionPrivacy">Photos are never uploaded or saved by the app. Reloading clears your edits.</p></details>
       <noscript><p>JavaScript is needed to process photos locally. / 请启用 JavaScript 以在本机处理照片。</p></noscript>
     </div>
       </section>
       </div>
+      <p id="error" class="error" role="alert" hidden></p>
+      </div>
       <div class="preview-column">
       <section class="editor region" aria-labelledby="crop-title">
-        <div class="section-heading"><h2 id="crop-title" data-i18n="step2">Your photo</h2><div class="editor-actions"><button id="reset-crop" class="text-button" data-i18n="resetCrop" disabled>Reset framing</button><button id="clear" class="text-button" disabled data-i18n="clear">Clear photo</button></div></div>
+        <div class="section-heading"><h2 id="crop-title" data-i18n="step2">3. Edit photo</h2><div class="editor-actions" hidden><button id="reset-crop" class="text-button" data-i18n="resetCrop" disabled>Reset framing</button><button id="clear" class="text-button" disabled data-i18n="clear">Clear photo</button></div></div>
         <div class="editor-workspace"><div id="crop-stage" class="crop-stage">
-          <div id="crop-empty" class="empty"><h3 data-i18n="emptyTitle">Start with a photo</h3><p data-i18n="empty">Choose a photo from Photos or Files. Your crop and print sheet will appear here.</p></div>
+          <div id="crop-empty" class="empty">
+            <svg class="empty-portrait" viewBox="0 0 72 76" aria-hidden="true" focusable="false">
+              <rect width="72" height="76" rx="6" fill="#d9e6dc"/>
+              <g transform="translate(6 14)">
+                <path d="M3 62c0-14 11-21 21-24h12c11 3 21 10 21 24z" fill="#314b6a"/>
+                <path d="M24 31h12v11l-6 5-6-5z" fill="#ad715b"/>
+                <path d="M15 21c0-10 6-16 15-16s15 6 15 16c0 12-6 20-15 20s-15-8-15-20z" fill="#c99175"/>
+                <path d="M15 24c-3-6-2-14 2-18 6-6 19-7 25 0 4 4 5 11 2 18l-3-11c-7 4-15 4-22 3z" fill="#493d38"/>
+                <path d="M25 32q5 3 10 0" fill="none" stroke="#8d5444" stroke-linecap="round"/>
+              </g>
+            </svg>
+            <p data-i18n="empty">Your crop preview appears here after you choose a photo.</p>
+          </div>
           <div id="crop-wrap" hidden>
             <canvas id="crop" width="600" height="600" tabindex="0" role="img" aria-label="Photo crop preview"></canvas><div id="guide-overlay" aria-hidden="true" hidden></div>
             <button id="inspect-edit" class="button quiet" type="button" aria-label="Magnify photo" aria-haspopup="dialog" aria-controls="jpeg-viewer" title="Magnify photo">
@@ -123,10 +137,10 @@
             </button>
           </div>
         </div>
-        <div class="editor-tools"><div id="framing-review" class="review-notice" role="status" hidden><p data-i18n="reviewNeeded">Requirements changed. Review your framing before exporting.</p><button id="review-framing" class="text-button" data-i18n="reviewFraming">Review framing</button><button id="confirm-framing" class="button quiet" data-i18n="framingReviewed">Framing reviewed</button></div>
+        <div class="editor-tools" hidden><div id="framing-review" class="review-notice" role="status" hidden><p data-i18n="reviewNeeded">Requirements changed. Review your framing before exporting.</p><button id="review-framing" class="text-button" data-i18n="reviewFraming">Review framing</button><button id="confirm-framing" class="button quiet" data-i18n="framingReviewed">Framing reviewed</button></div>
         <div class="tool-tabs" role="tablist" aria-label="Photo tools" id="tool-tabs">
-          <button id="background-tab" role="tab" aria-selected="false" aria-controls="background-panel" tabindex="-1" data-i18n="backgroundTool">Remove background</button>
           <button id="framing-tab" role="tab" aria-selected="true" aria-controls="framing-panel" data-i18n="framingTool">Framing</button>
+          <button id="background-tab" role="tab" aria-selected="false" aria-controls="background-panel" tabindex="-1" data-i18n="backgroundTab">Background</button>
           <button id="adjustments-tab" role="tab" aria-selected="false" aria-controls="adjustments-panel" tabindex="-1" data-i18n="adjustmentsTool">Adjustments</button>
         </div>
         <fieldset id="edit-controls" disabled>
@@ -170,12 +184,15 @@
       </section>
       <section class="sheet region" aria-labelledby="sheet-title">
         <div class="section-heading"><h2 id="sheet-title" data-i18n="singleStep3">4. Customize output</h2></div>
+        <p id="output-empty" class="hint" data-i18n="outputInactive">Single photo or 4×6 print sheet.</p>
+        <details class="output-options" id="output-options">
+          <summary id="output-options-toggle" data-i18n="outputMode">Output format</summary>
         <fieldset class="mode-picker"><legend class="visually-hidden" data-i18n="outputMode">Output format</legend>
           <label><input type="radio" name="output-mode" value="single"><span class="mini-mockup" aria-hidden="true"><span class="example-digital"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><span class="output-choice-copy"><strong data-i18n="singleMode">Single photo</strong><span class="hint" data-i18n="digitalExample">Save one JPEG, with optional compression.</span></span></label>
           <label><input type="radio" name="output-mode" value="print" checked><span class="mini-mockup" aria-hidden="true"><span class="example-sheet"><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span><span class="portrait"><span class="portrait-head"></span><span class="portrait-body"></span></span></span></span><span class="output-choice-copy"><strong data-i18n="printMode">Printable sheet</strong><span class="hint" data-i18n="printExample">Arrange copies on a 4×6 sheet for printing.</span></span></label>
         </fieldset>
-        <p id="output-empty" class="hint" data-i18n="outputInactive">Choose a photo to prepare the output.</p>
-        <div class="output-body">
+        </details>
+        <div class="output-body" hidden>
           <div id="output-preview" class="output-preview">
             <div class="sheet-stage"><div class="sheet-preview"><canvas id="sheet" width="3600" height="2400" role="img" aria-label="Complete 4 by 6 inch print sheet" hidden></canvas><div id="cut-preview" aria-hidden="true" hidden></div><span class="output-magnifier" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" focusable="false"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5M8 10.5h5m-2.5-2.5v5"/></svg></span></div><p id="sheet-empty" data-i18n="sheetEmpty">Your complete 4×6 sheet appears after you choose a photo.</p></div>
 
@@ -230,11 +247,14 @@
       </section>
       <section class="export region" aria-labelledby="export-title">
         <div class="section-heading"><h2 id="export-title" data-i18n="exportTitle">5. Export</h2></div>
+        <p id="export-empty" class="hint" data-i18n="exportInactive">Save your JPEG when it’s ready.</p>
+        <div id="export-content" hidden>
         <div class="export-actions"><button id="save" class="button primary" data-i18n="save" disabled>Save JPEG</button><button id="share" class="button quiet" data-i18n="share" disabled>Share JPEG</button></div>
         <p class="hint" data-i18n="exportSizeNote">Saving an image to iPhone Photos may slightly change its file size. Save to Files or a drive to preserve the exact size.</p>
         <p id="export-status" class="hint" role="status" aria-live="polite"></p>
         <details class="print-note" id="print-note"><summary data-i18n="printTitle">Print at exactly 4×6 inches</summary><p data-i18n="print">Keep the entire sheet. Turn off automatic cropping, enlargement, and fit/fill options. Borderless printing may trim the edges. Measure your first test print.</p></details>
 
+        </div>
       </section>
       </div>
     </div>

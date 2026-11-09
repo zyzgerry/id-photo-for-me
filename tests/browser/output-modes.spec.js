@@ -1,10 +1,10 @@
-import { openApp, reviewFraming } from './open-app.js';
+import { openApp, reviewFraming, selectOutputMode } from './open-app.js';
 import { test, expect } from '@playwright/test';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
 const fixture=name=>fileURLToPath(new URL(`../fixtures/${name}`,import.meta.url));
 const single=async page=>{
-  await page.locator('[name=output-mode][value=single]').check();
+  await selectOutputMode(page,'single');
   await page.locator('#custom-requirements').click();await page.locator('#single-fit').selectOption('original');
   await reviewFraming(page);
   if(await page.locator('[name=output-quality][value=compress]').isEnabled()){await page.locator('[name=output-quality][value=compress]').check();}
@@ -65,7 +65,7 @@ test('Portugal uses manual head guides without borrowing another mission’s ran
   await expect(page.locator('#head-reference')).toBeHidden();
   await expect(page.locator('.guide-line')).toHaveCount(2);
   expect(await page.locator('#sheet').evaluate(c=>c.toDataURL())).toBe(before);
-  await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#guide-control')).toContainText('头部位置参考线');
+  await page.locator('[name=language][value=zh]').check();await expect(page.locator('#guide-control')).toContainText('头部位置参考线');
   await single(page);await expect(page.locator('#guide-control')).toBeHidden();
 });
 
@@ -108,7 +108,7 @@ test('file-size and exact-pixel targets apply exclusively and show the encoded f
   await page.locator('#pixel-width').fill('0');await expect(page.locator('#save')).toBeDisabled();
   await page.locator('[name=compression-target][value=file]').check();await page.locator('#max-kb').fill('100');await ready(page);
   expect((await download(page)).bytes.length).toBeLessThanOrEqual(100000);await expect(page.locator('#pixel-width')).toBeHidden();
-  await page.setViewportSize({width:320,height:900});await page.locator('#language').check();
+  await page.setViewportSize({width:320,height:900});await page.locator('[name=language][value=zh]').check();
   await page.locator('.sheet').screenshot({path:`.qa/compression-file-phone-${info.project.name}.png`});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });
@@ -122,7 +122,7 @@ test('single crop supports exact pixel dimensions and mode changes preserve prin
   await page.locator('#single-fit').selectOption('original');await ready(page);
   await expect(page.locator('#pixel-height')).toHaveValue('900');expect((await download(page)).size).toEqual([600,900]);
   await print(page);await ready(page);await expect(page.locator('#zoom')).toHaveValue('1');expect((await download(page)).size).toEqual([3600,2400]);
-  await single(page);await ready(page);await page.locator('#language').setChecked(('zh')==='zh');await expect(page.locator('#sheet-title')).toHaveText('4. 自定义输出');
+  await single(page);await ready(page);await page.locator('[name=language][value=zh]').check();await expect(page.locator('#sheet-title')).toHaveText('4. 自定义输出');
 });
 
 test('a superseded compression job cannot overwrite print output or leak errors',async({page})=>{

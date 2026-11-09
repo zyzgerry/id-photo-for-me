@@ -7,7 +7,8 @@ test('output heading precedes formats, print is default, and export is a separat
   await page.goto('./');await expect(page.locator('body')).not.toHaveAttribute('inert');
   await expect(page.locator('[name=output-mode][value=print]')).toBeChecked();
   await expect(page.locator('.sheet h2')).toHaveCount(1);await expect(page.locator('#sheet-title')).toHaveText('4. Customize output');
-  const heading=await page.locator('#sheet-title').boundingBox(),selector=await page.locator('.mode-picker').boundingBox();expect(heading.y+heading.height).toBeLessThanOrEqual(selector.y);
+  await expect(page.locator('.mode-picker')).toBeHidden();
+  const heading=await page.locator('#sheet-title').boundingBox(),selector=await page.locator('#output-options-toggle').boundingBox();expect(heading.y+heading.height).toBeLessThanOrEqual(selector.y);
   await expect(page.locator('.sheet #save')).toHaveCount(0);await expect(page.locator('.export #save')).toHaveCount(1);
   await expect(page.locator('#inspect-output')).toHaveCount(0);
   await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#save')).toBeEnabled();
@@ -29,7 +30,7 @@ test('compact preview sticks during settings and remains visibly marked while ou
   await page.locator('#sheet').click();await expect(page.locator('#jpeg-viewer')).toBeVisible();await page.locator('#viewer-close').click();await expect(page.locator('#save')).toBeDisabled();
   await page.evaluate(()=>window.finishEncode());await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#jpeg-quality').fill('0');await expect(page.locator('#sheet')).toBeVisible();await expect(page.locator('#single-result')).toBeVisible();await expect(page.locator('#preview-status')).toContainText('Previous');await expect(page.locator('#save')).toBeDisabled();
-  await page.locator('#language').check();await expect(page.locator('#preview-status')).toContainText('上次结果');
+  await page.locator('[name=language][value=zh]').check();await expect(page.locator('#preview-status')).toContainText('上次结果');
   // Scroll the lower pixel controls below the pinned result.
   await page.locator('#reset-pixels').scrollIntoViewIfNeeded();
   const box=await page.locator('#output-preview').boundingBox();expect(box.y).toBeGreaterThanOrEqual(0);expect(box.y+box.height).toBeLessThan(812);expect(box.height).toBeLessThan(200);

@@ -38,7 +38,7 @@ test('one pixel dimension is calculated and changing ratio retains the chosen ed
   await page.locator('#ratio-width').fill('1');await page.locator('#ratio-height').fill('1');await reviewFraming(page);
   await expect(page.locator('#pixel-width')).toHaveValue('600');await expect(page.locator('#pixel-height')).toHaveValue('600');await expect(page.locator('#save')).toBeEnabled();
   expect((await download(page)).size).toEqual([600,600]);
-  await page.setViewportSize({width:320,height:900});await page.locator('#language').check();
+  await page.setViewportSize({width:320,height:900});await page.locator('[name=language][value=zh]').check();
   await expect(page.locator('#pixel-width-label')).toHaveText('宽度（自动计算）');await page.locator('.sheet').screenshot({path:`.qa/pixel-linked-phone-${info.project.name}.png`});
   expect(await page.evaluate(()=>document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });

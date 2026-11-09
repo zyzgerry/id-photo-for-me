@@ -41,7 +41,7 @@ test('background removal is optional, reversible, and composes with both outputs
   await reviewFraming(page);
   await expect(q('save')).toBeEnabled();
   await q('framing-tab').focus();
-  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowRight');
   await expect(q('background-tab')).toBeFocused();
   await expect(q('remove-background')).toBeEnabled();
   expect(requests.some(url => /\/models\/|\/modnet-experiment\/|\/remove-background\.js/.test(url))).toBe(false);

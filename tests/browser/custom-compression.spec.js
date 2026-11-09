@@ -82,7 +82,7 @@ test('print sheet close-up shows the exact saved JPEG and returns focus', async 
 test('phone close-up supports pinch and drag with compact bilingual controls',async({page},info)=>{
   await page.setViewportSize({width:375,height:812});await page.emulateMedia({reducedMotion:'reduce'});await start(page);
   await page.locator('#pixel-height').fill('1200');await expect(page.locator('#pixel-width-label')).toContainText('calculated');
-  await page.locator('#language').check();await expect(page.locator('#pixel-width-label')).toContainText('自动计算');
+  await page.locator('[name=language][value=zh]').check();await expect(page.locator('#pixel-width-label')).toContainText('自动计算');
   await expect(page.locator('#save')).toBeEnabled();
   const magnifier=page.locator('.output-magnifier');
   await magnifier.scrollIntoViewIfNeeded();
