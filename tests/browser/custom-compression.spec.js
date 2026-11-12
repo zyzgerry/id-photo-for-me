@@ -15,6 +15,7 @@ async function download(page){const event=page.waitForEvent('download');await pa
 test('custom quality is uncapped, synchronized, remembered and reset only on source replacement',async({page})=>{
   await start(page);await page.locator('#pixel-width').fill('300');await expect(page.locator('#save')).toBeEnabled();const original=await download(page);
   await expect(page.locator('#jpeg-quality')).toHaveValue('100');
+  await expect(page.locator('#jpeg-quality')).toHaveAccessibleName('JPEG quality setting (1–100)');
   await page.locator('#pixel-width').fill('300');await page.locator('#jpeg-quality').fill('25');
   await expect(page.locator('#jpeg-quality-slider')).toHaveValue('25');await expect(page.locator('#save')).toBeEnabled();
   const custom=await download(page);expect(custom.length).toBeLessThan(original.length);
@@ -29,6 +30,21 @@ test('custom quality is uncapped, synchronized, remembered and reset only on sou
   await page.locator('[name=compression-target][value=pixels]').check();await page.locator('#jpeg-quality-slider').fill('1');await expect(page.locator('#jpeg-quality')).toHaveValue('1');await expect(page.locator('#save')).toBeEnabled();
   await page.locator('#reset-pixels').click();await expect(page.locator('#jpeg-quality')).toHaveValue('1');
   await page.locator('#photo').setInputFiles(fixture);await expect(page.locator('#jpeg-quality')).toHaveValue('100');await expect(page.locator('#save')).toBeEnabled();
+});
+
+test('changing document requirements resets explicit pixels and retains JPEG quality',async({page})=>{
+  await openApp(page,'single');
+  await page.locator('#photo').setInputFiles(fixture);
+  await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('[name=output-quality][value=compress]').check();
+  await page.locator('[name=compression-target][value=pixels]').check();
+  await page.locator('#jpeg-quality').fill('70');
+  await page.locator('#pixel-width').fill('500');
+  await page.locator('#country').selectOption('pt');
+  await reviewFraming(page);
+  await expect(page.locator('#save')).toBeEnabled();
+  await expect(page.locator('#pixel-width')).toHaveValue('80');
+  await expect(page.locator('#jpeg-quality')).toHaveValue('70');
 });
 
 test('close-up reads the exact downloaded JPEG, supports keyboard zoom and restores focus',async({page},info)=>{

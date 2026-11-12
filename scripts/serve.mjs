@@ -9,7 +9,8 @@ createServer(async (req, res) => {
     let file = resolve(root, '.' + (path || '/'));
     if (file !== root && !file.startsWith(root + sep)) { res.writeHead(403).end(); return; }
     if ((await stat(file)).isDirectory()) file = resolve(file, 'index.html');
+    const body = await readFile(file);
     res.writeHead(200, { 'Content-Type': mime[extname(file)] || 'application/octet-stream' });
-    res.end(await readFile(file));
+    res.end(body);
   } catch { res.writeHead(404).end('Not found'); }
 }).listen(4173, '127.0.0.1', () => console.log('Local: http://127.0.0.1:4173/id-photo-for-me/'));

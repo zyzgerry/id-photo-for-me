@@ -25,7 +25,7 @@ export async function exportSingle(image, settings, options, isCurrent = ()=>tru
       // Prefer gentle compression, then modest resizing, before stronger compression.
       const scales=options.allowResize?[scale,Math.max(minimumScale,scale*0.95),Math.max(minimumScale,scale*0.9)]:[1];
       let smallestBlob;
-      for(const floor of [0.9,0.8,0.7,0.55]) {
+      for(const [floorIndex,floor] of [0.9,0.8,0.7,0.55].entries()) {
         const visited=new Set();
         for(const candidateScale of scales) {
           width=Math.max(options.minWidth,Math.round(options.width*candidateScale));
@@ -36,9 +36,11 @@ export async function exportSingle(image, settings, options, isCurrent = ()=>tru
           active();
           if(canvas) canvas.width=canvas.height=1;
           canvas=renderCrop(image,settings,width,height);
-          let blob=await exportJpeg(canvas,1); active();
-          if(blob.size<=options.maxBytes) return {blob,width,height,quality:1};
-          blob=await exportJpeg(canvas,floor); active();
+          if(floorIndex===0) {
+            const blob=await exportJpeg(canvas,1); active();
+            if(blob.size<=options.maxBytes) return {blob,width,height,quality:1};
+          }
+          const blob=await exportJpeg(canvas,floor); active();
           smallestBlob=blob;
           if(blob.size>options.maxBytes) continue;
           let best={blob,width,height,quality:floor},low=floor,high=1;

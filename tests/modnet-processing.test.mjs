@@ -36,3 +36,14 @@ test('The selected resolution uses neutral padding and tightens the entire quant
  tightenFullMask(mask);
  assert.deepEqual(Array.from(mask), [0, 0, 22, 128, 212, 213, 255]);
 });
+
+test('MODNet letterboxing retains one row for an extremely wide supported image', () => {
+ const {inputWidth, inputHeight} = RECIPE;
+ const input = prepareInput(new Uint8Array(4096 * 4).fill(255), 4096, 1);
+ assert.equal(input[(inputHeight / 2 - 1) * inputWidth], 1);
+});
+
+test('MODNet rejects a mask that would erase the whole photo', () => {
+ const empty = new Uint8Array([0, 15, 51]);
+ assert.throws(() => tightenFullMask(empty), /no foreground/);
+});

@@ -3,6 +3,7 @@ const MAX_PIXELS = 50_000_000;
 const MAX_SIDE = 12000;
 let worker;
 let decoderReady;
+let decoderQueue = Promise.resolve();
 
 export function prepareDecoder() {
   if (decoderReady) return decoderReady;
@@ -82,6 +83,33 @@ async function nativeDecode(file) {
   } finally { URL.revokeObjectURL(url); }
 }
 
+function decodeHeic(file) {
+  // All fallback requests share the worker and its message handlers.
+  const result = decoderQueue.then(async () => {
+    await prepareDecoder();
+    const decoder = worker;
+    return new Promise((resolve, reject) => {
+      const reset = () => {
+        clearTimeout(timer);
+        if (worker === decoder) {
+          decoder.terminate(); worker = null; decoderReady = null;
+        }
+        reject(new Error('decoderError'));
+      };
+      const timer = setTimeout(reset, 45000);
+      decoder.onmessage = ({ data }) => {
+        clearTimeout(timer);
+        if (data.bitmap) resolve(data.bitmap); else reject(new Error('decodeError'));
+      };
+      decoder.onerror = reset;
+      decoder.onmessageerror = reset;
+      try { decoder.postMessage({ file }); } catch { reset(); }
+    });
+  });
+  decoderQueue = result.catch(() => {});
+  return result;
+}
+
 export async function decodePhoto(file) {
   if (!file.size || file.size > MAX_BYTES) throw new Error('fileLimit');
   const kind = inspectImage(new Uint8Array(await file.arrayBuffer()));
@@ -90,18 +118,7 @@ export async function decodePhoto(file) {
   catch (error) {
     if (error.message === 'pixelLimit') throw error;
     if (kind !== 'heic') throw new Error('decodeError');
-    await prepareDecoder();
-    image = await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => {
-        worker.terminate(); worker = null; decoderReady = null; reject(new Error('decoderError'));
-      }, 45000);
-      worker.onmessage = ({ data }) => {
-        clearTimeout(timer);
-        if (data.bitmap) resolve(data.bitmap); else reject(new Error('decodeError'));
-      };
-      worker.onerror = () => { clearTimeout(timer); worker.terminate(); worker = null; decoderReady = null; reject(new Error('decoderError')); };
-      worker.postMessage({ file });
-    });
+    image = await decodeHeic(file);
   }
   const width = image.naturalWidth || image.width;
   const height = image.naturalHeight || image.height;

@@ -39,7 +39,7 @@ for(const prefix of ['/id-photo-for-me','']) test(`cached ${prefix||'root'} page
     }
     await build('first');
     const cachedHtml=await readFile(resolve(fixture,'dist/index.html'));
-    const requests=[];let manifest='normal';
+    const requests=[];let manifest='normal', stillPublishing=false;
     server=createServer(async(req,res)=>{
       try {
         const url=new URL(req.url,'http://localhost');requests.push(url);
@@ -52,9 +52,9 @@ for(const prefix of ['/id-photo-for-me','']) test(`cached ${prefix||'root'} page
         const entry=path==='/'||path==='/index.html';
         const file=resolve(fixture,'dist','.'+(entry?'/index.html':path));
         if(!file.startsWith(resolve(fixture,'dist')+sep)){res.writeHead(403).end();return;}
-        const data=entry&&!url.searchParams.has('release')?cachedHtml:await readFile(file);
+        const data=entry&&(stillPublishing||!url.searchParams.has('release'))?cachedHtml:await readFile(file);
         const mime={'.html':'text/html','.js':'text/javascript','.json':'application/json','.css':'text/css','.svg':'image/svg+xml','.jpg':'image/jpeg'};
-        res.writeHead(200,{'Content-Type':mime[extname(file)]||'text/plain','Cache-Control':'public, max-age=31536000'}).end(data);
+        res.writeHead(200,{'Content-Type':mime[extname(file)]||'text/plain','Cache-Control':stillPublishing?'no-store':'public, max-age=31536000'}).end(data);
       }catch{res.writeHead(404).end();}
     });
     await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
@@ -79,6 +79,15 @@ for(const prefix of ['/id-photo-for-me','']) test(`cached ${prefix||'root'} page
       manifest=failure;await page.goto(currentUrl,{waitUntil:'commit'});
       await expect(page.locator('#size-title')).toHaveText('second');
     }
+    manifest='normal';stillPublishing=true;
+    await page.goto(currentUrl+'&publishing-test=1',{waitUntil:'commit'});
+    await expect(page.getByRole('alert')).toContainText('The update is still being published');
+    await expect(page.locator('#photo')).toHaveCount(0);
+    const reload=page.getByRole('button',{name:'Reload'});
+    await expect(reload).toBeFocused();
+    stillPublishing=false;
+    await reload.click();
+    await expect(page.locator('#size-title')).toHaveText('second');
   }finally{
     releaseCheck();
     if(server)await new Promise(resolve=>{

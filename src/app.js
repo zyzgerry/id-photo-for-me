@@ -190,7 +190,26 @@ function printLayout(clamp = false) {
     requestedCopies=Math.min(printCapacity,Math.max(1,requestedCopies||1));
     if(photo&&previous!==requestedCopies) setStatus('copyAdjusted');
   }
-  return layoutSheet(width,height,requestedCopies??undefined);
+  return requestedCopies===null || requestedCopies===printCapacity ? maximum : layoutSheet(width,height,requestedCopies);
+}
+
+function singleCropRatio() {
+  if ($('single-fit').value==='original') return photo ? photo.canvas.width/photo.canvas.height : 1;
+  return Number($('ratio-width').value)/Number($('ratio-height').value);
+}
+
+function syncPrintHeight() {
+  const full = $('single-fit').value==='original';
+  if (full ? !photo : ['ratio-width','ratio-height'].some(id=>!$(id).value || !$(id).checkValidity())) return;
+  $('height').value=Number((Number($('width').value)/singleCropRatio()).toFixed(6));
+}
+
+function syncSingleCrop() {
+  if (['width','height'].some(id=>!$(id).value || !$(id).checkValidity())) return;
+  const multiplier=$('units').value==='inch'?25.4:1;
+  $('single-fit').value='crop';
+  $('ratio-width').value=Number($('width').value)*multiplier;
+  $('ratio-height').value=Number($('height').value)*multiplier;
 }
 
 function chooseSize(review=true) {
@@ -201,7 +220,6 @@ function chooseSize(review=true) {
   setError();
   try {
     layout = printLayout(true); settings.ratio = layout.widthMm/layout.heightMm;
-    $('single-fit').value='crop';$('ratio-width').value=layout.widthMm;$('ratio-height').value=layout.heightMm;
     if (Math.abs(previousRatio - settings.ratio) > 1e-6) {
       if (photo) {markFramingReview();setStatus('cropChanged');}
     }
@@ -211,8 +229,7 @@ function chooseSize(review=true) {
 
 function configureSingle(changed) {
   if(['pixel-width','pixel-height'].includes(changed)){pixelsEdited=true;pixelEdge=changed==='pixel-height'?'height':'width';}
-  const aspect=photo?photo.canvas.width/photo.canvas.height:1;
-  const ratio=$('single-fit').value==='original'?aspect:Number($('ratio-width').value)/Number($('ratio-height').value);
+  const ratio=singleCropRatio();
   if(['fit','ratio'].includes(changed)) markFramingReview();
   if(Number.isFinite(ratio)&&ratio>0){
     if(changed==='mode'&&Math.abs(settings.ratio-ratio)>1e-6) markFramingReview();
@@ -233,6 +250,7 @@ function showSingleError(key) {
 }
 
 function setMode(next) {
+  if (mode==='print' && next==='single' && customRequirements && layout && settings.zoom!==1 && $('single-fit').value==='original') syncSingleCrop();
   mode=next;
   selectTool('framing');setError();singleResult=null;
   $('single-settings').hidden=mode!=='single';
@@ -243,20 +261,16 @@ function setMode(next) {
   updateModeLabels();
   if(mode==='single') {
     if(preset){$('single-fit').value='crop';$('ratio-width').value=preset.widthMm;$('ratio-height').value=preset.heightMm;}
-    else if($('single-fit').value==='crop'){
-      const multiplier=$('units').value==='inch'?25.4:1;
-      $('ratio-width').value=Number($('width').value)*multiplier;$('ratio-height').value=Number($('height').value)*multiplier;
-    }
     configureSingle('mode');
   }
   else {
-    if(!preset) $('height').value=Number((Number($('width').value)/settings.ratio).toFixed(6));
+    if(customRequirements) syncPrintHeight();
     chooseSize(false);
   }
 }
 
 function bestQualityOptions(){
-  const rect=cropRect(photo.canvas.width,photo.canvas.height,settings.ratio,settings.zoom,settings.x,settings.y);
+  const rect=canFrame()?cropRect(photo.canvas.width,photo.canvas.height,settings.ratio,settings.zoom,settings.x,settings.y):photo.canvas;
   return validateSingle({width:Math.max(1,Math.floor(rect.width)),height:Math.max(1,Math.floor(rect.height)),maxKB:null,allowResize:false,minWidth:1,minHeight:1});
 }
 
@@ -592,6 +606,7 @@ $('photo').addEventListener('change', async event => {
   setStatus('loading');
   try {
     const result = await decodePhoto(selected);
+    const replacing = !!photo;
     clearPhoto();
     photo = result; setStatus('ready');
     document.querySelector('.file-button').classList.replace('primary','quiet');
@@ -605,7 +620,14 @@ $('photo').addEventListener('change', async event => {
       $('pixel-height').value=Math.max(1,Math.round(photo.canvas.height*scale));
     }
     updateModeLabels();updatePresetDetails();
-    if(mode==='single') configureSingle('photo');else chooseSize(false);
+    if(mode==='single') configureSingle('photo');
+    else {
+      if (customRequirements && $('single-fit').value==='original') {
+        if (replacing) syncSingleCrop();
+        else syncPrintHeight();
+      }
+      chooseSize(false);
+    }
     if (compactSetup.matches) {
       const focused = document.activeElement;
       if (focused === uploadFocus || focused === document.body) {
@@ -620,7 +642,8 @@ $('photo').addEventListener('change', async event => {
   finally { loading = false; $('photo').disabled = false; $('clear').disabled = !photo; $('photo').value = ''; $('photo').removeAttribute('aria-busy'); updateBackgroundControls(); }
 });
 $('clear').onclick = () => { clearPhoto(); $('photo').focus(); };
-function updateRequirementSelection(){
+function updateRequirementSelection(resetPixels = false){
+  if(resetPixels) pixelsEdited=false;
   preset=customRequirements?null:catalog.find(p=>p.id===$('document').value)||null;
   if(preset){
     $('single-fit').value=preset.fit||'crop';
@@ -630,13 +653,15 @@ function updateRequirementSelection(){
   if(mode==='print') chooseSize();
   else {markFramingReview();configureSingle('preset');}
 }
-$('country').onchange = () => {updateDocuments();updateRequirementSelection();};
-$('document').onchange = ()=>updateRequirementSelection();
+$('country').onchange = () => {updateDocuments();updateRequirementSelection(true);};
+$('document').onchange = ()=>updateRequirementSelection(true);
 function selectRequirementsTab(custom){
   if(customRequirements===custom) return;
   const fields=['single-fit','ratio-width','ratio-height'];
   if(customRequirements) customFraming=fields.map(id=>$(id).value);
   else if(customFraming) fields.forEach((id,index)=>{$(id).value=customFraming[index];});
+  else if(mode==='print') syncSingleCrop();
+  if(custom && mode==='print') syncPrintHeight();
   customRequirements=custom;updateRequirementSelection();updatePresetDetails();
 }
 for(const [id,custom] of [['document-requirements',false],['custom-requirements',true]]) {
@@ -650,7 +675,10 @@ for(const [id,custom] of [['document-requirements',false],['custom-requirements'
 }
 $('review-framing').onclick=()=>{selectTool('framing');$('crop-title').scrollIntoView({block:'start'});$('crop').focus({preventScroll:true});};
 $('confirm-framing').onclick=()=>{settings.review=false;updateExportAvailability();};
-for (const id of ['width','height']) $(id).oninput = chooseSize;
+for (const id of ['width','height']) $(id).oninput = () => {
+  if (customRequirements) syncSingleCrop();
+  chooseSize();
+};
 $('units').onchange = () => {
   const inch = $('units').value === 'inch';
   for (const id of ['width','height']) {

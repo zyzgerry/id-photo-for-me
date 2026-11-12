@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { layoutSheet, cropRect, withJpegDensity, mmToPx } from '../src/geometry.js';
-import { inspectImage } from '../src/image.js';
+import { decodePhoto, inspectImage } from '../src/image.js';
 import { validateSingle, exportSingle } from '../src/single.js';
 import { PRESETS, PREPARATION_PRESETS, VERIFIED } from '../src/presets.js';
 import { messages } from '../src/i18n.js';
@@ -111,6 +112,34 @@ test('file headers enforce size limits before native decoding', () => {
   assert.throws(()=>inspectImage(new Uint8Array([71,73,70,56])),/unsupported/);
 });
 
+test('overlapping HEIC fallbacks each receive their own decoded photo', async t => {
+  const bytes = await readFile(new URL('./fixtures/quadrants.heic', import.meta.url));
+  const first = new File([bytes], 'first.heic');
+  const second = new File([bytes], 'second.heic');
+  const previous = {Worker: globalThis.Worker, Image: globalThis.Image,
+    HTMLImageElement: globalThis.HTMLImageElement, document: globalThis.document};
+  t.after(() => Object.assign(globalThis, previous));
+  t.mock.timers.enable({apis:['setTimeout']});
+  const requests = [];
+  globalThis.Worker = class {
+    constructor() { queueMicrotask(() => this.onmessage({data:{ready:true}})); }
+    postMessage({file}) { requests.push({file, respond: width => this.onmessage({data:{bitmap:{width,height:100}}})}); }
+  };
+  globalThis.Image = class { async decode() { throw new Error('Native HEIC unavailable'); } };
+  globalThis.document = {createElement: () => ({getContext: () => ({fillRect(){}, drawImage(){}})})};
+  globalThis.HTMLImageElement = globalThis.Image;
+  const firstResult = decodePhoto(first);
+  await new Promise(setImmediate);
+  const secondResult = decodePhoto(second);
+  await new Promise(setImmediate);
+  assert.deepEqual(requests.map(request => request.file.name), ['first.heic']);
+  requests[0].respond(101);
+  await new Promise(setImmediate);
+  assert.deepEqual(requests.map(request => request.file.name), ['first.heic','second.heic']);
+  requests[1].respond(202);
+  assert.deepEqual((await Promise.all([firstResult,secondResult])).map(photo => photo.originalWidth), [101,202]);
+});
+
 test('single-JPEG validation enforces pixel minimums and decimal-KB byte limits',()=>{
   const base={width:1200,height:900,maxKB:300,allowResize:true,minWidth:600,minHeight:450};
   assert.equal(validateSingle(base).maxBytes,300000);
@@ -163,6 +192,15 @@ test('JPEG tries modest resizing before strong compression',async()=>{
 test('JPEG retains fixed pixels and can relax quality when resizing is forbidden',async()=>{
   const result=await encodedWith((w,h,q)=>q>=0.9?160000:130000,{allowResize:false});
   assert.equal(result.width,400);assert.ok(result.quality<0.9 && result.quality>=0.8);
+});
+
+test('JPEG does not repeat a failed maximum-quality encode at the same size', async () => {
+  const maximumAttempts = [];
+  await encodedWith((w,h,q) => {
+    if (q===1) maximumAttempts.push(w+'x'+h);
+    return q>=0.8 ? 160000 : 130000;
+  });
+  assert.deepEqual(maximumAttempts, ['400x500','380x475','360x450']);
 });
 
 test('JPEG respects minimum pixels, rejects impossible caps and cancels stale work',async()=>{

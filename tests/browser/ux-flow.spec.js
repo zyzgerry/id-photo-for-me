@@ -115,6 +115,41 @@ test('changing requirements preserves edits, blocks export for review, and retai
   await expect(page.locator('#framing-review')).toBeHidden();await expect(page.locator('#save')).toBeEnabled();
 });
 
+test('custom output modes share proportions without rewriting the entered crop ratio',async({page})=>{
+  await openApp(page,'single');
+  await page.locator('#custom-requirements').click();
+  await page.locator('#ratio-width').fill('1');await page.locator('#ratio-height').fill('1000');
+  await page.locator('[value=print][name=output-mode]').check();
+  await page.locator('[value=single][name=output-mode]').check();
+  await expect(page.locator('#ratio-width')).toHaveValue('1');
+  await expect(page.locator('#ratio-height')).toHaveValue('1000');
+  await expect(page.locator('#error')).toBeHidden();
+
+  await page.locator('[value=print][name=output-mode]').check();
+  await page.locator('#width').fill('40');await page.locator('#height').fill('50');
+  await page.locator('[value=single][name=output-mode]').check();
+  await expect(page.locator('#ratio-width')).toHaveValue('40');
+  await expect(page.locator('#ratio-height')).toHaveValue('50');
+});
+
+test('custom full-photo framing survives an output round trip',async({page})=>{
+  await openApp(page,'single');
+  await page.locator('#custom-requirements').click();
+  await page.locator('#single-fit').selectOption('original');
+  await page.locator('#photo').setInputFiles(fixture);
+  await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('[value=print][name=output-mode]').check();
+  await expect(page.locator('#height')).toHaveValue('52.5');
+  await page.locator('[value=single][name=output-mode]').check();
+  await expect(page.locator('#single-fit')).toHaveValue('original');
+  await expect(page.locator('#save')).toBeEnabled();
+  await page.locator('[value=print][name=output-mode]').check();
+  await page.locator('#zoom').fill('1.5');
+  await page.locator('[value=single][name=output-mode]').check();
+  await expect(page.locator('#single-fit')).toHaveValue('crop');
+  await expect(page.locator('#zoom')).toHaveValue('1.5');
+});
+
 test('full-photo mode ignores hidden crop errors and relinks a replacement photo across modes',async({page})=>{
   await openApp(page,'single');
   await page.locator('#custom-requirements').click();await page.locator('#single-fit').selectOption('crop');await page.locator('#ratio-width').fill('0');

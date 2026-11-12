@@ -92,6 +92,23 @@ test('single mode preserves a full HEIC photo and exports offline without arrang
   expect((await download(page)).size).toEqual([90,60]);
 });
 
+test('full-photo output keeps exact working dimensions in Best quality and Auto',async({page})=>{
+  await openApp(page,'single');
+  await page.locator('#custom-requirements').click();
+  await page.locator('#single-fit').selectOption('original');
+  const buffer=Buffer.from(await page.evaluate(()=>{
+    const canvas=document.createElement('canvas');canvas.width=250;canvas.height=304;
+    return canvas.toDataURL('image/png').split(',')[1];
+  }),'base64');
+  await page.locator('#photo').setInputFiles({name:'full.png',mimeType:'image/png',buffer});
+  await expect(page.locator('#save')).toBeEnabled();
+  const best=await download(page);
+  expect(best.size).toEqual([250,304]);
+  await page.locator('[name=output-quality][value=compress]').check();
+  await expect(page.locator('#save')).toBeEnabled();
+  expect((await download(page)).bytes).toEqual(best.bytes);
+});
+
 test('file-size and exact-pixel targets apply exclusively and show the encoded file size',async({page},info)=>{
   await openApp(page);await single(page);
   await page.locator('#photo').setInputFiles({name:'noise.png',mimeType:'image/png',buffer:await noise(page)});await ready(page);

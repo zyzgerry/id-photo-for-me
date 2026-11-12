@@ -6,7 +6,7 @@ const roundEven = value => value % 1 === .5 ? 2 * Math.round(value / 2) : Math.r
 function geometry(width, height, inputWidth, inputHeight) {
   if (![width, height].every(v => Number.isInteger(v) && v > 0 && v <= 4096)) throw new Error('Invalid working dimensions.');
   const scale = Math.min(inputWidth / width, inputHeight / height);
-  const rw = roundEven(width * scale), rh = roundEven(height * scale);
+  const rw = Math.max(1, roundEven(width * scale)), rh = Math.max(1, roundEven(height * scale));
   return {rw, rh, left: Math.floor((inputWidth - rw) / 2), top: Math.floor((inputHeight - rh) / 2)};
 }
 
@@ -71,5 +71,10 @@ export function tightenFullMask(mask) {
   const cutoff = RECIPE.edgeCutoff, range = 1 - 2 * cutoff;
   const lookup = Uint8Array.from({length: 256}, (_, alpha) =>
     roundEven(Math.max(0, Math.min(1, (alpha / 255 - cutoff) / range)) * 255));
-  for (let i = 0; i < mask.length; i++) mask[i] = lookup[mask[i]];
+  let hasForeground = false;
+  for (let i = 0; i < mask.length; i++) {
+    mask[i] = lookup[mask[i]];
+    if (mask[i]) hasForeground = true;
+  }
+  if (!hasForeground) throw new Error('The model found no foreground. Try another photo.');
 }

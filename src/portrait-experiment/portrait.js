@@ -101,6 +101,7 @@ $('photo').onchange = async () => {
     finish(); status(ready ? 'Photo ready. Choose Remove background.' : 'Photo ready. Prepare the model to continue.', 'ready');
   } catch (error) {
     if (id !== active) return;
+    $('photo').value = '';
     const messages = {fileLimit: 'Choose a photo up to 30 MB.', pixelLimit: 'Choose a photo up to 50 megapixels and 12,000 pixels per side.', unsupported: 'Choose a JPEG, PNG or HEIC photo.', decodeError: 'Could not open this photo. Try a JPEG exported from Photos.', decoderError: 'HEIC decoding failed. Retry or choose a JPEG.'};
     errors.push({at: new Date().toISOString(), phase: 'decode', message: error.message}); finish(); status(messages[error.message] || error.message, 'error');
   }
